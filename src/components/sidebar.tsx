@@ -8,7 +8,7 @@ import { ChevronLeft, Menu, X } from 'lucide-react'
 
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
   isCollapsed: boolean
-  setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>
+  setIsCollapsed: React.Dispatoh<React.SetStateAction<boolean>>
 }
 
 export default function Sidebar2({
@@ -112,6 +112,7 @@ export default function Sidebar2({
           <ChevronLeft
             // stroke={1.5}
             className={`h-5 w-5 ${isCollapsed ? 'rotate-180' : ''}`}
+            size={18}
           />
         </Button>
       </Layout>

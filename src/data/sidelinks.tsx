@@ -1,5 +1,15 @@
 import {
-  LayoutDashboard
+  FileClock,
+  FolderSync,
+  Inbox,
+  LayoutDashboard,
+  PackageMinus,
+  PackagePlus,
+  PackageSearch,
+  Plus,
+  ShoppingCart,
+  Warehouse,
+  Wrench
 } from 'lucide-react'
 
 export interface NavLink {
@@ -22,6 +32,24 @@ export const sidelinks: SideLink[] = [
     icon: <LayoutDashboard size={18} />
   },
   {
+    title: 'Permintaan',
+    label: '',
+    href: '/permintaan/barang',
+    icon: <Inbox size={18} />,
+  },
+  {
+    title: 'Perbaikan',
+    label: '',
+    href: '/permintaan/perbaikan',
+    icon: <Wrench size={18} />,
+  },
+  {
+    title: 'Peminjaman',
+    label: '',
+    href: '/permintaan/peminjaman',
+    icon: <FileClock size={18} />,
+  },
+  {
     title: 'Manajemen',
     label: '',
     href: '/manajemen',
@@ -32,14 +60,8 @@ export const sidelinks: SideLink[] = [
     title: 'Pengadaan',
     label: '3',
     href: '/tasks',
-    icon: <LayoutDashboard size={18} />,
+    icon: <ShoppingCart size={18} />,
     sub: [
-      {
-        title: 'Permintaan Barang',
-        label: '',
-        href: '/pengadaan/permintaan-barang',
-        icon: <LayoutDashboard size={18} />,
-      },
       {
         title: 'Permintaan Pembelian',
         label: '',
@@ -76,31 +98,31 @@ export const sidelinks: SideLink[] = [
     title: 'Gudang',
     label: '',
     href: '/',
-    icon: <LayoutDashboard size={18} />,
+    icon: <Warehouse size={18} />,
     sub: [
       {
-        title: 'Permintaan Barang',
+        title: 'Permintaan ',
         label: '',
         href: '/gudang/permintaan-barang',
-        icon: <LayoutDashboard size={18} />,
+        icon: <PackageSearch size={18} />,
       },
       {
-        title: 'Barang Masuk',
+        title: 'Masuk',
         label: '',
         href: '/gudang/barang-masuk',
-        icon: <LayoutDashboard size={18} />,
+        icon: <PackagePlus size={18} />,
       },
       {
-        title: 'Barang Keluar',
+        title: 'Keluar',
         label: '',
         href: '/gudang/barang-keluar',
-        icon: <LayoutDashboard size={18} />,
+        icon: <PackageMinus size={18} />,
       },
       {
-        title: 'Mutasi Barang',
+        title: 'Mutasi ',
         label: '',
         href: '/gudang/mutasi-barang',
-        icon: <LayoutDashboard size={18} />,
+        icon: <FolderSync size={18} />,
       },
     ]
   },
@@ -155,31 +177,6 @@ export const sidelinks: SideLink[] = [
         icon: <LayoutDashboard size={18} />,
       },
     ]
-  },
-  {
-    title: 'User',
-    label: '',
-    href: '',
-    icon: <LayoutDashboard size={18} />,
-    isTitle: true
-  },
-  {
-    title: 'Permintaan',
-    label: '',
-    href: '/permintaan/barang',
-    icon: <LayoutDashboard size={18} />,
-  },
-  {
-    title: 'Perbaikan',
-    label: '',
-    href: '/permintaan/perbaikan',
-    icon: <LayoutDashboard size={18} />,
-  },
-  {
-    title: 'Peminjaman',
-    label: '',
-    href: '/permintaan/peminjaman',
-    icon: <LayoutDashboard size={18} />,
   },
   {
     title: 'Master',
