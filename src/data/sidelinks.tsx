@@ -8,6 +8,7 @@ import {
   PackageSearch,
   Plus,
   ShoppingCart,
+  Users,
   Warehouse,
   Wrench
 } from 'lucide-react'
@@ -32,7 +33,26 @@ export const sidelinks: SideLink[] = [
     icon: <LayoutDashboard size={18} />
   },
   {
+    title: 'Laporan',
+    label: '',
+    href: '/laporan',
+    icon: <LayoutDashboard size={18} />
+  },
+  {
+    title: 'Kartu Stok',
+    label: '',
+    href: '/kartu-stok',
+    icon: <LayoutDashboard size={18} />
+  },
+  {
     title: 'Permintaan',
+    label: '',
+    href: '/permintaan',
+    icon: <LayoutDashboard size={18} />,
+    isTitle: true
+  },
+  {
+    title: 'Barang',
     label: '',
     href: '/permintaan/barang',
     icon: <Inbox size={18} />,
@@ -118,13 +138,13 @@ export const sidelinks: SideLink[] = [
         href: '/gudang/barang-keluar',
         icon: <PackageMinus size={18} />,
       },
-      {
-        title: 'Mutasi ',
-        label: '',
-        href: '/gudang/mutasi-barang',
-        icon: <FolderSync size={18} />,
-      },
     ]
+  },
+  {
+    title: 'Mutasi ',
+    label: '',
+    href: '/gudang/mutasi-barang',
+    icon: <FolderSync size={18} />,
   },
   {
     title: 'Perbaikan',
@@ -179,17 +199,17 @@ export const sidelinks: SideLink[] = [
     ]
   },
   {
-    title: 'Master',
+    title: 'Admin',
     label: '',
-    href: '',
+    href: 'admin',
     icon: <LayoutDashboard size={18} />,
     isTitle: true
   },
   {
-    title: 'Permintaan',
+    title: 'User',
     label: '',
-    href: '/',
-    icon: <LayoutDashboard size={18} />,
+    href: '/user',
+    icon: <Users size={18} />,
   },
   {
     title: 'Perbaikan',
