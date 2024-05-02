@@ -94,7 +94,7 @@ export default function Page() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full">
+                <Button disabled={isLoading} type="submit" className="w-full">
                   {isLoading ?
                     <LoaderCircle className="animate-spin" />
                     :
@@ -107,13 +107,6 @@ export default function Page() {
         </div>
       </div>
       <div className="hidden bg-muted lg:block">
-        {/* <Image
-          src="/placeholder.svg"
-          alt="Image"
-          width="1920"
-          height="1080"
-          className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-        /> */}
       </div>
     </div>
   )

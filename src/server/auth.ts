@@ -84,23 +84,22 @@ export const authOptions: NextAuthOptions = {
         return {};
       }
       if (account) {
-        // token.accessToken = account.access_token;
+        token.accessToken = account.access_token;
       }
       if (user) {
-
-        // token.role = user.role
-
-        // token.dinas = { id: user?.Dinas?.id, name: user?.Dinas?.name }
+        token.id = user.id
       }
       return token
     },
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    session: ({ session, token }) => {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.id
+        },
+      }
+    },
   },
 };
 

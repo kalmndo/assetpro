@@ -8,7 +8,7 @@ import { ChevronLeft, Menu, X } from 'lucide-react'
 
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
   isCollapsed: boolean
-  setIsCollapsed: React.Dispatoh<React.SetStateAction<boolean>>
+  setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 export default function Sidebar2({

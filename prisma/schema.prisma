@@ -24,11 +24,52 @@ model Post {
 }
 
 model User {
-    id        String   @id @default(cuid())
-    name      String?
-    email     String?  @unique
-    image     String?
-    password  String
+    id           String  @id @default(cuid())
+    name         String
+    email        String  @unique
+    image        String?
+    password     String
+    title        String
+    departmentId String
+    atasanId     String?
+
+    atasan     User?      @relation("AtasanBawahan", fields: [atasanId], references: [id])
+    bawahan    User[]     @relation("AtasanBawahan")
+    UserRole   UserRole[]
+    Department Department @relation(fields: [departmentId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model UserRole {
+    id     String @id @default(cuid())
+    roleId String
+    userId String
+
+    user User @relation(fields: [userId], references: [id])
+    role Role @relation(fields: [roleId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Department {
+    id   String @id @default(cuid())
+    name String
+
+    User User[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Role {
+    id   String @id
+    name String
+
+    UserRole UserRole[]
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }

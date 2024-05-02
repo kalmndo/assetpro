@@ -1,21 +1,17 @@
-"use client"
 import { DataTable } from "@/components/data-table";
-import { Button } from "@/components/ui/button";
-import { type User, columns } from "@/feature/user/columns";
-import { Plus } from "lucide-react";
+import { AddModal } from "@/feature/user/add-modal";
+import { columns } from "@/feature/user/columns";
+import { api } from "@/trpc/server";
 
-const data: User[] = [
-  {
-    name: 'adam',
-    email: 'kalmndo@gmail.com',
-    department: 'Biro Mal',
-    title: 'Kepala',
-    role: 'admin'
+export default async function Page() {
+  const users = await api.user.getAll()
+  const departments = await api.department.getSelect()
+  const atasans = await api.user.getAtasanSelect()
+
+  const modalData = {
+    departments,
+    atasans
   }
-]
-
-export default function Page() {
-
 
   return (
     <div>
@@ -29,14 +25,11 @@ export default function Page() {
           </p>
         </div>
         <div className="">
-          <Button size="sm">
-            <Plus size={18} className="mr-1" />
-            Tambah
-          </Button>
+          <AddModal data={modalData} />
         </div>
       </div>
       <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
-        <DataTable data={data} columns={columns} />
+        <DataTable data={users} columns={columns} />
       </div>
     </div>
   )

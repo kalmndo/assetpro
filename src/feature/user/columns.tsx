@@ -1,8 +1,10 @@
+"use client"
 import { type ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/data-table/column-header'
 
 import { DataTableRowActions } from '@/components/data-table/row-actions'
 import { z } from 'zod'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export const userSchema = z.object({
   name: z.string(),
@@ -23,7 +25,11 @@ export const columns: ColumnDef<User>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <div className='flex space-x-2'>
+        <div className='flex space-x-2 items-center'>
+          <Avatar>
+            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+            <AvatarFallback>CN</AvatarFallback>
+          </Avatar>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('name')}
           </span>
