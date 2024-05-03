@@ -2,7 +2,6 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/data-table/column-header'
 
-import { DataTableRowActions } from '@/components/data-table/row-actions'
 import { z } from 'zod'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
@@ -15,7 +14,6 @@ export const userSchema = z.object({
 })
 
 export type User = z.infer<typeof userSchema>
-
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -104,12 +102,6 @@ export const columns: ColumnDef<User>[] = [
         </div>
       )
     },
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    id: 'actions',
-    cell: ({ row }) => <DataTableRowActions row={row} />,
     enableSorting: false,
     enableHiding: false,
   },

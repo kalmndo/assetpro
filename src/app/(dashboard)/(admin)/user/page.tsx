@@ -1,6 +1,5 @@
-import { DataTable } from "@/components/data-table";
-import { AddModal } from "@/feature/user/add-modal";
-import { columns } from "@/feature/user/columns";
+import { AddEditModal } from "@/feature/user/add-edit-modal";
+import { Table } from "@/feature/user/table";
 import { api } from "@/trpc/server";
 
 export default async function Page() {
@@ -25,11 +24,11 @@ export default async function Page() {
           </p>
         </div>
         <div className="">
-          <AddModal data={modalData} />
+          <AddEditModal data={modalData} />
         </div>
       </div>
       <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
-        <DataTable data={users} columns={columns} />
+        <Table data={users} modalData={modalData} />
       </div>
     </div>
   )

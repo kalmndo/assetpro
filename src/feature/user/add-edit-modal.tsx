@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { LoaderCircle, Plus } from "lucide-react"
@@ -30,7 +29,7 @@ import { useState } from "react"
 import SearchSelect from "@/components/search-select"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { revalidatePath } from 'next/cache'
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 
 const formSchema = z.object({
   "name": z.string().min(1).max(255),
@@ -86,56 +85,71 @@ type Props = {
   data: {
     departments: SelectProps[],
     atasans: SelectProps[]
-  }
+  },
+  value?: any,
+  isEdit?: boolean
 }
 
-export function AddModal({ data }: Props) {
+export function AddEditModal({ value, data, isEdit = false }: Props) {
   const router = useRouter()
-  const { mutateAsync, isPending } = api.user.create.useMutation()
+  const { mutateAsync: create, isPending: isCreatePending } = api.user.create.useMutation()
+  const { mutateAsync: update, isPending: isUpdatePending } = api.user.update.useMutation()
   const [open, setOpen] = useState(false)
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      department: "",
-      title: "",
-      atasan: "",
+      name: isEdit ? value.name : '',
+      email: isEdit ? value.email : '',
+      department: isEdit ? value.departmentId : '',
+      title: isEdit ? value.title : '',
+      atasan: isEdit ? value.atasanId : '',
       role: []
     },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      await mutateAsync(values)
-      setOpen(false)
-      toast.success('Berhasil membuat user')
-      router.refresh()
-      form.reset()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-      toast.error(error.message)
+    if (isEdit) {
+      try {
+        const result = await update({ id: value.id, ...values })
+        setOpen(false)
+        toast.success(result.message)
+        router.refresh()
+        form.reset()
+      } catch (error: any) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+        toast.error(error.message)
+      }
+    } else {
+      try {
+        const result = await create(values)
+        setOpen(false)
+        toast.success(result.message)
+        router.refresh()
+        form.reset()
+      } catch (error: any) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+        toast.error(error.message)
+      }
     }
   }
 
-  function handleOpen() {
-    setOpen(true)
-  }
-
   return (
-    <Dialog open={open} onOpenChange={setOpen} >
-      <DialogTrigger asChild onClick={handleOpen}>
-        <Button size="sm">
-          <Plus size={18} className="mr-1" />
-          Tambah
-        </Button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild >
+        {
+          isEdit ? <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Edit</DropdownMenuItem>
+            : <Button size="sm">
+              <Plus size={18} className="mr-1" />
+              Tambah
+            </Button>
+        }
       </DialogTrigger>
       <DialogContent className="overflow-y-scroll max-h-[80vh]">
         <DialogHeader>
           <DialogTitle
           >
-            Tambah User
+            {isEdit ? "Ubah User" : "Tambah User"}
           </DialogTitle>
         </DialogHeader>
         <div className="relative">
@@ -220,7 +234,7 @@ export function AddModal({ data }: Props) {
                               return (
                                 <FormItem
                                   key={item.id}
-                                  className="flex flex-row items-start space-x-3 space-y-0"
+                                  className="flex flex-row items-center space-x-3 space-y-0"
                                 >
                                   <FormControl>
                                     <Checkbox
@@ -254,11 +268,11 @@ export function AddModal({ data }: Props) {
                 )}
               />
               <DialogFooter>
-                <Button disabled={isPending} type="submit">
-                  {isPending ?
+                <Button disabled={isCreatePending || isUpdatePending} type="submit">
+                  {isCreatePending || isUpdatePending ?
                     <LoaderCircle className="animate-spin" />
-                    :
-                    "Tambah"
+                    : isEdit ? "Ubah" :
+                      "Tambah"
                   }
                 </Button>
               </DialogFooter>

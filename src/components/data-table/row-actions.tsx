@@ -1,22 +1,19 @@
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
-import { type Row } from '@tanstack/react-table'
-
 import { Button } from '@/components/custom/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { type ReactNode } from 'react'
 
-interface DataTableRowActionsProps<TData> {
-  row: Row<TData>
+interface DataTableRowActionsProps {
+  children: ReactNode
 }
 
-export function DataTableRowActions<TData>({
-  row,
-}: DataTableRowActionsProps<TData>) {
-
+export function DataTableRowActions({
+  children
+}: DataTableRowActionsProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -29,8 +26,7 @@ export function DataTableRowActions<TData>({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end' className='w-[160px]'>
-        <DropdownMenuItem>Edit</DropdownMenuItem>
-        <DropdownMenuItem>Delete</DropdownMenuItem>
+        {children}
       </DropdownMenuContent>
     </DropdownMenu>
   )
