@@ -1,4 +1,4 @@
-import { AddEditModal } from "@/feature/user/add-edit-modal";
+import { AddDialog } from "@/feature/user/add-dialog";
 import { Table } from "@/feature/user/table";
 import { api } from "@/trpc/server";
 
@@ -24,7 +24,7 @@ export default async function Page() {
           </p>
         </div>
         <div className="">
-          <AddEditModal data={modalData} />
+          <AddDialog data={modalData} />
         </div>
       </div>
       <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>

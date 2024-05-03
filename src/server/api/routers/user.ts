@@ -5,6 +5,7 @@ import {
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import bcrypt from 'bcryptjs'
 
 export const userRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -14,7 +15,8 @@ export const userRouter = createTRPCRouter({
           createdAt: "desc"
         },
         include: {
-          Department: true
+          Department: true,
+          UserRole: true
         }
       })
 
@@ -61,15 +63,15 @@ export const userRouter = createTRPCRouter({
         role,
         title
       } = input
-
+      const password = await bcrypt.hash("asdf1234", 10);
       try {
         await ctx.db.user.create({
           data: {
             name,
             email,
             departmentId: department,
-            atasanId: atasan,
-            password: 'asdf',
+            atasanId: atasan ? atasan : undefined,
+            password,
             title,
             UserRole: {
               createMany: role.length > 0 ? {
@@ -109,7 +111,7 @@ export const userRouter = createTRPCRouter({
       email: z.string(),
       department: z.string(),
       title: z.string(),
-      atasan: z.string(),
+      atasan: z.string().nullable(),
       role: z.array(z.string())
     }))
     .mutation(async ({ ctx, input }) => {
@@ -124,24 +126,44 @@ export const userRouter = createTRPCRouter({
       } = input
 
       try {
-        await ctx.db.user.update({
-          where: { id },
-          data: {
-            name,
-            email,
-            departmentId: department,
-            atasanId: atasan,
-            password: 'asdf',
-            title,
-            UserRole: {
-              createMany: role.length > 0 ? {
-                data: role.map((v) => ({
-                  roleId: v
-                }))
-              } : undefined
+
+        await ctx.db.$transaction(async (tx) => {
+          const result = await tx.user.update({
+            where: { id },
+            data: {
+              name,
+              email,
+              departmentId: department,
+              atasanId: atasan ?? undefined,
+              title
+            },
+            include: { UserRole: true }
+          })
+
+          const rolesToDelete = result.UserRole
+            .filter(v => !role.includes(v.roleId))
+            .map(v => v.id);
+
+          const existingRoleIds = result.UserRole.map(role => role.roleId);
+          const rolesToCreate = role.filter(roleId => !existingRoleIds.includes(roleId));
+          if (rolesToCreate.length > 0) {
+            await tx.userRole.createMany({
+              data: rolesToCreate.map((v) => ({ roleId: v, userId: id }))
+            })
+          }
+
+          if (rolesToDelete.length > 0) {
+            for (const deleteId of rolesToDelete) {
+              await tx.userRole.delete({
+                where: {
+                  id: deleteId
+                }
+              })
             }
-          },
+          }
+
         })
+
         return {
           ok: true,
           message: 'Berhasil mengubah user'

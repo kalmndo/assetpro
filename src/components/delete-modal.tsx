@@ -35,11 +35,11 @@ export const DeleteModal = (
         <AlertDialogHeader>
           <AlertDialogTitle>Apakah kamu yakin?</AlertDialogTitle>
           <AlertDialogDescription>
-            Aksi ini tidak dapat dibatalkan. Aksi ini akan menghapus data <b className="text-black">{`(${dataName}})`}</b> <b className="text-black">{name}</b> dari server
+            Aksi ini tidak dapat dibatalkan. Aksi ini akan menghapus data <b className="text-black">{`(${dataName})`}</b> <b className="text-black">{name}</b> dari server
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Batal</AlertDialogCancel>
+          <AlertDialogCancel >Batal</AlertDialogCancel>
           <AlertDialogAction disabled={isPending} onClick={onSubmit}>{isPending ? <LoaderCircle className="animate-spin" /> : 'Yakin'}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
