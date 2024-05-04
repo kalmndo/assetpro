@@ -77,6 +77,12 @@ export const sidelinks: SideLink[] = [
     isTitle: true
   },
   {
+    title: 'Permintaan Barang',
+    label: '',
+    href: '/im',
+    icon: <FileClock size={18} />,
+  },
+  {
     title: 'Pengadaan',
     label: '3',
     href: '/tasks',
@@ -212,10 +218,36 @@ export const sidelinks: SideLink[] = [
     icon: <Users size={18} />,
   },
   {
-    title: 'Perbaikan',
+    title: 'Master Barang',
     label: '',
-    href: '/',
+    href: '/mb',
     icon: <LayoutDashboard size={18} />,
+    sub: [
+      {
+        title: 'Kategori',
+        label: '',
+        href: '/mb/kategori',
+        icon: <LayoutDashboard size={18} />,
+      },
+      {
+        title: 'Sub Kategori',
+        label: '',
+        href: '/mb/sub-kategori',
+        icon: <LayoutDashboard size={18} />,
+      },
+      {
+        title: 'Sub Sub Kategori',
+        label: '',
+        href: '/mb/sub-sub-kategori',
+        icon: <LayoutDashboard size={18} />,
+      },
+      {
+        title: 'Barang',
+        label: '',
+        href: '/mb/barang',
+        icon: <LayoutDashboard size={18} />,
+      },
+    ]
   },
   {
     title: 'Peminjaman',

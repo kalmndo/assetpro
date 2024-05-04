@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Fragment } from 'react'
 
 export const userSchema = z.object({
   name: z.string(),
@@ -35,12 +36,12 @@ const HoverRole = ({ role }: { role: string[] }) => {
           <div className="p-4">
             <h4 className="mb-4 text-sm font-medium leading-none">Role</h4>
             {role.map((v) => (
-              <>
-                <div key={v} className="text-sm">
+              <Fragment key={v}>
+                <div className="text-sm">
                   {v}
                 </div>
                 <Separator className="my-2" />
-              </>
+              </Fragment>
             ))}
           </div>
         </ScrollArea>

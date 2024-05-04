@@ -17,15 +17,15 @@ const defaultValues = {
 
 export function Table({ data, modalData }: { data: any, modalData: any }) {
   const [dialog, setDialog] = useState<{ open: boolean | string, data: any }>({ open: false, data: defaultValues })
-  const { mutateAsync, isPending } = api.user.remove.useMutation()
+  const { mutateAsync, isPending } = api.mbKategori.remove.useMutation()
   const router = useRouter()
 
   const onSubmit = async () => {
     try {
       const result = await mutateAsync({ id: dialog.data.id })
-      setDialog({ open: false, data: defaultValues })
       toast.success(result.message)
       router.refresh()
+      setDialog({ open: false, data: defaultValues })
     } catch (error: any) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
       toast.error(error.message)
@@ -40,7 +40,6 @@ export function Table({ data, modalData }: { data: any, modalData: any }) {
     <div>
       <DataTable
         data={data}
-        filter={{ column: 'name', placeholder: 'Nama ...' }}
         columns={[
           ...columns,
           {
@@ -55,6 +54,9 @@ export function Table({ data, modalData }: { data: any, modalData: any }) {
             enableHiding: false,
           },
         ]}
+        filter={{ column: 'name', placeholder: 'Nama ...' }}
+      // ini masalah di column
+      // facetedFilter={[{ column: 'golongan', title: "Golongan", options: [{ label: 'Aset', value: "Aset" }] }]}
       />
       <DeleteModal
         open={dialog.open === 'delete'}

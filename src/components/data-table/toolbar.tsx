@@ -4,16 +4,37 @@ import { type Table } from '@tanstack/react-table'
 import { Button } from '@/components/custom/button'
 import { Input } from '@/components/ui/input'
 import { DataTableViewOptions } from './view-options'
+import { DataTableFacetedFilter } from './faceted-filter'
+import { Fragment } from 'react'
 
 // import { priorities, statuses } from '../data/data'
 // import { DataTableFacetedFilter } from './data-table-faceted-filter'
 
+export type DataTableToolbarFilterProps = {
+  column: string
+  placeholder: string
+}
+
+export type DataTableFacetedFilterProps = {
+  column: string
+  title: string
+  options: {
+    label: string
+    value: string
+    icon?: React.ComponentType<{ className?: string }>
+  }[]
+}
+
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
+  facetedFilter?: DataTableFacetedFilterProps[]
+  filter: DataTableToolbarFilterProps
 }
 
 export function DataTableToolbar<TData>({
   table,
+  facetedFilter,
+  filter
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0
 
@@ -21,29 +42,27 @@ export function DataTableToolbar<TData>({
     <div className='flex items-center justify-between'>
       <div className='flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2'>
         <Input
-          placeholder='Cari...'
-          value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
+          placeholder={filter.placeholder}
+          value={(table.getColumn(filter.column)?.getFilterValue() as string) ?? ''}
           onChange={(event) =>
-            table.getColumn('title')?.setFilterValue(event.target.value)
+            table.getColumn(filter.column)?.setFilterValue(event.target.value)
           }
           className='h-8 w-[150px] lg:w-[250px]'
         />
-        {/* <div className='flex gap-x-2'>
-          {table.getColumn('status') && (
-            <DataTableFacetedFilter
-              column={table.getColumn('status')}
-              title='Status'
-              options={statuses}
-            />
-          )}
-          {table.getColumn('priority') && (
-            <DataTableFacetedFilter
-              column={table.getColumn('priority')}
-              title='Priority'
-              options={priorities}
-            />
-          )}
-        </div> */}
+
+        <div className='flex gap-x-2'>
+          {facetedFilter?.map(({ options, column, title }, index) => (
+            <Fragment key={index}>
+              {table.getColumn(column) && (
+                <DataTableFacetedFilter
+                  column={table.getColumn(column)}
+                  title={title}
+                  options={options}
+                />
+              )}
+            </Fragment>
+          ))}
+        </div>
         {isFiltered && (
           <Button
             variant='ghost'

@@ -73,3 +73,81 @@ model Role {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
+
+model MasterBarangGolongan {
+    id   String @id @default(cuid())
+    name String
+    code Int    @unique
+
+    MasterBarangKategori MasterBarangKategori[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model MasterBarangKategori {
+    id         String @id @default(cuid())
+    name       String
+    code       Int
+    classCode  String
+    fullCode   String @unique
+    golonganId String
+
+    Golongan                MasterBarangGolongan      @relation(fields: [golonganId], references: [id])
+    MasterBarangSubKategori MasterBarangSubKategori[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model MasterBarangSubKategori {
+    id         String @id @default(cuid())
+    name       String
+    code       Int
+    classCode  String
+    fullCode   String @unique
+    kategoriId String
+
+    Kategori                   MasterBarangKategori         @relation(fields: [kategoriId], references: [id])
+    MasterBarangSuSubbKategori MasterBarangSubSubKategori[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model MasterBarangSubSubKategori {
+    id            String @id @default(cuid())
+    name          String
+    code          Int
+    classCode     String
+    fullCode      String @unique
+    subKategoriId String
+
+    SubKategori MasterBarangSubKategori @relation(fields: [subKategoriId], references: [id])
+
+    createdAt    DateTime       @default(now())
+    updatedAt    DateTime       @updatedAt
+    MasterBarang MasterBarang[]
+}
+
+model MasterBarang {
+    id               String @id @default(cuid())
+    name             String
+    code             Int
+    classCode        String
+    fullCode         String @unique
+    subSubKategoriId String
+
+    SubSubKategori MasterBarangSubSubKategori @relation(fields: [subSubKategoriId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model MasterUnit {
+    id   String @id @default(cuid())
+    name String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}

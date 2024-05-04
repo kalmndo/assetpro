@@ -12,7 +12,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  useReactTable,
+  useReactTable, type Table as TableType,
 } from '@tanstack/react-table'
 
 import {
@@ -25,16 +25,20 @@ import {
 } from '@/components/ui/table'
 
 import { DataTablePagination } from './pagination'
-import { DataTableToolbar } from './toolbar'
+import { type DataTableFacetedFilterProps, DataTableToolbar, type DataTableToolbarFilterProps } from './toolbar'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  facetedFilter?: DataTableFacetedFilterProps[]
+  filter: DataTableToolbarFilterProps
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  facetedFilter,
+  filter
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
@@ -68,7 +72,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className='space-y-4'>
-      <DataTableToolbar table={table} />
+      <DataTableToolbar table={table} filter={filter} facetedFilter={facetedFilter} />
       <div className='rounded-md border'>
         <Table>
           <TableHeader>
