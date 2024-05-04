@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 type Data = {
   label: string
   value: string
-  [key: string]: string;
+  [key: string]: string | number;
 }
 
 type TextInputProps = {

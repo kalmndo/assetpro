@@ -68,7 +68,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         {...props}
       >
-        {((leftSection && loading) ||
+        {((leftSection && loading) ??
           (!leftSection && !rightSection && loading)) && (
             <Loader2 className='mr-2 h-4 w-4 animate-spin' />
           )}
@@ -84,5 +84,4 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = 'Button'
 
-// eslint-disable-next-line react-refresh/only-export-components
 export { Button, buttonVariants }

@@ -17,7 +17,7 @@ const defaultValues = {
 
 export function Table({ data, modalData }: { data: any, modalData: any }) {
   const [dialog, setDialog] = useState<{ open: boolean | string, data: any }>({ open: false, data: defaultValues })
-  const { mutateAsync, isPending } = api.mbKategori.remove.useMutation()
+  const { mutateAsync, isPending } = api.mbSubKategori.remove.useMutation()
   const router = useRouter()
 
   const onSubmit = async () => {
@@ -61,7 +61,7 @@ export function Table({ data, modalData }: { data: any, modalData: any }) {
       <DeleteModal
         open={dialog.open === 'delete'}
         onOpenChange={onOpenChange}
-        dataName="KATEGORI"
+        dataName="SUB KATEGORI"
         name={dialog.data.name}
         isPending={isPending}
         onSubmit={onSubmit}

@@ -6,7 +6,6 @@ import {
   PackageMinus,
   PackagePlus,
   PackageSearch,
-  Plus,
   ShoppingCart,
   Users,
   Warehouse,

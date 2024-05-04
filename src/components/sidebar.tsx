@@ -75,7 +75,7 @@ export default function Sidebar2({
             <div
               className={`flex flex-col justify-end truncate ${isCollapsed ? 'invisible w-0' : 'visible w-auto'}`}
             >
-              <span className='font-medium'>Anjing</span>
+              <span className='font-medium'>Assetpro</span>
             </div>
           </div>
 

@@ -6,74 +6,62 @@ import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-export const mbKategoriRouter = createTRPCRouter({
+export const mbSubKategoriRouter = createTRPCRouter({
   getAll: protectedProcedure
     .query(async ({ ctx }) => {
-      const result = await ctx.db.masterBarangKategori.findMany({
+      const result = await ctx.db.masterBarangSubKategori.findMany({
         orderBy: {
           createdAt: "desc"
         },
         include: {
-          Golongan: true
+          Kategori: true
+
         }
       })
 
       return result.map((v) => ({
         ...v,
         kode: `${v.classCode}.${v.code}`,
-        golongan: v.Golongan.name
+        kategori: v.Kategori.name,
+        golonganId: v.Kategori.golonganId
       }))
     }),
-  getSelect: protectedProcedure
-    .query(async ({ ctx }) => {
-      const result = await ctx.db.masterBarangKategori.findMany({
-        orderBy: {
-          createdAt: "desc"
-        },
-      })
 
-      return result.map((v) => ({
-        label: v.name,
-        value: v.id,
-        code: v.code,
-        golonganId: v.golonganId
-      }))
-    }),
   create: protectedProcedure
     .input(z.object({
       name: z.string(),
       code: z.string(),
-      golonganId: z.string(),
+      kategoriId: z.string(),
       classCode: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
       const {
         name,
         code,
-        golonganId,
+        kategoriId,
         classCode
       } = input
 
       try {
-        await ctx.db.masterBarangKategori.create({
+        await ctx.db.masterBarangSubKategori.create({
           data: {
             name,
             code: Number(code),
-            golonganId,
+            kategoriId,
             classCode,
             fullCode: `${classCode}.${code}`
           },
         })
         return {
           ok: true,
-          message: 'Berhasil menambah kategori'
+          message: 'Berhasil menambah sub kategori'
         }
       } catch (error) {
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
           if (error.code === 'P2002') {
             throw new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
-              message: "Kode kategori ini sudah ada, harap ubah.",
+              message: "Kode sub kategori ini sudah ada, harap ubah.",
               cause: error,
             });
           }
@@ -91,7 +79,7 @@ export const mbKategoriRouter = createTRPCRouter({
       id: z.string(),
       name: z.string(),
       code: z.string(),
-      golonganId: z.string(),
+      kategoriId: z.string(),
       classCode: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
@@ -99,27 +87,27 @@ export const mbKategoriRouter = createTRPCRouter({
         id,
         name,
         code,
-        golonganId,
+        kategoriId,
         classCode
       } = input
 
       try {
 
-        await ctx.db.masterBarangKategori.update({
+        await ctx.db.masterBarangSubKategori.update({
           where: {
             id
           },
           data: {
             name,
             code: Number(code),
-            golonganId,
+            kategoriId,
             classCode,
             fullCode: `${classCode}.${code}`
           },
         })
         return {
           ok: true,
-          message: 'Berhasil mengubah kategori'
+          message: 'Berhasil mengubah sub kategori'
         }
       } catch (error) {
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -149,12 +137,12 @@ export const mbKategoriRouter = createTRPCRouter({
       } = input
 
       try {
-        await ctx.db.masterBarangKategori.delete({
+        await ctx.db.masterBarangSubKategori.delete({
           where: { id },
         })
         return {
           ok: true,
-          message: 'Berhasil menghapus kategori'
+          message: 'Berhasil menghapus sub kategori'
         }
       } catch (error) {
         throw new TRPCError({
