@@ -1,6 +1,9 @@
 import { AddDialog } from "@/feature/mb-sub-sub-kategori/add-dialog";
 import { Table } from "@/feature/mb-sub-sub-kategori/table";
 import { api } from "@/trpc/server";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import Link from "next/link";
+
 
 export default async function Page() {
   const data = await api.mbSubSubKategori.getAll()
@@ -16,7 +19,20 @@ export default async function Page() {
 
   return (
     <div>
-      <div className="mb-4 flex justify-between">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/master">Master</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Sub Sub Kategori</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      <div className="my-4 flex justify-between">
         <div className="">
           <h1 className='text-2xl font-bold tracking-tight'>
             Sub Sub Kategori

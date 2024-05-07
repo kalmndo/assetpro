@@ -172,86 +172,22 @@ export const sidelinks: SideLink[] = [
     ]
   },
   {
-    title: 'Pemeliharaan',
-    label: '',
-    href: '/',
-    icon: <LayoutDashboard size={18} />,
-    sub: [
-      {
-        title: 'Gedung',
-        label: '',
-        href: '/pemeliharaan/gedung',
-        icon: <LayoutDashboard size={18} />,
-      },
-      {
-        title: 'Kendaraan',
-        label: '',
-        href: '/pemeliharaan/kendaraan',
-        icon: <LayoutDashboard size={18} />,
-      },
-      {
-        title: 'Peralatan',
-        label: '',
-        href: '/pemeliharaan/peralatan',
-        icon: <LayoutDashboard size={18} />,
-      },
-      {
-        title: 'Furnitur',
-        label: '',
-        href: '/pemeliharaan/furnitur',
-        icon: <LayoutDashboard size={18} />,
-      },
-    ]
-  },
-  {
-    title: 'Admin',
+    title: '',
     label: '',
     href: 'admin',
     icon: <LayoutDashboard size={18} />,
     isTitle: true
   },
   {
-    title: 'User',
+    title: 'Master',
     label: '',
-    href: '/user',
-    icon: <Users size={18} />,
-  },
-  {
-    title: 'Master Barang',
-    label: '',
-    href: '/mb',
+    href: '/master',
     icon: <LayoutDashboard size={18} />,
-    sub: [
-      {
-        title: 'Kategori',
-        label: '',
-        href: '/mb/kategori',
-        icon: <LayoutDashboard size={18} />,
-      },
-      {
-        title: 'Sub Kategori',
-        label: '',
-        href: '/mb/sub-kategori',
-        icon: <LayoutDashboard size={18} />,
-      },
-      {
-        title: 'Sub Sub Kategori',
-        label: '',
-        href: '/mb/sub-sub-kategori',
-        icon: <LayoutDashboard size={18} />,
-      },
-      {
-        title: 'Barang',
-        label: '',
-        href: '/mb/barang',
-        icon: <LayoutDashboard size={18} />,
-      },
-    ]
   },
   {
-    title: 'Peminjaman',
+    title: 'Pengaturan',
     label: '',
-    href: '/',
+    href: '/pengaturan',
     icon: <LayoutDashboard size={18} />,
   },
 ]
