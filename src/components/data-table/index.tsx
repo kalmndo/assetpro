@@ -32,17 +32,19 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   facetedFilter?: DataTableFacetedFilterProps[]
   filter: DataTableToolbarFilterProps
+  columnVisibilityDefaultState?: VisibilityState
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   facetedFilter,
-  filter
+  filter,
+  columnVisibilityDefaultState = {}
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+    React.useState<VisibilityState>(columnVisibilityDefaultState)
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   )
