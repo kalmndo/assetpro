@@ -1,4 +1,5 @@
 import AppShell from "@/components/app-shell";
+import Cart from "@/components/cart";
 import { Layout, LayoutBody, LayoutHeader } from "@/components/custom/layout";
 import { Input } from "@/components/ui/input";
 import { UserNav } from "@/components/user-nav";
@@ -29,6 +30,7 @@ export default function LayoutYa({ children }: Props) {
 
           <div className='ml-auto flex items-center space-x-4'>
             {/* <ThemeSwitch /> */}
+            <Cart />
             <UserNav />
           </div>
         </LayoutHeader>

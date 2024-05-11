@@ -26,6 +26,7 @@ import {
 
 import { DataTablePagination } from './pagination'
 import { type DataTableFacetedFilterProps, DataTableToolbar, type DataTableToolbarFilterProps } from './toolbar'
+import { CheckboxToolbar } from './checkbox-toolbar'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -33,6 +34,7 @@ interface DataTableProps<TData, TValue> {
   facetedFilter?: DataTableFacetedFilterProps[]
   filter: DataTableToolbarFilterProps
   columnVisibilityDefaultState?: VisibilityState
+  checkboxToolbarActions?: { title: string, desc: string, handleAction(table: any): void }[]
 }
 
 export function DataTable<TData, TValue>({
@@ -40,7 +42,8 @@ export function DataTable<TData, TValue>({
   data,
   facetedFilter,
   filter,
-  columnVisibilityDefaultState = {}
+  columnVisibilityDefaultState = {},
+  checkboxToolbarActions
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
@@ -126,6 +129,13 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
+      {checkboxToolbarActions &&
+        <CheckboxToolbar
+          table={table}
+          count={table.getFilteredSelectedRowModel().rows.length}
+          actions={checkboxToolbarActions}
+        />
+      }
     </div>
   )
 }
