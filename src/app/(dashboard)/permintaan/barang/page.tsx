@@ -1,16 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Table } from "@/feature/mb-kategori/table";
 import { api } from "@/trpc/server";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { Table } from "./_components/table";
 
 export default async function Page() {
-  const data = await api.mbKategori.getAll()
-  const golongans = await api.mbGolongan.getSelect()
-
-  const modalData = {
-    golongans
-  }
+  const data = await api.permintaanBarang.getAll()
 
   return (
     <div>
@@ -34,7 +29,7 @@ export default async function Page() {
         </div>
       </div>
       <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
-        <Table data={data} modalData={modalData} />
+        <Table data={data} />
       </div>
     </div>
   )

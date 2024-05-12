@@ -1,5 +1,4 @@
 import { z } from "zod";
-
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -8,6 +7,25 @@ import { TRPCError } from "@trpc/server";
 import { Prisma } from "@prisma/client";
 
 export const permintaanBarangRouter = createTRPCRouter({
+  getAll: protectedProcedure
+    .query(async ({ ctx }) => {
+      const result = await ctx.db.permintaanBarang.findMany({
+        orderBy: {
+          createdAt: "desc"
+        },
+        include: {
+          Ruang: true,
+          PermintaanBarangBarang: true
+        }
+      })
+
+      return result.map((v) => ({
+        ...v,
+        ruang: v.Ruang.name,
+        jumlah: v.PermintaanBarangBarang.length,
+        tanggal: v.createdAt.toLocaleDateString()
+      }))
+    }),
   create: protectedProcedure
     .input(z.object({
       no: z.string(),
