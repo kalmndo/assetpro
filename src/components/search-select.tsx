@@ -48,7 +48,7 @@ const SearchSelect = (props: TextInputProps) => {
       control={props.form.control}
       name={props.name}
       render={({ field }) => (
-        <FormItem className="flex flex-col ">
+        <FormItem className="flex flex-col my-2 ">
           <FormLabel>{props.label}</FormLabel>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -105,7 +105,6 @@ const SearchSelect = (props: TextInputProps) => {
         </FormItem>
       )}
     />
-
   )
 }
 

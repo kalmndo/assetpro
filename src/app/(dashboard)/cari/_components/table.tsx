@@ -16,7 +16,10 @@ export function Table({ data }: { data: any }) {
           id: v.original.id,
           image: v.original.image,
           kode: v.original.kode,
-          name: v.original.name
+          name: v.original.name,
+          kodeAnggaran: [],
+          qty: 1,
+          unit: 'Pcs'
         }))
 
         // @ts-ignore

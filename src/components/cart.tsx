@@ -12,15 +12,9 @@ import { ShoppingCart, Trash } from "lucide-react"
 import { ScrollArea } from "./ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { useAtom, useAtomValue, type PrimitiveAtom } from "jotai"
-import { cartsAtomsAtom } from "@/data/cart"
-import { Badge } from "./ui/badge"
+import { type CartType, cartsAtomsAtom } from "@/data/cart"
+import Link from "next/link"
 
-type CartType = {
-  id: string
-  gambar: string
-  name: string
-  kode: string
-}
 
 
 function Barang({
@@ -95,7 +89,9 @@ export default function Cart() {
 
           </ScrollArea>
           <div className="">
-            <Button className="w-full">Buat permintaan</Button>
+            <Link href="/permintaan/barang/create" >
+              <Button disabled={cartAtoms.length === 0} className="w-full">Buat permintaan</Button>
+            </Link>
           </div>
         </div>
       </SheetContent>

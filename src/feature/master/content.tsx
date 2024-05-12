@@ -72,7 +72,7 @@ const master = [
       {
         name: 'Ruang',
         logo: <Layout />,
-        to: 'master/',
+        to: 'master/ruang',
         desc: 'Connect with Telegram for',
       },
       {

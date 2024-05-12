@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-    provider = "mysql"
+    provider = "postgresql"
     // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
     // Further reading:
     // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
@@ -54,14 +54,90 @@ model UserRole {
     updatedAt DateTime @updatedAt
 }
 
+model PermintaanBarang {
+    id      String @id @default(cuid())
+    no      String @unique
+    status  String
+    perihal String
+    ruangId String
+
+    Ruang                  MasterRuang              @relation(fields: [ruangId], references: [id])
+    PermintaanBarangBarang PermintaanBarangBarang[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model PermintaanBarangBarang {
+    id           String @id @default(cuid())
+    permintaanId String
+    barangId     String
+    status       String
+    qty          Int
+    qtyOrdered   Int
+    qtyOut       Int
+    uomId        String
+
+    Permintaan                         PermintaanBarang                     @relation(fields: [permintaanId], references: [id])
+    Barang                             MasterBarang                         @relation(fields: [barangId], references: [id])
+    Uom                                MasterUnit                           @relation(fields: [uomId], references: [id])
+    PermintaanBarangBarangSplit        PermintaanBarangBarangSplit[]
+    PermintaanBarangBarangHistory      PermintaanBarangBarangHistory[]
+    PermintaanBarangBarangKodeAnggaran PermintaanBarangBarangKodeAnggaran[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model PermintaanBarangBarangKodeAnggaran {
+    id             String @id @default(cuid())
+    pbbId          String
+    kodeAnggaranId String
+
+    Barang       PermintaanBarangBarang @relation(fields: [pbbId], references: [id])
+    KodeAnggaran MasterKodeAnggaran     @relation(fields: [kodeAnggaranId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model PermintaanBarangBarangSplit {
+    id     String  @id @default(cuid())
+    pbbId  String
+    desc   String
+    status String
+    qty    Int
+    foto   String?
+
+    Barang PermintaanBarangBarang @relation(fields: [pbbId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model PermintaanBarangBarangHistory {
+    id     String @id @default(cuid())
+    pbbId  String
+    desc   String
+    status String
+
+    Barang PermintaanBarangBarang @relation(fields: [pbbId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+// --------------------------- MASTER --------------------------------
+
 model Department {
     id   String @id @default(cuid())
     name String
 
     User User[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt          DateTime             @default(now())
+    updatedAt          DateTime             @updatedAt
+    MasterKodeAnggaran MasterKodeAnggaran[]
 }
 
 model Role {
@@ -140,14 +216,52 @@ model MasterBarang {
 
     SubSubKategori MasterBarangSubSubKategori @relation(fields: [subSubKategoriId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt              DateTime                 @default(now())
+    updatedAt              DateTime                 @updatedAt
+    PermintaanBarangBarang PermintaanBarangBarang[]
 }
 
 model MasterUnit {
     id   String @id @default(cuid())
     name String
 
+    createdAt              DateTime                 @default(now())
+    updatedAt              DateTime                 @updatedAt
+    PermintaanBarangBarang PermintaanBarangBarang[]
+}
+
+model MasterRuang {
+    id   String @id @default(cuid())
+    name String
+
+    PermintaanBarang PermintaanBarang[]
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+}
+
+model MasterNomor {
+    id            String  @unique
+    name          String
+    format        String
+    reset         Int
+    resetType     Int?
+    currentNumber BigInt?
+    currentMonth  Int
+    currentYear   Int
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model MasterKodeAnggaran {
+    id           String @id @unique
+    name         String
+    departmentId String
+
+    Department Department @relation(fields: [departmentId], references: [id])
+
+    createdAt                          DateTime                             @default(now())
+    updatedAt                          DateTime                             @updatedAt
+    PermintaanBarangBarangKodeAnggaran PermintaanBarangBarangKodeAnggaran[]
 }

@@ -7,6 +7,8 @@ import { mbSubKategoriRouter } from "./routers/mb-sub-kategori";
 import { mbSubSubKategoriRouter } from "./routers/mb-sub-sub-kategori";
 import { mbBarangRouter } from "./routers/mb-barang";
 import { cariBarangRouter } from "./routers/cari-barang";
+import { mRuangRouter } from "./routers/m-ruang";
+import { permintaanBarangRouter } from "./routers/permintaan-barang";
 
 /**
  * This is the primary router for your server.
@@ -21,7 +23,9 @@ export const appRouter = createTRPCRouter({
   mbSubKategori: mbSubKategoriRouter,
   mbSubSubKategori: mbSubSubKategoriRouter,
   mbBarang: mbBarangRouter,
-  cariBarang: cariBarangRouter
+  mRuang: mRuangRouter,
+  cariBarang: cariBarangRouter,
+  permintaanBarang: permintaanBarangRouter
 });
 
 // export type definition of API
