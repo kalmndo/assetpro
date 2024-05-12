@@ -5,6 +5,7 @@ import {
   protectedProcedure,
 } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
+import { Prisma } from "@prisma/client";
 
 export const permintaanBarangRouter = createTRPCRouter({
   create: protectedProcedure
@@ -74,6 +75,15 @@ export const permintaanBarangRouter = createTRPCRouter({
           message: "Berhasil membuat permintaan barang"
         }
       } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+          if (error.code === 'P2002') {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "No Internal Memo ini sudah terdaftar, harap ubah.",
+              cause: error,
+            });
+          }
+        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Kemunkingan terjadi kesalahan sistem, silahkan coba lagi",
