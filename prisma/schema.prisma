@@ -38,8 +38,9 @@ model User {
     UserRole   UserRole[]
     Department Department @relation(fields: [departmentId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt        DateTime           @default(now())
+    updatedAt        DateTime           @updatedAt
+    PermintaanBarang PermintaanBarang[]
 }
 
 model UserRole {
@@ -55,12 +56,14 @@ model UserRole {
 }
 
 model PermintaanBarang {
-    id      String @id @default(cuid())
-    no      String @unique
-    status  String
-    perihal String
-    ruangId String
+    id         String @id @default(cuid())
+    no         String @unique
+    status     String
+    perihal    String
+    ruangId    String
+    pemohondId String
 
+    Pemohon                User                     @relation(fields: [pemohondId], references: [id])
     Ruang                  MasterRuang              @relation(fields: [ruangId], references: [id])
     PermintaanBarangBarang PermintaanBarangBarang[]
 

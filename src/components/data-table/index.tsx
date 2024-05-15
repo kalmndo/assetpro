@@ -32,9 +32,10 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   facetedFilter?: DataTableFacetedFilterProps[]
-  filter: DataTableToolbarFilterProps
+  filter?: DataTableToolbarFilterProps
   columnVisibilityDefaultState?: VisibilityState
   checkboxToolbarActions?: { title: string, desc: string, handleAction(table: any): void }[]
+  isPagintation?: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -43,7 +44,8 @@ export function DataTable<TData, TValue>({
   facetedFilter,
   filter,
   columnVisibilityDefaultState = {},
-  checkboxToolbarActions
+  checkboxToolbarActions,
+  isPagintation = true
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
@@ -77,7 +79,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className='space-y-4'>
-      <DataTableToolbar table={table} filter={filter} facetedFilter={facetedFilter} />
+      {filter && <DataTableToolbar table={table} filter={filter} facetedFilter={facetedFilter} />}
       <div className='rounded-md border'>
         <Table>
           <TableHeader>
@@ -128,7 +130,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      {isPagintation && <DataTablePagination table={table} />}
       {checkboxToolbarActions &&
         <CheckboxToolbar
           table={table}

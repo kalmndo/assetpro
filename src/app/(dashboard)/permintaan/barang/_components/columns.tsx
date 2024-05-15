@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 
 export const schema = z.object({
+  id: z.string(),
   no: z.string(),
   perihal: z.string(),
   ruang: z.string(),
@@ -24,7 +25,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`barang/${row.getValue<string>('no')}`} className='flex w-full'>
+        <Link href={`barang/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('no')}
           </span>
@@ -41,7 +42,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`barang/${row.getValue<string>('no')}`} className='flex w-full'>
+        <Link href={`barang/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('perihal')}
           </span>
@@ -56,7 +57,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`barang/${row.getValue<string>('no')}`} className='flex w-full'>
+        <Link href={`barang/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('ruang')}
           </span>
@@ -71,7 +72,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`barang/${row.getValue<string>('no')}`} className='flex w-full'>
+        <Link href={`barang/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('jumlah')}
           </span>
@@ -86,7 +87,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`barang/${row.getValue<string>('no')}`} className='flex w-full'>
+        <Link href={`barang/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('tanggal')}
           </span>
@@ -101,7 +102,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`barang/${row.getValue<string>('no')}`} className='flex w-full'>
+        <Link href={`barang/${row.original.id}`} className='flex w-full'>
           <Badge variant="default">
             {row.getValue('status')}
           </Badge>

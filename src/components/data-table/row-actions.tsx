@@ -8,17 +8,19 @@ import {
 import { type ReactNode } from 'react'
 
 interface DataTableRowActionsProps {
-  children: ReactNode
+  children: ReactNode,
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | null | undefined
 }
 
 export function DataTableRowActions({
-  children
+  children,
+  variant = 'ghost'
 }: DataTableRowActionsProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant='ghost'
+          variant={variant}
           className='flex h-8 w-8 p-0 data-[state=open]:bg-muted'
         >
           <DotsHorizontalIcon className='h-4 w-4' />
