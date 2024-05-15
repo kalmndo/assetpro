@@ -19,6 +19,11 @@ export const STATUS = {
     id: 'approve',
     name: 'Disetujui',
     color: 'bg-green-600'
+  },
+  IM_REJECT: {
+    id: 'reject',
+    name: 'Ditolak',
+    color: 'bg-green-600'
   }
 }
 

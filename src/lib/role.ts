@@ -5,11 +5,11 @@ type RoleType = {
 
 export const ROLE = {
   IM_READ: {
-    id: 'permintaan-barang-read',
+    id: 'im-view',
     name: 'Internal Memo (read)',
   },
   IM_APPROVE: {
-    id: 'permintaan-barang-approve',
+    id: 'im-approve',
     name: 'Internal Memo (approve)',
   },
 }

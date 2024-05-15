@@ -21,7 +21,7 @@ declare module "next-auth" {
     user: {
       id: string;
       // ...other properties
-      // role: UserRole;
+      role: string[];
     } & DefaultSession["user"];
   }
 
@@ -50,6 +50,9 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         const user = await db.user.findFirst({
           where: { email: credentials?.email },
+          include: {
+            UserRole: true
+          }
         });
 
         if (!user) {
@@ -67,7 +70,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Wrong credentials");
         }
 
-        return { ...user };
+        return { ...user, role: user.UserRole.map((v) => v.roleId) };
       },
     }),
   ],
@@ -87,7 +90,9 @@ export const authOptions: NextAuthOptions = {
         token.accessToken = account.access_token;
       }
       if (user) {
-        token.id = user.id
+        token.id = user.id,
+          // @ts-ignore
+          token.role = user.role
       }
       return token
     },
@@ -96,7 +101,9 @@ export const authOptions: NextAuthOptions = {
         ...session,
         user: {
           ...session.user,
-          id: token.id
+          id: token.id,
+          // @ts-ignore
+          role: token.role
         },
       }
     },

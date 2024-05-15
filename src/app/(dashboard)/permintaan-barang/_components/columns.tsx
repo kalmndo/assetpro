@@ -13,6 +13,7 @@ export const schema = z.object({
   jumlah: z.number(),
   tanggal: z.string(),
   status: z.string(),
+  Pemohon: z.object({ name: z.string() }).nullable()
 })
 
 export type Schema = z.infer<typeof schema>
@@ -25,7 +26,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`barang/${row.original.id}`} className='flex w-full'>
+        <Link href={`permintaan-barang/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('no')}
           </span>
@@ -36,13 +37,28 @@ export const columns: ColumnDef<Schema>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: 'pemohon',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Pemohon' />
+    ),
+    cell: ({ row }) => {
+      return (
+        <Link href={`permintaan-barang/${row.original.id}`} className='flex w-full'>
+          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
+            {row.original.Pemohon?.name}
+          </span>
+        </Link>
+      )
+    },
+  },
+  {
     accessorKey: 'perihal',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Perihal & Tujuan' />
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`barang/${row.original.id}`} className='flex w-full'>
+        <Link href={`permintaan-barang/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('perihal')}
           </span>
@@ -57,7 +73,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`barang/${row.original.id}`} className='flex w-full'>
+        <Link href={`permintaan-barang/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('ruang')}
           </span>
@@ -72,7 +88,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`barang/${row.original.id}`} className='flex w-full'>
+        <Link href={`permintaan-barang/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('jumlah')}
           </span>
@@ -87,7 +103,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`barang/${row.original.id}`} className='flex w-full'>
+        <Link href={`permintaan-barang/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('tanggal')}
           </span>
@@ -103,7 +119,7 @@ export const columns: ColumnDef<Schema>[] = [
     cell: ({ row }) => {
       const { color, name } = getStatus(row.getValue('status'))
       return (
-        <Link href={`barang/${row.original.id}`} className='flex w-full'>
+        <Link href={`permintaan-barang/${row.original.id}`} className='flex w-full'>
           <span style={{ color }} className='max-w-32 truncate font-semibold sm:max-w-72 md:max-w-[31rem]'>
             {name}
           </span>

@@ -10,20 +10,50 @@ import { ROLE } from "@/lib/role";
 
 export const permintaanBarangRouter = createTRPCRouter({
   getAll: protectedProcedure
-    .query(async ({ ctx }) => {
-      const result = await ctx.db.permintaanBarang.findMany({
-        orderBy: {
-          createdAt: "desc"
-        },
-        include: {
-          Ruang: true,
-          PermintaanBarangBarang: true
+    .input(z.object({
+      isUser: z.boolean()
+    }))
+    .query(async ({ ctx, input }) => {
+      const { isUser } = input
+
+      let findMany;
+
+      if (isUser) {
+        findMany = {
+          where: {
+            // @ts-ignore
+            pemohondId: ctx.session.user.id
+          },
+          orderBy: {
+            createdAt: "desc" as any
+          },
+          include: {
+            Ruang: true,
+            PermintaanBarangBarang: true
+          }
         }
-      })
+      } else {
+        findMany = {
+          orderBy: {
+            createdAt: "desc"
+          },
+          include: {
+            // @ts-ignore
+            Pemohon: true,
+            Ruang: true,
+            PermintaanBarangBarang: true
+          }
+        }
+      }
+
+      // @ts-ignore
+      const result = await ctx.db.permintaanBarang.findMany(findMany)
 
       return result.map((v) => ({
         ...v,
+        // @ts-ignore
         ruang: v.Ruang.name,
+        // @ts-ignore
         jumlah: v.PermintaanBarangBarang.length,
         tanggal: v.createdAt.toLocaleDateString()
       }))
@@ -32,6 +62,14 @@ export const permintaanBarangRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
+      const user = await ctx.db.user.findUnique({
+        where: { id: userId },
+        include: {
+          UserRole: true
+        }
+      })
+      const roles = user?.UserRole.map((v) => v.roleId)
+
       const { id } = input
       const result = await ctx.db.permintaanBarang.findFirst({
         where: {
@@ -81,7 +119,7 @@ export const permintaanBarangRouter = createTRPCRouter({
 
 
 
-      const barang = PermintaanBarangBarang.map((v) => ({
+      const barang = PermintaanBarangBarang.filter((v) => v.status !== STATUS.IM_REJECT.id).map((v) => ({
         id: v.id,
         name: v.Barang.name,
         kode: v.Barang.fullCode,
@@ -95,7 +133,10 @@ export const permintaanBarangRouter = createTRPCRouter({
       }))
 
       // TODO: 
-      const canUpdate = userId === atasanId && status === getStatus(STATUS.PENGAJUAN.id).id
+      const isAtasan = userId === atasanId && status === getStatus(STATUS.PENGAJUAN.id).id
+      const isImApprove = roles?.includes(ROLE.IM_APPROVE.id) && status === getStatus(STATUS.ATASAN_SETUJU.id).id
+
+      const canUpdate = isAtasan || isImApprove
 
       return {
         id,
@@ -158,7 +199,7 @@ export const permintaanBarangRouter = createTRPCRouter({
             const pbbId = await tx.permintaanBarangBarang.create({
               data: {
                 barangId: id,
-                status: 'waiting',
+                status: STATUS.PENGAJUAN.id,
                 permintaanId: pb.id,
                 qty: Number(qty),
                 qtyOrdered: 0,
@@ -247,7 +288,7 @@ export const permintaanBarangRouter = createTRPCRouter({
       }
 
       const isAtasan = res.Pemohon.atasanId === userId && res.status === getStatus(STATUS.PENGAJUAN.id).id
-      const canEdit = user?.UserRole.some((v) => v.id === ROLE.IM_APPROVE.id) && res.status === getStatus(STATUS.ATASAN_SETUJU.id).id
+      const canEdit = user?.UserRole.some((v) => v.roleId === ROLE.IM_APPROVE.id) && res.status === getStatus(STATUS.ATASAN_SETUJU.id).id
 
       const status = isAtasan ? STATUS.ATASAN_SETUJU.id : STATUS.IM_APPROVE.id
 
@@ -270,7 +311,7 @@ export const permintaanBarangRouter = createTRPCRouter({
             }
           })
           const updateRejectBarangs = [...(update ?? []), ...(reject ?? [])].map((v) => v.id)
-          const untouchedBarangs = pb.PermintaanBarangBarang.filter((v) => !updateRejectBarangs.includes(v.id))
+          const untouchedBarangs = pb.PermintaanBarangBarang.filter((v) => !updateRejectBarangs.includes(v.id) && v.status !== STATUS.IM_REJECT.id)
 
           if (untouchedBarangs.length > 0) {
             for (const iterator of untouchedBarangs) {
@@ -279,14 +320,14 @@ export const permintaanBarangRouter = createTRPCRouter({
                   id: iterator.id
                 },
                 data: {
-                  status,
+                  status: STATUS.IM_APPROVE.id,
                 }
               })
               await tx.permintaanBarangBarangHistory.createMany({
                 data: untouchedBarangs.map((v) => ({
                   pbbId: v.id,
                   desc: "Setuju",
-                  status
+                  status: STATUS.IM_APPROVE.id
                 }))
               })
             }
@@ -299,7 +340,7 @@ export const permintaanBarangRouter = createTRPCRouter({
                   id: iterator.id
                 },
                 data: {
-                  status,
+                  status: STATUS.IM_APPROVE.id,
                   qty: Number(iterator.qty),
                   uomId: iterator.uomId
                 }
@@ -310,7 +351,7 @@ export const permintaanBarangRouter = createTRPCRouter({
                 pbbId: v.id,
                 // TODO: TO STRING REACT ELEMENT
                 desc: "Menyetujui dan melakukan perubahan barang",
-                status
+                status: STATUS.IM_APPROVE.id
               }))
             })
           }
@@ -322,7 +363,7 @@ export const permintaanBarangRouter = createTRPCRouter({
                   id: iterator.id
                 },
                 data: {
-                  status: isAtasan ? 'Ditolak atasan' : "Ditolak",
+                  status: STATUS.IM_REJECT.id
                 }
               })
             }
@@ -331,7 +372,7 @@ export const permintaanBarangRouter = createTRPCRouter({
               data: reject.map((v) => ({
                 pbbId: v.id,
                 desc: v.catatan,
-                status: isAtasan ? 'Ditolak atasan' : "Ditolak",
+                status: STATUS.IM_REJECT.id
               }))
             })
           }

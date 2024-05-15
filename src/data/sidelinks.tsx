@@ -7,7 +7,6 @@ import {
   PackagePlus,
   PackageSearch,
   ShoppingCart,
-  Users,
   Warehouse,
   Wrench
 } from 'lucide-react'
@@ -78,7 +77,7 @@ export const sidelinks: SideLink[] = [
   {
     title: 'Permintaan Barang',
     label: '',
-    href: '/im',
+    href: '/permintaan-barang',
     icon: <FileClock size={18} />,
   },
   {

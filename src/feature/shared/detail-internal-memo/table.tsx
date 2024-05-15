@@ -132,6 +132,8 @@ export function Table({
     setDialog({ open: false, data: DEFAULT_BARANG_VALUE })
   }
 
+  const isAllBarangReject = barangs.every((v) => v.status === 'to-reject')
+
   return (
     <div>
       <DataTable
@@ -174,7 +176,7 @@ export function Table({
         >
           Tolak
         </Button>
-        <Button size="lg" onClick={() => setDialog({ open: 'approve', data: DEFAULT_BARANG_VALUE })}>Setuju</Button>
+        {!isAllBarangReject && <Button size="lg" onClick={() => setDialog({ open: 'approve', data: DEFAULT_BARANG_VALUE })}>Setuju</Button>}
       </div>}
       <DialogRejectBarang
         open={dialog.open === 'reject-barang'}
