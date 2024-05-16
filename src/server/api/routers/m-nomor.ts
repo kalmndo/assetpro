@@ -29,7 +29,7 @@ export const mNomor = createTRPCRouter({
       }
 
       // internal memo
-      const format = result.format
+      // const format = result.format
 
       // list penomoran
       // nomor urut (1 - 1000000) NOMOR
