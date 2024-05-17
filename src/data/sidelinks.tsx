@@ -125,12 +125,6 @@ export const sidelinks: SideLink[] = [
     icon: <Warehouse size={18} />,
     sub: [
       {
-        title: 'Permintaan ',
-        label: '',
-        href: '/gudang/permintaan-barang',
-        icon: <PackageSearch size={18} />,
-      },
-      {
         title: 'Masuk',
         label: '',
         href: '/gudang/barang-masuk',
@@ -166,6 +160,26 @@ export const sidelinks: SideLink[] = [
         title: 'Keluar',
         label: '',
         href: '/perbaikan/keluar',
+        icon: <LayoutDashboard size={18} />,
+      },
+    ]
+  },
+  {
+    title: 'Peminjaman',
+    label: '',
+    href: '',
+    icon: <LayoutDashboard size={18} />,
+    sub: [
+      {
+        title: 'internal',
+        label: '',
+        href: '/peminjama/internal',
+        icon: <LayoutDashboard size={18} />,
+      },
+      {
+        title: 'external',
+        label: '',
+        href: '/peminjaman/external',
         icon: <LayoutDashboard size={18} />,
       },
     ]

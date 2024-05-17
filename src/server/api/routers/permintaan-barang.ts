@@ -34,6 +34,10 @@ export const permintaanBarangRouter = createTRPCRouter({
         }
       } else {
         findMany = {
+          where: {
+            // @ts-ignore
+            NOT: { status: STATUS.PENGAJUAN.id }
+          },
           orderBy: {
             createdAt: "desc"
           },
