@@ -6,6 +6,7 @@ export type CartType = {
   name: string
   kode: string
   qty: string
+  uom: string
   kodeAnggaran: string[]
 }
 

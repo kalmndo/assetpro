@@ -14,6 +14,7 @@ export const cariBarangRouter = createTRPCRouter({
         ctx.db.masterBarang.findMany({
           where: kategori ? { subSubKategoriId: kategori } : {},
           include: {
+            Uom: true,
             SubSubKategori: {
               include: {
                 SubKategori: {
@@ -38,6 +39,8 @@ export const cariBarangRouter = createTRPCRouter({
         image: '',
         name: v.name,
         kode: v.fullCode,
+        uom: v.Uom.name,
+        uomId: v.uomId,
         subSubKategori: v.SubSubKategori.name,
         subKategori: v.SubSubKategori.SubKategori.name,
         kategori: v.SubSubKategori.SubKategori.Kategori.name,

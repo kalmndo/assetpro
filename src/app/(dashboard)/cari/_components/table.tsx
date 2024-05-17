@@ -7,19 +7,23 @@ import { cartsAtom } from "@/data/cart";
 export function Table({ data }: { data: any }) {
   const setCarts = useSetAtom(cartsAtom)
 
+  console.log("data", data)
+
   const checkboxToolbarActions = [
     {
       title: 'Simpan',
       desc: "Simpan ke keranjang permintaan",
       handleAction: (table: any) => {
+        console.log("table", table.getFilteredSelectedRowModel().rows.map((v: any) => v.original))
         const newData = table.getFilteredSelectedRowModel().rows.map((v: any) => ({
           id: v.original.id,
           image: v.original.image,
           kode: v.original.kode,
           name: v.original.name,
           kodeAnggaran: [],
-          qty: 1,
-          unit: 'Pcs'
+          qty: '1',
+          uom: v.original.uom,
+          uomId: v.original.uomId
         }))
 
         // @ts-ignore

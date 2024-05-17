@@ -57,14 +57,12 @@ export default function Content({
   })
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (barang.every((v: any) => v.kodeAnggaran.length > 1)) {
+    console.log("barang", barang)
+    if (barang.every((v: any) => v.kodeAnggaran.length > 0)) {
       try {
         const result = await mutateAsync({
           ...values,
-          barang: barang.map((b: any) => ({
-            ...b,
-            uomId: 'clw3dm8x20000a7snfvjb659m'
-          }))
+          barang
         })
 
         toast.success(result.message)

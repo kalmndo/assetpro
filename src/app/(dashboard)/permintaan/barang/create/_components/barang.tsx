@@ -35,7 +35,9 @@ export default function Barang({
           </div>
         </div>
       </TableCell>
-      <TableCell>Pcs</TableCell>
+      <TableCell>
+        {cart.uom}
+      </TableCell>
       <TableCell>
         <Input
           className="w-24"
