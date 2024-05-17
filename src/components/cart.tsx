@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { useAtom, useAtomValue, type PrimitiveAtom } from "jotai"
 import { type CartType, cartsAtomsAtom } from "@/data/cart"
 import Link from "next/link"
+import { useState } from "react"
 
 
 
@@ -54,10 +55,11 @@ function Barang({
 }
 
 export default function Cart() {
+  const [open, setOpen] = useState(false)
   const [cartAtoms, dispatch] = useAtom(cartsAtomsAtom)
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button
           size='icon'
@@ -89,7 +91,7 @@ export default function Cart() {
 
           </ScrollArea>
           <div className="">
-            <Link href="/permintaan/barang/create" >
+            <Link href="/permintaan/barang/create" onClick={() => setOpen(false)} >
               <Button disabled={cartAtoms.length === 0} className="w-full">Buat permintaan</Button>
             </Link>
           </div>

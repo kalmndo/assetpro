@@ -178,6 +178,16 @@ export const permintaanBarangRouter = createTRPCRouter({
 
       try {
         const result = await ctx.db.$transaction(async (tx) => {
+          const userId = ctx.session.user.id
+
+          const user = await tx.user.findFirst({
+            where: {
+              id: userId
+            },
+          })
+
+          const atasanId = user?.atasanId
+
           const pb = await tx.permintaanBarang.create({
             data: {
               no,
@@ -217,6 +227,17 @@ export const permintaanBarangRouter = createTRPCRouter({
               })
             })
           }
+
+          await tx.notification.create({
+            data: {
+              fromId: userId,
+              // TODO: Benerin ini kalau gak ada atasan
+              toId: atasanId ?? userId,
+              link: `/permintaan/barang/${pb.id}`,
+              desc: "",
+              isRead: false,
+            }
+          })
           return {
             id: pb.id
           }

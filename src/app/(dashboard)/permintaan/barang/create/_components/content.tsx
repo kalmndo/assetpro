@@ -29,7 +29,7 @@ import Barang from "./barang";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { RESET } from "jotai/utils";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   "no": z.string().min(1).max(255),

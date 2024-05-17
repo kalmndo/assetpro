@@ -8,6 +8,32 @@ import { z } from "zod";
 import bcrypt from 'bcryptjs'
 
 export const userRouter = createTRPCRouter({
+  me: protectedProcedure
+    .query(async ({ ctx, }) => {
+      const userId = ctx.session.user.id
+      const user = await ctx.db.user.findUnique({
+        where: {
+          id: userId
+        },
+        include: {
+          NotificationTo: {
+            include: {
+              From: true
+            }
+          }
+        }
+      })
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User tidak ada",
+        });
+      }
+      return {
+        id: user.id,
+        notifications: user.NotificationTo
+      }
+    }),
   getAll: protectedProcedure
     .query(async ({ ctx }) => {
       const result = await ctx.db.user.findMany({
