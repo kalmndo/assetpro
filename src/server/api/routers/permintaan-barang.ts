@@ -177,7 +177,7 @@ export const permintaanBarangRouter = createTRPCRouter({
       const pemohondId = ctx.session.user.id
 
       try {
-        await ctx.db.$transaction(async (tx) => {
+        const result = await ctx.db.$transaction(async (tx) => {
           const pb = await tx.permintaanBarang.create({
             data: {
               no,
@@ -217,10 +217,14 @@ export const permintaanBarangRouter = createTRPCRouter({
               })
             })
           }
+          return {
+            id: pb.id
+          }
         })
 
         return {
           ok: true,
+          data: { id: result.id },
           message: "Berhasil membuat permintaan barang"
         }
       } catch (error) {

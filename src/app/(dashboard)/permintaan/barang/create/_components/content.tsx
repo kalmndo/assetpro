@@ -29,6 +29,7 @@ import Barang from "./barang";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { RESET } from "jotai/utils";
+import { redirect, useRouter } from "next/navigation";
 
 const formSchema = z.object({
   "no": z.string().min(1).max(255),
@@ -46,6 +47,7 @@ export default function Content({
   const [cartAtoms, dispatch] = useAtom(cartsAtomsAtom)
   const [barang, setBarang] = useAtom(cartsAtom)
   const { mutateAsync, isPending } = api.permintaanBarang.create.useMutation()
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -57,7 +59,6 @@ export default function Content({
   })
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log("barang", barang)
     if (barang.every((v: any) => v.kodeAnggaran.length > 0)) {
       try {
         const result = await mutateAsync({
@@ -68,6 +69,7 @@ export default function Content({
         toast.success(result.message)
         form.reset()
         setBarang(RESET)
+        router.replace(`/permintaan/barang/${result.data.id}`)
 
       } catch (error: any) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
