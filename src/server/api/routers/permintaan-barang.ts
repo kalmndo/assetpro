@@ -337,6 +337,8 @@ export const permintaanBarangRouter = createTRPCRouter({
           })
           const updateRejectBarangs = [...(update ?? []), ...(reject ?? [])].map((v) => v.id)
           const untouchedBarangs = pb.PermintaanBarangBarang.filter((v) => !updateRejectBarangs.includes(v.id) && v.status !== STATUS.IM_REJECT.id)
+          // <p class="text-sm font-semibold">Adam Kalalmondo<span class="font-normal ml-2">meminta persetujuan internal memo</span></p>
+          const notifDesc = `<p class="text-sm font-semibold">${user?.name}<span class="font-normal ml-[5px]">Menyetujui ${res.no}</span></p>`
 
           if (untouchedBarangs.length > 0) {
             for (const iterator of untouchedBarangs) {
@@ -401,10 +403,20 @@ export const permintaanBarangRouter = createTRPCRouter({
               }))
             })
           }
+
+          await tx.notification.create({
+            data: {
+              fromId: userId,
+              toId: res.pemohondId,
+              link: `/permintaan/barang/${pb.id}`,
+              desc: notifDesc,
+              isRead: false,
+            }
+          })
         })
         return {
           ok: true,
-          message: "Berhasil membuat permintaan barang"
+          message: "Berhasil menyetujui permintaan barang"
         }
       } catch (error) {
         throw new TRPCError({

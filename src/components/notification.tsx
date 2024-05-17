@@ -30,9 +30,7 @@ function Item({
           <AvatarFallback>{item.From.name}</AvatarFallback>
         </Avatar>
       </div>
-      <div className="grow">
-        <div dangerouslySetInnerHTML={{ __html: item.desc }}></div>
-      </div>
+      <div className="flex" dangerouslySetInnerHTML={{ __html: item.desc }}></div>
       <div>
         {!item.isRead && <div className="w-4 h-4 rounded-full bg-primary" />}
       </div>
