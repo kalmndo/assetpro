@@ -50,7 +50,7 @@ const SearchSelect = (props: TextInputProps) => {
       name={props.name}
       render={({ field }) => (
         <FormItem className="flex flex-col ">
-          <FormLabel className="mt-1">{props.label}</FormLabel>
+          <FormLabel className="my-1">{props.label}</FormLabel>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <FormControl>
@@ -60,7 +60,7 @@ const SearchSelect = (props: TextInputProps) => {
                   aria-expanded={open}
                   disabled={props.disabled ?? false}
                   className={cn(
-                    " justify-between",
+                    "justify-between",
                     !field.value && "text-muted-foreground"
                   )}
                 >

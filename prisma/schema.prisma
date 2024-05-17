@@ -210,27 +210,47 @@ model MasterBarangSubSubKategori {
 }
 
 model MasterBarang {
-    id               String @id @default(cuid())
+    id               String  @id @default(cuid())
+    image            String?
     name             String
     code             Int
     classCode        String
-    fullCode         String @unique
+    fullCode         String  @unique
     subSubKategoriId String
+    uomId            String
+    deskripsi        String
 
-    SubSubKategori MasterBarangSubSubKategori @relation(fields: [subSubKategoriId], references: [id])
-
-    createdAt              DateTime                 @default(now())
-    updatedAt              DateTime                 @updatedAt
+    SubSubKategori         MasterBarangSubSubKategori @relation(fields: [subSubKategoriId], references: [id])
+    Uom                    MasterUnit                 @relation(fields: [uomId], references: [id])
     PermintaanBarangBarang PermintaanBarangBarang[]
+    MasterBarangUnit       MasterBarangUnit[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model MasterBarangUnit {
+    id       String @id @default(cuid())
+    barangId String
+    uomId    String
+
+    Uom          MasterUnit   @relation(fields: [uomId], references: [id])
+    MasterBarang MasterBarang @relation(fields: [barangId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model MasterUnit {
     id   String @id @default(cuid())
     name String
 
-    createdAt              DateTime                 @default(now())
-    updatedAt              DateTime                 @updatedAt
     PermintaanBarangBarang PermintaanBarangBarang[]
+    MasterBarang           MasterBarang[]
+    MasterBarangUnit       MasterBarangUnit[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model MasterRuang {

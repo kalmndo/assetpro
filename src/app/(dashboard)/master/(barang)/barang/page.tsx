@@ -10,12 +10,14 @@ export default async function Page() {
   const kategoris = await api.mbKategori.getSelect()
   const subKategoris = await api.mbSubKategori.getSelect()
   const subSubKategoris = await api.mbSubSubKategori.getSelect()
+  const uoms = await api.mUom.getSelect()
 
   const modalData = {
     golongans,
     kategoris,
     subKategoris,
-    subSubKategoris
+    subSubKategoris,
+    uoms
   }
 
   return (

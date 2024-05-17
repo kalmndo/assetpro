@@ -15,13 +15,13 @@ import { Form } from "./form"
 import { toast } from "sonner"
 import { type SelectProps } from "@/lib/type"
 
-
 interface Props {
   data: {
     golongans: SelectProps[],
     kategoris: SelectProps[],
     subKategoris: SelectProps[],
-    subSubKategoris: SelectProps[]
+    subSubKategoris: SelectProps[],
+    uoms: SelectProps[]
   },
 }
 
@@ -51,7 +51,7 @@ export const AddDialog = ({ data }: Props) => {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={setOpen} >
       <DialogTrigger asChild >
         <Button size="sm">
           <Plus size={18} className="mr-1" />
@@ -59,7 +59,7 @@ export const AddDialog = ({ data }: Props) => {
         </Button>
 
       </DialogTrigger>
-      <DialogContent >
+      <DialogContent className="sm:max-w-3xl overflow-y-scroll max-h-[550px]">
         <DialogHeader>
           <DialogTitle>Tambah Barang</DialogTitle>
         </DialogHeader>

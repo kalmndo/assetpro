@@ -7,6 +7,9 @@ await import("./src/env.js");
 /** @type {import("next").NextConfig} */
 const config = {
   output: "standalone",
+  images: {
+    remotePatterns: [{hostname: 'assetprodj.s3.ap-southeast-1.amazonaws.com'}]
+  }
 };
 
 export default config;

@@ -39,26 +39,35 @@ export const mbBarangRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({
       name: z.string(),
+      image: z.string().nullable(),
       code: z.string(),
       subSubKategoriId: z.string(),
-      classCode: z.string()
+      classCode: z.string(),
+      uomId: z.string(),
+      deskripsi: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
       const {
         name,
+        image,
         code,
         subSubKategoriId,
-        classCode
+        classCode,
+        uomId,
+        deskripsi
       } = input
 
       try {
         await ctx.db.masterBarang.create({
           data: {
             name,
+            image,
             code: Number(code),
             subSubKategoriId,
             classCode,
-            fullCode: `${classCode}.${code}`
+            fullCode: `${classCode}.${code}`,
+            uomId,
+            deskripsi
           },
         })
         return {

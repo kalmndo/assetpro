@@ -11,8 +11,6 @@ import { Form } from "./form"
 import { type SelectProps } from "@/lib/type"
 import { toast } from "sonner"
 
-
-
 interface Props {
   open: boolean
   onOpenChange(open: boolean): void
@@ -21,6 +19,7 @@ interface Props {
     kategoris: SelectProps[]
     subKategoris: SelectProps[]
     subSubKategoris: SelectProps[]
+    uoms: SelectProps[]
   },
   value: any
 }
@@ -48,11 +47,9 @@ export const EditDialog = ({ open, onOpenChange, data, value }: Props) => {
     }
   }
 
-
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="overflow-y-scroll max-h-[80vh]">
+      <DialogContent className="sm:max-w-3xl overflow-y-scroll max-h-[550px]">
         <DialogHeader>
           <DialogTitle>Ubah Barang</DialogTitle>
         </DialogHeader>
