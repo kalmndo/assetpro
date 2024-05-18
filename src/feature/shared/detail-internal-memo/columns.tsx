@@ -4,10 +4,12 @@ import { type ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/data-table/column-header'
 import { z } from 'zod'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { getInitials } from '@/lib/utils'
 
 export const schema = z.object({
   id: z.string(),
   name: z.string(),
+  image: z.string(),
   kode: z.string().nullable(),
   jumlah: z.string(),
   uom: z.object({
@@ -36,8 +38,8 @@ export const columns: ColumnDef<Schema>[] = [
       return (
         <div className={`flex space-x-2 items-center ${isReject && 'opacity-25'}`}>
           <Avatar className='rounded-sm w-12 h-12'>
-            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-            <AvatarFallback>CN</AvatarFallback>
+            <AvatarImage src={row.original.image} alt="@shadcn" />
+            <AvatarFallback>{getInitials(row.original.name)}</AvatarFallback>
           </Avatar>
           <div className='block'>
             <p className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>

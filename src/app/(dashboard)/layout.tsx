@@ -35,7 +35,7 @@ export default async function LayoutYa({ children }: Props) {
             {/* <ThemeSwitch /> */}
             <Notification notifications={result.notifications} />
             <Cart />
-            <UserNav />
+            <UserNav data={result} />
           </div>
         </LayoutHeader>
         <LayoutBody className='flex flex-col' fixedHeight>

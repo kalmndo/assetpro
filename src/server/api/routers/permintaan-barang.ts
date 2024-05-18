@@ -83,7 +83,8 @@ export const permintaanBarangRouter = createTRPCRouter({
           Ruang: true,
           Pemohon: {
             include: {
-              Department: true
+              Department: true,
+              DepartmentUnit: true
             }
           },
           PermintaanBarangBarang: {
@@ -115,8 +116,9 @@ export const permintaanBarangRouter = createTRPCRouter({
           title,
           atasanId,
           Department: {
-            name: department
-          }
+            name: department,
+          },
+          DepartmentUnit
         },
         PermintaanBarangBarang
       } = result
@@ -126,6 +128,7 @@ export const permintaanBarangRouter = createTRPCRouter({
       const barang = PermintaanBarangBarang.filter((v) => v.status !== STATUS.IM_REJECT.id).map((v) => ({
         id: v.id,
         name: v.Barang.name,
+        image: v.Barang.image ?? '',
         kode: v.Barang.fullCode,
         jumlah: String(v.qty),
         uom: {
@@ -151,9 +154,10 @@ export const permintaanBarangRouter = createTRPCRouter({
         status,
         pemohon: {
           name,
-          image,
+          image: image ?? '',
           title,
           department,
+          departmentUnit: DepartmentUnit?.name
         },
         barang,
         canUpdate
@@ -231,14 +235,14 @@ export const permintaanBarangRouter = createTRPCRouter({
               })
             })
           }
-
+          const desc = `<p class="text-sm font-semibold">${user?.name}<span class="font-normal ml-[5px]">Meminta persetujuan internal memo ${pb.no}</span></p>`
           await tx.notification.create({
             data: {
               fromId: userId,
               // TODO: Benerin ini kalau gak ada atasan
               toId: atasanId ?? userId,
               link: `/permintaan/barang/${pb.id}`,
-              desc: "",
+              desc,
               isRead: false,
             }
           })

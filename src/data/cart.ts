@@ -2,7 +2,7 @@ import { atomWithStorage, splitAtom } from 'jotai/utils'
 
 export type CartType = {
   id: string
-  gambar: string
+  image: string
   name: string
   kode: string
   qty: string

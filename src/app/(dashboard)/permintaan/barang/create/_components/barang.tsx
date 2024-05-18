@@ -7,6 +7,7 @@ import { type PrimitiveAtom, useAtom } from "jotai"
 import { Trash } from "lucide-react"
 import KodeAnggaranDialog from "./kode-anggaran-dialog"
 import { type SelectProps } from "@/lib/type"
+import { getInitials } from "@/lib/utils"
 
 export default function Barang({
   cartAtom,
@@ -18,15 +19,14 @@ export default function Barang({
   kodeAnggarans: SelectProps[]
 }) {
   const [cart, setCart] = useAtom(cartAtom)
-
   return (
     <TableRow>
       <TableCell className="font-medium">
         <div className="flex gap-4 items-center mb-4">
           <div>
             <Avatar className='h-12 w-12 rounded-sm'>
-              <AvatarImage src="" alt='@shadcn' />
-              <AvatarFallback>SN</AvatarFallback>
+              <AvatarImage src={cart.image} alt='@shadcn' />
+              <AvatarFallback>{getInitials(cart.name)}</AvatarFallback>
             </Avatar>
           </div>
           <div className="grow">

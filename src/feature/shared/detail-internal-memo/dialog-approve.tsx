@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowDown, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { getInitials } from "@/lib/utils";
 
 export default function DialogApprove({
   open,
@@ -69,15 +70,15 @@ export default function DialogApprove({
               <div className="flex justify-between">
                 <div className="flex gap-4 items-center">
                   <Avatar className='rounded-sm w-12 h-12'>
-                    <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                    <AvatarFallback>CN</AvatarFallback>
+                    <AvatarImage src={v.image} alt="@shadcn" />
+                    <AvatarFallback>{getInitials(v.name)}</AvatarFallback>
                   </Avatar>
                   <div className='block text-sm'>
                     <p className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-                      Jazz
+                      {v.name}
                     </p>
                     <p className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-                      1.2.3.4.5
+                      {v.kode}
                     </p>
                   </div>
                 </div>
@@ -106,8 +107,8 @@ export default function DialogApprove({
               <div className="flex justify-between">
                 <div className="flex gap-4 items-center">
                   <Avatar className='rounded-sm w-12 h-12'>
-                    <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                    <AvatarFallback>CN</AvatarFallback>
+                    <AvatarImage src={v.image} alt="@shadcn" />
+                    <AvatarFallback>{getInitials(v.name)}</AvatarFallback>
                   </Avatar>
                   <div className='block text-sm'>
                     <p className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>

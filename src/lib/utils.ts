@@ -42,8 +42,10 @@ export function convertToRoman(num: number) {
 }
 
 export function getInitials(name: string): string {
-  const words: string[] = name.split(' ');
-  if (words.length < 2) return ''; // Return empty string if less than two words
+  const words: string[] = name.split(' ').filter(Boolean); // Filter out any empty strings
+  if (words.length === 0) return ''; // Return empty string if no words
+  // @ts-ignore
+  if (words.length === 1) return words[0][0].toUpperCase(); // Return the first initial if only one word
   // @ts-ignore
   const firstInitial: string = words[0][0].toUpperCase();
   // @ts-ignore

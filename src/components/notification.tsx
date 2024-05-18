@@ -15,6 +15,7 @@ import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import Link from "next/link"
 import { type RouterOutputs } from "@/trpc/react"
+import { getInitials } from "@/lib/utils"
 
 function Item({
   item,
@@ -27,7 +28,7 @@ function Item({
       <div>
         <Avatar className='h-12 w-12 rounded-sm'>
           <AvatarImage src={item.From.image ?? ''} alt='@shadcn' />
-          <AvatarFallback>{item.From.name}</AvatarFallback>
+          <AvatarFallback>{getInitials(item.From.name)}</AvatarFallback>
         </Avatar>
       </div>
       <div className="flex" dangerouslySetInnerHTML={{ __html: item.desc }}></div>

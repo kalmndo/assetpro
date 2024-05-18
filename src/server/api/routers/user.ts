@@ -19,9 +19,12 @@ export const userRouter = createTRPCRouter({
           NotificationTo: {
             include: {
               From: true
+            },
+            orderBy: {
+              createdAt: 'desc'
             }
           }
-        }
+        },
       })
       if (!user) {
         throw new TRPCError({
@@ -30,7 +33,8 @@ export const userRouter = createTRPCRouter({
         });
       }
       return {
-        id: user.id,
+        ...user,
+        image: user.image ?? '',
         notifications: user.NotificationTo
       }
     }),

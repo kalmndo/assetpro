@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { api } from "@/trpc/server";
 import { getStatus } from "@/lib/status";
 import { Table } from "@/feature/shared/detail-internal-memo";
+import { getInitials } from "@/lib/utils";
 
 export default async function Page({ params: { id } }: { params: { id: string } }) {
   const data = await api.permintaanBarang.get({ id })
@@ -62,19 +63,19 @@ export default async function Page({ params: { id } }: { params: { id: string } 
             </div>
             <div className="space-y-2">
               <p className="text-sm">Perihal</p>
-              <p className="text-sm">Permohonan internal memo</p>
+              <p className="text-sm">{data.perihal}</p>
             </div>
           </div>
           <div className="space-y-4">
             <p className="text-sm">Pemohon</p>
             <Avatar className='w-14 h-14'>
-              <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-              <AvatarFallback>CN</AvatarFallback>
+              <AvatarImage src={data.pemohon.image} alt="@shadcn" />
+              <AvatarFallback>{getInitials(data.pemohon.name)}</AvatarFallback>
             </Avatar>
             <p className="font-semibold">{data.pemohon.name}</p>
             <div className="text-sm">
-              <p>Kepala</p>
-              <p>{data.pemohon.department} - Pengadaan</p>
+              <p>{data.pemohon.title}</p>
+              <p>{data.pemohon.department} - {data.pemohon.departmentUnit}</p>
             </div>
           </div>
         </div>
