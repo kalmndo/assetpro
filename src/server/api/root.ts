@@ -11,6 +11,7 @@ import { mRuangRouter } from "./routers/m-ruang";
 import { permintaanBarangRouter } from "./routers/permintaan-barang";
 import { mUomRouter } from "./routers/m-uom";
 import { departmentUnitRouter } from "./routers/department-unit";
+import { kodeAnggaranRouter } from "./routers/kode-anggaran";
 
 /**
  * This is the primary router for your server.
@@ -27,6 +28,7 @@ export const appRouter = createTRPCRouter({
   mbSubSubKategori: mbSubSubKategoriRouter,
   mbBarang: mbBarangRouter,
   mRuang: mRuangRouter,
+  kodeAnggaran: kodeAnggaranRouter,
   mUom: mUomRouter,
   cariBarang: cariBarangRouter,
   permintaanBarang: permintaanBarangRouter

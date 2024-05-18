@@ -298,6 +298,7 @@ model MasterNomor {
 model MasterKodeAnggaran {
     id           String @id @unique
     name         String
+    nilai        Int?
     departmentId String
 
     Department Department @relation(fields: [departmentId], references: [id])

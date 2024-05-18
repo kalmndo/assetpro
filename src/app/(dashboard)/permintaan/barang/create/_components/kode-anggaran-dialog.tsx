@@ -61,7 +61,7 @@ export default function KodeAnggaranDialog({
             : 'Input kode anggaran'}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
           <DialogTitle>Input Kode Anggaran</DialogTitle>
           <DialogDescription>
@@ -106,7 +106,7 @@ export default function KodeAnggaranDialog({
                 <li key={i} className="flex justify-between items-center">
                   <div className="flex items-center">
                     <Circle size={7} className="mr-4" />
-                    {v}
+                    {kodeAnggarans.find((a) => a.value === v)?.label}
                   </div>
                   <Button
                     variant="ghost"

@@ -2,31 +2,9 @@ import { Separator } from "@/components/ui/separator";
 import { api } from "@/trpc/server";
 import Content from "./_components/content";
 
-const kodeAnggarans = [
-  {
-    label: "1",
-    value: '1'
-  },
-  {
-    label: "2",
-    value: '2'
-  },
-  {
-    label: "3",
-    value: '3'
-  },
-  {
-    label: "4",
-    value: '4'
-  },
-  {
-    label: "5",
-    value: '5'
-  },
-]
-
 export default async function Page() {
   const ruangs = await api.mRuang.getSelect()
+  const kodeAnggarans = await api.kodeAnggaran.getSelectByUser()
 
   return (
     <div>

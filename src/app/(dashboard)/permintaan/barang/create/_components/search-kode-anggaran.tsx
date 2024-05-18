@@ -46,7 +46,7 @@ export default function SearchKodeAnggaran({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className=" p-0">
+      <PopoverContent className="w-[600px] p-0">
         <Command>
           <CommandInput placeholder="Kode anggaran" />
           <CommandEmpty>No data.</CommandEmpty>
