@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import UploadAvatar from "@/components/upload-avatar"
 import { type SelectProps } from "@/lib/type"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { LoaderCircle } from "lucide-react"
@@ -44,26 +45,11 @@ const items: Items[] = [
   {
     separator: true
   },
-  {
-    id: "applications",
-    label: "Applications",
-  },
-  {
-    id: "desktop",
-    label: "Desktop",
-  },
-  {
-    id: "downloads",
-    label: "Downloads",
-  },
-  {
-    id: "documents",
-    label: "Documents",
-  },
 ] as const
 
 const formSchema = z.object({
   "name": z.string().min(1).max(255),
+  "image": z.string().nullable(),
   "email": z.string().min(1).max(9999),
   "department": z.string().min(1).max(255),
   "title": z.string().min(1).max(255),
@@ -95,6 +81,7 @@ export const Form = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: isEdit ? value.name : '',
+      image: isEdit ? value.image : '',
       email: isEdit ? value.email : '',
       department: isEdit ? value.departmentId : '',
       title: isEdit ? value.title : '',
@@ -107,6 +94,13 @@ export const Form = ({
     <div className="relative">
       <OriginalForm {...form}>
         <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 ">
+          <UploadAvatar
+            defaultImage={form.getValues('image') ?? ''}
+            size="small"
+            onChange={(v) => {
+              form.setValue('image', `https://assetprodj.s3.ap-southeast-1.amazonaws.com/${v}`)
+            }}
+          />
           <FormField
             control={form.control}
             name="name"

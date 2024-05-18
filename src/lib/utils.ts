@@ -40,3 +40,13 @@ export function convertToRoman(num: number) {
 
   return roman;
 }
+
+export function getInitials(name: string): string {
+  const words: string[] = name.split(' ');
+  if (words.length < 2) return ''; // Return empty string if less than two words
+  // @ts-ignore
+  const firstInitial: string = words[0][0].toUpperCase();
+  // @ts-ignore
+  const lastInitial: string = words[words.length - 1][0].toUpperCase();
+  return firstInitial + lastInitial;
+}

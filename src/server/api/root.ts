@@ -1,6 +1,6 @@
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 import { userRouter } from "./routers/user";
-import { departmentRouer } from "./routers/department";
+import { departmentRouter } from "./routers/department";
 import { mbKategoriRouter } from "./routers/mb-kategori";
 import { mbGolonganRouter } from "./routers/mb-golongan";
 import { mbSubKategoriRouter } from "./routers/mb-sub-kategori";
@@ -10,6 +10,7 @@ import { cariBarangRouter } from "./routers/cari-barang";
 import { mRuangRouter } from "./routers/m-ruang";
 import { permintaanBarangRouter } from "./routers/permintaan-barang";
 import { mUomRouter } from "./routers/m-uom";
+import { departmentUnitRouter } from "./routers/department-unit";
 
 /**
  * This is the primary router for your server.
@@ -18,7 +19,8 @@ import { mUomRouter } from "./routers/m-uom";
  */
 export const appRouter = createTRPCRouter({
   user: userRouter,
-  department: departmentRouer,
+  department: departmentRouter,
+  departmentUnit: departmentUnitRouter,
   mbGolongan: mbGolonganRouter,
   mbKategori: mbKategoriRouter,
   mbSubKategori: mbSubKategoriRouter,

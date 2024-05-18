@@ -78,6 +78,7 @@ export const userRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({
       name: z.string(),
+      image: z.string().nullable(),
       email: z.string(),
       department: z.string(),
       title: z.string(),
@@ -87,6 +88,7 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const {
         name,
+        image,
         email,
         department,
         atasan,
@@ -98,6 +100,7 @@ export const userRouter = createTRPCRouter({
         await ctx.db.user.create({
           data: {
             name,
+            image,
             email,
             departmentId: department,
             atasanId: atasan ? atasan : undefined,
@@ -138,6 +141,7 @@ export const userRouter = createTRPCRouter({
     .input(z.object({
       id: z.string(),
       name: z.string(),
+      image: z.string().nullable(),
       email: z.string(),
       department: z.string(),
       title: z.string(),
@@ -148,6 +152,7 @@ export const userRouter = createTRPCRouter({
       const {
         id,
         name,
+        image,
         email,
         department,
         atasan,
@@ -162,6 +167,7 @@ export const userRouter = createTRPCRouter({
             where: { id },
             data: {
               name,
+              image,
               email,
               departmentId: department,
               atasanId: atasan ?? undefined,

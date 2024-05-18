@@ -24,19 +24,21 @@ model Post {
 }
 
 model User {
-    id           String  @id @default(cuid())
-    name         String
-    email        String  @unique
-    image        String?
-    password     String
-    title        String
-    departmentId String
-    atasanId     String?
+    id               String  @id @default(cuid())
+    name             String
+    email            String  @unique
+    image            String?
+    password         String
+    title            String
+    departmentId     String
+    departmentUnitId String?
+    atasanId         String?
 
-    atasan     User?      @relation("AtasanBawahan", fields: [atasanId], references: [id])
-    bawahan    User[]     @relation("AtasanBawahan")
-    UserRole   UserRole[]
-    Department Department @relation(fields: [departmentId], references: [id])
+    atasan         User?           @relation("AtasanBawahan", fields: [atasanId], references: [id])
+    bawahan        User[]          @relation("AtasanBawahan")
+    UserRole       UserRole[]
+    Department     Department      @relation(fields: [departmentId], references: [id])
+    DepartmentUnit DepartmentUnit? @relation(fields: [departmentUnitId], references: [id])
 
     createdAt        DateTime           @default(now())
     updatedAt        DateTime           @updatedAt
@@ -139,11 +141,24 @@ model Department {
     id   String @id @default(cuid())
     name String
 
-    User User[]
-
-    createdAt          DateTime             @default(now())
-    updatedAt          DateTime             @updatedAt
+    User               User[]
     MasterKodeAnggaran MasterKodeAnggaran[]
+    DepartmentUnit     DepartmentUnit[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model DepartmentUnit {
+    id           String @id @default(cuid())
+    name         String
+    departmentId String
+
+    Department Department @relation(fields: [departmentId], references: [id])
+    User       User[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model Role {

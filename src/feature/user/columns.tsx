@@ -9,9 +9,11 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/h
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Fragment } from 'react'
+import { getInitials } from '@/lib/utils'
 
 export const userSchema = z.object({
   name: z.string(),
+  image: z.string(),
   email: z.string(),
   title: z.string(),
   department: z.string(),
@@ -60,8 +62,8 @@ export const columns: ColumnDef<User>[] = [
       return (
         <div className='flex space-x-2 items-center'>
           <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-            <AvatarFallback>CN</AvatarFallback>
+            <AvatarImage src={row.original.image} alt="@shadcn" />
+            <AvatarFallback>{getInitials(row.original.name)}</AvatarFallback>
           </Avatar>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('name')}

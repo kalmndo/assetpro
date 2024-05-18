@@ -83,6 +83,23 @@ const master = [
       },
     ]
   },
+  {
+    name: 'Department',
+    data: [
+      {
+        name: 'Department',
+        logo: <Layout />,
+        to: 'master/department',
+        desc: 'Connect with Telegram for',
+      },
+      {
+        name: 'Department Unit',
+        logo: <Layout />,
+        to: 'master/department-unit',
+        desc: 'Connect with Telegram for',
+      },
+    ]
+  },
 ]
 
 export default function Content({ }) {

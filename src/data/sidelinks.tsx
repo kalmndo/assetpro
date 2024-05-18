@@ -5,7 +5,6 @@ import {
   LayoutDashboard,
   PackageMinus,
   PackagePlus,
-  PackageSearch,
   ShoppingCart,
   Warehouse,
   Wrench

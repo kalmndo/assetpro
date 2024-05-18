@@ -5,19 +5,26 @@ import {
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-export const departmentRouter = createTRPCRouter({
+export const departmentUnitRouter = createTRPCRouter({
   getAll: protectedProcedure
     .query(async ({ ctx }) => {
-      const result = await ctx.db.department.findMany({
+      const result = await ctx.db.departmentUnit.findMany({
         orderBy: {
           createdAt: "desc"
         },
+        include: {
+          Department: true
+        }
       })
-      return result
+
+      return result.map((v) => ({
+        ...v,
+        department: v.Department.name
+      }))
     }),
   getSelect: protectedProcedure
     .query(async ({ ctx }) => {
-      const result = await ctx.db.department.findMany({
+      const result = await ctx.db.departmentUnit.findMany({
         orderBy: {
           createdAt: "desc"
         },
@@ -31,21 +38,24 @@ export const departmentRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({
       name: z.string(),
+      departmentId: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
       const {
         name,
+        departmentId
       } = input
 
       try {
-        await ctx.db.department.create({
+        await ctx.db.departmentUnit.create({
           data: {
+            departmentId,
             name,
           },
         })
         return {
           ok: true,
-          message: 'Berhasil menambah ruang'
+          message: 'Berhasil menambah department unit'
         }
       } catch (error) {
         throw new TRPCError({
@@ -60,26 +70,29 @@ export const departmentRouter = createTRPCRouter({
     .input(z.object({
       id: z.string(),
       name: z.string(),
+      departmentId: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
       const {
         id,
         name,
+        departmentId
       } = input
 
       try {
 
-        await ctx.db.department.update({
+        await ctx.db.departmentUnit.update({
           where: {
             id
           },
           data: {
-            name
+            name,
+            departmentId
           },
         })
         return {
           ok: true,
-          message: 'Berhasil mengubah ruang'
+          message: 'Berhasil mengubah department unit'
         }
       } catch (error) {
         throw new TRPCError({
@@ -100,12 +113,12 @@ export const departmentRouter = createTRPCRouter({
       } = input
 
       try {
-        await ctx.db.department.delete({
+        await ctx.db.departmentUnit.delete({
           where: { id },
         })
         return {
           ok: true,
-          message: 'Berhasil menghapus ruang'
+          message: 'Berhasil menghapus department unit'
         }
       } catch (error) {
         throw new TRPCError({
@@ -115,5 +128,4 @@ export const departmentRouter = createTRPCRouter({
         });
       }
     }),
-
 });
