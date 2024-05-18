@@ -198,6 +198,7 @@ export function Table({
         onOpenChange={handleDialogClose}
       />
       <DialogReject
+        id={data.id}
         open={dialog.open === 'reject'}
         onOpenChange={handleDialogClose}
       />

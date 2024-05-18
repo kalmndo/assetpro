@@ -36,7 +36,7 @@ export const cariBarangRouter = createTRPCRouter({
 
       const data = result.map((v) => ({
         id: v.id,
-        image: '',
+        image: v.image ?? '',
         name: v.name,
         kode: v.fullCode,
         uom: v.Uom.name,

@@ -12,28 +12,44 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { LoaderCircle } from "lucide-react"
 import { useState } from "react"
+import { api } from "@/trpc/react"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation";
 
 interface Props {
+  id: string
   open: boolean
   onOpenChange(open: boolean): void
 }
 
 export const DialogReject = (
   {
+    id,
     open,
     onOpenChange,
   }: Props
 ) => {
+  const { mutateAsync, isPending } = api.permintaanBarang.reject.useMutation()
+  const router = useRouter()
   const [value, setValue] = useState("")
 
   const onChange = (e: any) => {
     setValue(e.target.value)
   }
 
-  const isPending = false
 
-  const onSubmit = () => {
-    console.log("")
+  const onSubmit = async () => {
+    try {
+      const result = await mutateAsync({
+        id,
+      })
+
+      toast.success(result.message)
+      router.refresh()
+    } catch (error: any) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+      toast.error(error.message)
+    }
   }
 
   return (

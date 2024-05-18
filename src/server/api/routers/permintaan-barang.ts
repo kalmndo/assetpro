@@ -433,5 +433,108 @@ export const permintaanBarangRouter = createTRPCRouter({
           cause: error,
         });
       }
+    }),
+  reject: protectedProcedure
+    .input(z.object({
+      id: z.string(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const {
+        id,
+      } = input
+
+      const userId = ctx.session.user.id
+      const user = await ctx.db.user.findUnique({
+        where: {
+          id: userId
+        },
+        include: {
+          UserRole: true
+        }
+      })
+
+      const res = await ctx.db.permintaanBarang.findUnique({
+        where: {
+          id
+        },
+        include: {
+          Pemohon: true
+        }
+      })
+
+      if (!res) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Permintaan Barang ini tidak ada",
+        });
+      }
+
+      const isAtasan = res.Pemohon.atasanId === userId && res.status === getStatus(STATUS.PENGAJUAN.id).id
+      const canEdit = user?.UserRole.some((v) => v.roleId === ROLE.IM_APPROVE.id) && res.status === getStatus(STATUS.ATASAN_SETUJU.id).id
+
+      const status = isAtasan ? STATUS.IM_REJECT.id : STATUS.IM_REJECT.id
+
+      if (!isAtasan && !canEdit) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Kamu tidak punya hak untuk melakukan ini",
+        });
+      }
+
+      try {
+        await ctx.db.$transaction(async (tx) => {
+          const pb = await tx.permintaanBarang.update({
+            where: { id },
+            data: {
+              status: status
+            },
+            include: {
+              PermintaanBarangBarang: true
+            }
+          })
+          const untouchedBarangs = pb.PermintaanBarangBarang.filter((v) => v.status !== STATUS.IM_REJECT.id)
+          const notifDesc = `<p class="text-sm font-semibold">${user?.name}<span class="font-normal ml-[5px]">Menolak permintaan ${res.no}</span></p>`
+
+          if (untouchedBarangs.length > 0) {
+            for (const iterator of untouchedBarangs) {
+              await tx.permintaanBarangBarang.update({
+                where: {
+                  id: iterator.id
+                },
+                data: {
+                  status: 'to-reject',
+                }
+              })
+              await tx.permintaanBarangBarangHistory.createMany({
+                data: untouchedBarangs.map((v) => ({
+                  pbbId: v.id,
+                  desc: "Tolak",
+                  status: 'to-reject'
+                }))
+              })
+            }
+          }
+
+          await tx.notification.create({
+            data: {
+              fromId: userId,
+              toId: res.pemohondId,
+              link: `/permintaan/barang/${pb.id}`,
+              desc: notifDesc,
+              isRead: false,
+            }
+          })
+        })
+        return {
+          ok: true,
+          message: "Berhasil menolak permintaan barang"
+        }
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Kemunkingan terjadi kesalahan sistem, silahkan coba lagi",
+          cause: error,
+        });
+      }
     })
 });

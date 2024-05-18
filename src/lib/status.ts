@@ -23,7 +23,7 @@ export const STATUS = {
   IM_REJECT: {
     id: 'reject',
     name: 'Ditolak',
-    color: 'bg-green-600'
+    color: '#dc2626'
   }
 }
 

@@ -31,7 +31,7 @@ function Barang({
     <div className="flex gap-4 items-center mb-4">
       <div>
         <Avatar className='h-12 w-12 rounded-sm'>
-          <AvatarImage src={cart.gambar} alt='@shadcn' />
+          <AvatarImage src={cart.image} alt='@shadcn' />
           <AvatarFallback>SN</AvatarFallback>
         </Avatar>
       </div>
