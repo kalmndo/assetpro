@@ -57,10 +57,6 @@ const TheForm = ({
 
   }
 
-  console.log("disable", disabled())
-  console.log("isDirty", !form.formState.isDirty)
-  console.log("isValid", !form.formState.isValid)
-
   return (
     <Form {...form}>
       <form noValidate onSubmit={form.handleSubmit(onSubmit)} >
