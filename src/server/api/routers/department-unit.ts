@@ -33,6 +33,7 @@ export const departmentUnitRouter = createTRPCRouter({
       return result.map((v) => ({
         label: v.name,
         value: v.id,
+        departmentId: v.departmentId
       }))
     }),
   create: protectedProcedure

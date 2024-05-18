@@ -16,7 +16,8 @@ interface Props {
   onOpenChange(open: boolean): void
   data: {
     departments: SelectProps[],
-    atasans: SelectProps[]
+    atasans: SelectProps[],
+    departmentUnits: SelectProps[]
   },
   value: any
 }

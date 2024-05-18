@@ -52,6 +52,7 @@ const formSchema = z.object({
   "image": z.string().nullable(),
   "email": z.string().min(1).max(9999),
   "department": z.string().min(1).max(255),
+  "departmentUnitId": z.string().nullable(),
   "title": z.string().min(1).max(255),
   "atasan": z.string().nullable(),
   "role": z.array(z.string())
@@ -64,6 +65,7 @@ interface Props {
   isPending: boolean
   data: {
     departments: SelectProps[],
+    departmentUnits: SelectProps[],
     atasans: SelectProps[]
   },
   value?: any,
@@ -84,12 +86,16 @@ export const Form = ({
       image: isEdit ? value.image : '',
       email: isEdit ? value.email : '',
       department: isEdit ? value.departmentId : '',
+      departmentUnitId: isEdit ? value.departmentUnitId : '',
       title: isEdit ? value.title : '',
       atasan: isEdit ? value.atasanId : '',
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       role: isEdit ? value.UserRole?.map((v: any) => v.roleId) : []
     },
   })
+
+  const departmentUnits = data.departmentUnits.filter((v) => v.departmentId === form.watch("department"))
+
   return (
     <div className="relative">
       <OriginalForm {...form}>
@@ -134,6 +140,16 @@ export const Form = ({
               label="Department"
               name="department"
               placeholder="Pilih Department "
+            />
+          </div>
+          <div className="mt-2">
+            <SearchSelect
+              data={departmentUnits}
+              form={form}
+              label="Department Unit"
+              name="departmentUnitId"
+              placeholder="Pilih Department Unit"
+              disabled={!form.watch('department')}
             />
           </div>
           <FormField

@@ -18,7 +18,8 @@ import { toast } from "sonner"
 interface Props {
   data: {
     departments: SelectProps[],
-    atasans: SelectProps[]
+    atasans: SelectProps[],
+    departmentUnits: SelectProps[]
   },
 }
 

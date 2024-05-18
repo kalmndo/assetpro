@@ -9,10 +9,12 @@ export default async function Page() {
   const users = await api.user.getAll()
   const departments = await api.department.getSelect()
   const atasans = await api.user.getAtasanSelect()
+  const departmentUnits = await api.departmentUnit.getSelect()
 
   const modalData = {
     departments,
-    atasans
+    atasans,
+    departmentUnits
   }
 
   return (

@@ -79,6 +79,7 @@ export const userRouter = createTRPCRouter({
     .input(z.object({
       name: z.string(),
       image: z.string().nullable(),
+      departmentUnitId: z.string().nullable(),
       email: z.string(),
       department: z.string(),
       title: z.string(),
@@ -91,6 +92,7 @@ export const userRouter = createTRPCRouter({
         image,
         email,
         department,
+        departmentUnitId,
         atasan,
         role,
         title
@@ -106,6 +108,7 @@ export const userRouter = createTRPCRouter({
             atasanId: atasan ? atasan : undefined,
             password,
             title,
+            departmentUnitId,
             UserRole: {
               createMany: role.length > 0 ? {
                 data: role.map((v) => ({
@@ -144,6 +147,7 @@ export const userRouter = createTRPCRouter({
       image: z.string().nullable(),
       email: z.string(),
       department: z.string(),
+      departmentUnitId: z.string().nullable(),
       title: z.string(),
       atasan: z.string().nullable(),
       role: z.array(z.string())
@@ -155,6 +159,7 @@ export const userRouter = createTRPCRouter({
         image,
         email,
         department,
+        departmentUnitId,
         atasan,
         role,
         title
@@ -169,6 +174,7 @@ export const userRouter = createTRPCRouter({
               name,
               image,
               email,
+              departmentUnitId,
               departmentId: department,
               atasanId: atasan ?? undefined,
               title
