@@ -69,8 +69,8 @@ export const cariBarangRouter = createTRPCRouter({
         }
       })
 
-      function resultFn(code: number) {
-        return result.filter((v) => v.code === code).map((v) => ({
+      function aset() {
+        return result.filter((v) => v.code === 1).map((v) => ({
           id: v.id,
           name: v.name,
           child: v.MasterBarangKategori.filter((v) => v.code !== 1 && v.code !== 2).map((k) => ({
@@ -88,10 +88,29 @@ export const cariBarangRouter = createTRPCRouter({
         }))
       }
 
+      function persediaan() {
+        return result.filter((v) => v.code === 2).map((v) => ({
+          id: v.id,
+          name: v.name,
+          child: v.MasterBarangKategori.map((k) => ({
+            id: k.id,
+            name: k.name,
+            child: k.MasterBarangSubKategori.map((sk) => ({
+              id: sk.id,
+              name: sk.name,
+              child: sk.MasterBarangSuSubbKategori.map((ssk) => ({
+                id: ssk.id,
+                name: ssk.name
+              }))
+            }))
+          }))
+        }))
+      }
+
 
       return {
-        aset: resultFn(1),
-        persediaan: resultFn(2)
+        aset: aset(),
+        persediaan: persediaan()
       }
 
     })

@@ -25,7 +25,6 @@ const Search = () => {
 
 export default async function LayoutYa({ children }: Props) {
   const result = await api.user.me()
-  console.log("result", result)
   return (
     <AppShell>
       <Layout>

@@ -7,31 +7,84 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { type ChangeEvent, useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { z } from "zod";
+
+
+
+const formSchema = z.object({
+  "catatan": z.string().min(1).max(255),
+})
+
+const TheForm = ({
+  value,
+  onSubmit,
+}: {
+  value: any,
+  onSubmit(value: any): void,
+}) => {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      catatan: value.catatan ?? '',
+    },
+  })
+
+  return (
+    <Form {...form}>
+      <form noValidate onSubmit={form.handleSubmit(onSubmit)} >
+        <div className="space-y-2">
+          <FormField
+            control={form.control}
+            name="catatan"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Catatan</FormLabel>
+                <FormControl>
+                  <Input placeholder="Catatan" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <DialogFooter className="mt-4">
+          <Button
+            type="submit"
+            disabled={!form.formState.isDirty || !form.formState.isValid}
+          >
+            Tolak
+          </Button>
+        </DialogFooter>
+      </form>
+    </Form>
+  )
+}
 
 export default function DialogRejectBarang({
   open,
+  barang,
   name,
   onSubmit,
   onOpenChange
 }: {
   open: boolean,
+  barang: any,
   name: string,
-  onSubmit(): void,
+  onSubmit(v: any): void,
   onOpenChange(): void
 }) {
-  const [value, setValue] = useState("")
-
-  function onChange(e: ChangeEvent<HTMLInputElement>) {
-    setValue(e.target.value)
-  }
-
-  useEffect(() => {
-    setValue('')
-  }, [onSubmit])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -44,28 +97,7 @@ export default function DialogRejectBarang({
             Wajib isi catatan untuk menolak barang permintaan
           </DialogDescription>
         </DialogHeader>
-        <div className=" py-4">
-          <Label htmlFor="catatan" className="text-right">
-            Catatan
-          </Label>
-          <Input
-            id="catatan"
-            value={value}
-            placeholder="Catatan"
-            className="col-span-3"
-            onChange={onChange}
-          />
-        </div>
-        <DialogFooter>
-          <Button
-            disabled={!value}
-            type="submit"
-            variant="destructive"
-            onClick={onSubmit}
-          >
-            Tolak
-          </Button>
-        </DialogFooter>
+        <TheForm value={barang} onSubmit={onSubmit} />
       </DialogContent>
     </Dialog>
   )

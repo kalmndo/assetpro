@@ -65,13 +65,13 @@ export function Table({
     setDialog({ open: 'update', data: value })
   }
 
-  const onRejectSubmit = () => {
+  const onRejectSubmit = (value: any) => {
     const newBarang = barangs.map((v) => {
       if (v.id === dialog.data.id) {
         return {
           ...v,
           status: 'to-reject',
-          catatan: dialog.data.catatan,
+          catatan: value.catatan,
           qtyUpdate: undefined,
           uomUpdate: {
             id: undefined,
@@ -181,6 +181,7 @@ export function Table({
       <DialogRejectBarang
         open={dialog.open === 'reject-barang'}
         name={dialog.data?.name}
+        barang={dialog.data}
         onSubmit={onRejectSubmit}
         onOpenChange={handleDialogClose}
       />
