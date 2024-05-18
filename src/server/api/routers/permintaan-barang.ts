@@ -160,7 +160,8 @@ export const permintaanBarangRouter = createTRPCRouter({
           departmentUnit: DepartmentUnit?.name
         },
         barang,
-        canUpdate
+        canUpdate,
+        isImApprove
       }
     }),
   create: protectedProcedure

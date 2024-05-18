@@ -188,6 +188,7 @@ export function Table({
       <DialogUpdate
         open={dialog.open === 'update'}
         uoms={modalData.uom}
+        isImApprove={data.isImApprove}
         barang={dialog.data}
         onSubmit={onUpdateSubmit}
         onOpenChange={handleDialogClose}

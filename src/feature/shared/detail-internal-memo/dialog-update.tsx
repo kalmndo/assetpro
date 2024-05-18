@@ -22,20 +22,21 @@ import {
 } from "@/components/ui/form"
 import SearchSelect from "@/components/search-select";
 import { type SelectProps } from "@/lib/type";
+import { getInitials } from "@/lib/utils";
 
 const formSchema = z.object({
   "catatan": z.string().min(1).max(255),
   "jumlah": z.string().min(1).max(255),
   "uomId": z.string().min(1).max(255),
-  // "jumlah": z.preprocess((a) => parseInt(z.string().parse(a), 10),
-  //   z.number().lte(18, 'Must be 18 and above'))
 })
 
 const TheForm = ({
+  isImApprove,
   value,
   onSubmit,
   uoms
 }: {
+  isImApprove: boolean | undefined
   value: any,
   onSubmit(value: any): void,
   uoms: SelectProps[]
@@ -48,6 +49,17 @@ const TheForm = ({
       uomId: value.uomUpdate?.id ?? value.uom.id,
     },
   })
+
+  function disabled() {
+    if (isImApprove) {
+      return Number(form.watch("jumlah")) > Number(value.jumlah)
+    }
+
+  }
+
+  console.log("disable", disabled())
+  console.log("isDirty", !form.formState.isDirty)
+  console.log("isValid", !form.formState.isValid)
 
   return (
     <Form {...form}>
@@ -76,6 +88,7 @@ const TheForm = ({
                   <Input type='number' placeholder="Jumlah" {...field} />
                 </FormControl>
                 <FormMessage />
+                {isImApprove && <p className="text-xs text-red-400 ">Tidak bisa melebihi jumlah dari {value.jumlah}</p>}
               </FormItem>
             )}
           />
@@ -90,7 +103,7 @@ const TheForm = ({
         <DialogFooter className="mt-4">
           <Button
             type="submit"
-            disabled={!form.formState.isDirty || !form.formState.isValid}
+            disabled={!form.formState.isDirty || !form.formState.isValid || disabled()}
           >
             Ubah
           </Button>
@@ -103,17 +116,18 @@ const TheForm = ({
 export default function DialogUpdate({
   open,
   barang,
+  isImApprove,
   onSubmit,
   onOpenChange,
   uoms
 }: {
   open: boolean,
   barang: any,
+  isImApprove: boolean | undefined,
   onSubmit(value: any): void,
   onOpenChange(open: boolean): void,
   uoms: SelectProps[]
 }) {
-
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -122,10 +136,9 @@ export default function DialogUpdate({
           <DialogTitle className="mb-4">Ubah Permintaan Barang</DialogTitle>
           <div className="flex justify-between mt-4">
             <div className="flex gap-4">
-
               <Avatar className='rounded-sm w-12 h-12'>
-                <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                <AvatarFallback>CN</AvatarFallback>
+                <AvatarImage src={barang.image} alt="@shadcn" />
+                <AvatarFallback>{getInitials(barang.name)}</AvatarFallback>
               </Avatar>
               <div className='block'>
                 <p className='text-sm max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
@@ -141,7 +154,7 @@ export default function DialogUpdate({
             </div>
           </div>
         </DialogHeader>
-        <TheForm value={barang} onSubmit={onSubmit} uoms={uoms} />
+        <TheForm isImApprove={isImApprove} value={barang} onSubmit={onSubmit} uoms={uoms} />
       </DialogContent>
     </Dialog>
   )
