@@ -21,13 +21,13 @@ const master = [
         name: 'Penomoran Otomatis',
         logo: <Layout />,
         to: 'pengaturan/penomoran-otomatis',
-        desc: 'Connect with Telegram for',
+        desc: 'deskripsi',
       },
       {
         name: 'Kode Anggaran',
         logo: <Layout />,
         to: 'pengaturan/kode-anggaran',
-        desc: 'Connect with Telegram for',
+        desc: 'deskripsi',
       },
     ]
   },
