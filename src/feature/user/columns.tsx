@@ -16,7 +16,9 @@ export const userSchema = z.object({
   image: z.string(),
   email: z.string(),
   title: z.string(),
+  organisasi: z.string(),
   department: z.string(),
+  unit: z.string(),
   role: z.array(z.string()),
 })
 
@@ -59,6 +61,7 @@ export const columns: ColumnDef<User>[] = [
       <DataTableColumnHeader column={column} title='Nama' />
     ),
     cell: ({ row }) => {
+      console.log("row", row.original)
       return (
         <div className='flex space-x-2 items-center'>
           <Avatar>
@@ -109,6 +112,23 @@ export const columns: ColumnDef<User>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: 'organisasi',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Organisasi' />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className='flex space-x-2'>
+          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
+            {row.getValue('organisasi')}
+          </span>
+        </div>
+      )
+    },
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
     accessorKey: 'department',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Department' />
@@ -118,6 +138,23 @@ export const columns: ColumnDef<User>[] = [
         <div className='flex space-x-2'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('department')}
+          </span>
+        </div>
+      )
+    },
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: 'unit',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Unit' />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className='flex space-x-2'>
+          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
+            {row.getValue('unit')}
           </span>
         </div>
       )

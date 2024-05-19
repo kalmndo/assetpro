@@ -84,8 +84,14 @@ const master = [
     ]
   },
   {
-    name: 'Department',
+    name: 'Organisasi',
     data: [
+      {
+        name: 'Organisasi',
+        logo: <Layout />,
+        to: 'master/organisasi',
+        desc: 'deskripsi',
+      },
       {
         name: 'Department',
         logo: <Layout />,

@@ -5,25 +5,19 @@ import {
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-export const departmentRouter = createTRPCRouter({
+export const organisasiRouter = createTRPCRouter({
   getAll: protectedProcedure
     .query(async ({ ctx }) => {
-      const result = await ctx.db.department.findMany({
+      const result = await ctx.db.organisasi.findMany({
         orderBy: {
           createdAt: "desc"
         },
-        include: {
-          Organisasi: true
-        }
       })
-      return result.map((v) => ({
-        ...v,
-        organisasi: v.Organisasi.name,
-      }))
+      return result
     }),
   getSelect: protectedProcedure
     .query(async ({ ctx }) => {
-      const result = await ctx.db.department.findMany({
+      const result = await ctx.db.organisasi.findMany({
         orderBy: {
           createdAt: "desc"
         },
@@ -32,30 +26,26 @@ export const departmentRouter = createTRPCRouter({
       return result.map((v) => ({
         label: v.name,
         value: v.id,
-        organisasiId: v.organisasiId
       }))
     }),
   create: protectedProcedure
     .input(z.object({
       name: z.string(),
-      organisasiId: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
       const {
         name,
-        organisasiId
       } = input
 
       try {
-        await ctx.db.department.create({
+        await ctx.db.organisasi.create({
           data: {
-            organisasiId,
             name,
           },
         })
         return {
           ok: true,
-          message: 'Berhasil menambah department'
+          message: 'Berhasil menambah organisasi'
         }
       } catch (error) {
         throw new TRPCError({
@@ -69,13 +59,11 @@ export const departmentRouter = createTRPCRouter({
     .input(z.object({
       id: z.string(),
       name: z.string(),
-      organisasiId: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
       const {
         id,
         name,
-        organisasiId
       } = input
 
       try {
@@ -85,13 +73,12 @@ export const departmentRouter = createTRPCRouter({
             id
           },
           data: {
-            name,
-            organisasiId
+            name
           },
         })
         return {
           ok: true,
-          message: 'Berhasil mengubah department'
+          message: 'Berhasil mengubah organisasi'
         }
       } catch (error) {
         throw new TRPCError({
@@ -101,7 +88,6 @@ export const departmentRouter = createTRPCRouter({
         });
       }
     }),
-
   remove: protectedProcedure
     .input(z.object({
       id: z.string(),
@@ -117,7 +103,7 @@ export const departmentRouter = createTRPCRouter({
         })
         return {
           ok: true,
-          message: 'Berhasil menghapus department'
+          message: 'Berhasil menghapus organisasi'
         }
       } catch (error) {
         throw new TRPCError({

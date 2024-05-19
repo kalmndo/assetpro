@@ -13,9 +13,14 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Form } from "./form"
 import { toast } from "sonner"
+import { type SelectProps } from "@/lib/type"
 
 
-export const AddDialog = () => {
+export const AddDialog = ({
+  organisasis
+}: {
+  organisasis: SelectProps[]
+}) => {
   const router = useRouter()
   const { mutateAsync, isPending } = api.department.create.useMutation()
   const [open, setOpen] = useState(false)
@@ -47,6 +52,7 @@ export const AddDialog = () => {
           <DialogTitle>Tambah Department</DialogTitle>
         </DialogHeader>
         <Form
+          organisasis={organisasis}
           isPending={isPending}
           onSubmit={onSubmit}
         />

@@ -51,6 +51,7 @@ const formSchema = z.object({
   "name": z.string().min(1).max(255),
   "image": z.string().nullable(),
   "email": z.string().min(1).max(9999),
+  "organisasiId": z.string().min(1).max(9999),
   "department": z.string().min(1).max(255),
   "departmentUnitId": z.string().nullable(),
   "title": z.string().min(1).max(255),
@@ -66,7 +67,8 @@ interface Props {
   data: {
     departments: SelectProps[],
     departmentUnits: SelectProps[],
-    atasans: SelectProps[]
+    atasans: SelectProps[],
+    organisasis: SelectProps[]
   },
   value?: any,
 }
@@ -79,12 +81,15 @@ export const Form = ({
   isPending
 }: Props) => {
 
+  const organisasiId = data.organisasis.find((v) => v.value === data.departments.find((a) => a.value === value?.departmentId)?.organisasiId)?.value ?? ''
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: isEdit ? value.name : '',
       image: isEdit ? value.image : '',
       email: isEdit ? value.email : '',
+      organisasiId: isEdit ? organisasiId : '',
       department: isEdit ? value.departmentId : '',
       departmentUnitId: isEdit ? value.departmentUnitId : '',
       title: isEdit ? value.title : '',
@@ -94,6 +99,7 @@ export const Form = ({
     },
   })
 
+  const departments = data.departments.filter((v) => v.organisasiId === form.watch("organisasiId"))
   const departmentUnits = data.departmentUnits.filter((v) => v.departmentId === form.watch("department"))
 
   return (
@@ -135,7 +141,16 @@ export const Form = ({
           />
           <div className="mt-2">
             <SearchSelect
-              data={data.departments}
+              data={data.organisasis}
+              form={form}
+              label="Organisasi"
+              name="organisasiId"
+              placeholder="Pilih Organisasi "
+            />
+          </div>
+          <div className="mt-2">
+            <SearchSelect
+              data={departments}
               form={form}
               label="Department"
               name="department"

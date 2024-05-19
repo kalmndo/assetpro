@@ -1,36 +1,30 @@
 "use client"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog"
 import { api } from "@/trpc/react"
+import { Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { Form } from "./form"
-import { type SelectProps } from "@/lib/type"
 import { toast } from "sonner"
 
-interface Props {
-  open: boolean
-  onOpenChange(open: boolean): void
-  data: {
-    departments: SelectProps[],
-    atasans: SelectProps[],
-    departmentUnits: SelectProps[],
-    organisasis: SelectProps[]
-  },
-  value: any
-}
 
-export const EditDialog = ({ open, onOpenChange, data, value }: Props) => {
+export const AddDialog = () => {
   const router = useRouter()
-  const { mutateAsync, isPending } = api.user.update.useMutation()
+  const { mutateAsync, isPending } = api.organisasi.create.useMutation()
+  const [open, setOpen] = useState(false)
 
   async function onSubmit(values: any) {
+
     try {
-      const result = await mutateAsync({ id: value.id, ...values })
-      onOpenChange(open)
+      const result = await mutateAsync(values)
+      setOpen(false)
       toast.success(result.message)
       router.refresh()
     } catch (error: any) {
@@ -39,20 +33,22 @@ export const EditDialog = ({ open, onOpenChange, data, value }: Props) => {
     }
   }
 
-
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="overflow-y-scroll max-h-[80vh]">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild >
+        <Button size="sm">
+          <Plus size={18} className="mr-1" />
+          Tambah
+        </Button>
+
+      </DialogTrigger>
+      <DialogContent >
         <DialogHeader>
-          <DialogTitle>Ubah User</DialogTitle>
+          <DialogTitle>Tambah Department</DialogTitle>
         </DialogHeader>
         <Form
-          data={data}
           isPending={isPending}
           onSubmit={onSubmit}
-          isEdit
-          value={value}
         />
       </DialogContent>
     </Dialog>

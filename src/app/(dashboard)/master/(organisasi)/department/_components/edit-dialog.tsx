@@ -8,28 +8,24 @@ import {
 import { api } from "@/trpc/react"
 import { useRouter } from "next/navigation"
 import { Form } from "./form"
-import { type SelectProps } from "@/lib/type"
 import { toast } from "sonner"
+import { type SelectProps } from "@/lib/type"
 
 interface Props {
+  organisasis: SelectProps[]
   open: boolean
   onOpenChange(open: boolean): void
-  data: {
-    departments: SelectProps[],
-    atasans: SelectProps[],
-    departmentUnits: SelectProps[],
-    organisasis: SelectProps[]
-  },
   value: any
 }
 
-export const EditDialog = ({ open, onOpenChange, data, value }: Props) => {
+export const EditDialog = ({ organisasis, open, onOpenChange, value }: Props) => {
   const router = useRouter()
-  const { mutateAsync, isPending } = api.user.update.useMutation()
+  const { mutateAsync, isPending } = api.department.update.useMutation()
 
   async function onSubmit(values: any) {
     try {
       const result = await mutateAsync({ id: value.id, ...values })
+
       onOpenChange(open)
       toast.success(result.message)
       router.refresh()
@@ -39,16 +35,14 @@ export const EditDialog = ({ open, onOpenChange, data, value }: Props) => {
     }
   }
 
-
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="overflow-y-scroll max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle>Ubah User</DialogTitle>
+          <DialogTitle>Ubah Department</DialogTitle>
         </DialogHeader>
         <Form
-          data={data}
+          organisasis={organisasis}
           isPending={isPending}
           onSubmit={onSubmit}
           isEdit

@@ -137,9 +137,22 @@ model PermintaanBarangBarangHistory {
 
 // --------------------------- MASTER --------------------------------
 
-model Department {
+model Organisasi {
     id   String @id @default(cuid())
     name String
+
+    Department Department[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Department {
+    id           String @id @default(cuid())
+    name         String
+    organisasiId String
+
+    Organisasi Organisasi @relation(fields: [organisasiId], references: [id])
 
     User               User[]
     MasterKodeAnggaran MasterKodeAnggaran[]

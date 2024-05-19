@@ -5,7 +5,7 @@ import { AddDialog } from "./_components/add-dialog";
 import { Table } from "./_components/table";
 
 export default async function Page() {
-  const data = await api.department.getAll()
+  const data = await api.organisasi.getAll()
 
   return (
     <div>
@@ -18,17 +18,17 @@ export default async function Page() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Department</BreadcrumbPage>
+            <BreadcrumbPage>Organisasi</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
       <div className="my-4 flex justify-between">
         <div className="">
           <h1 className='text-2xl font-bold tracking-tight'>
-            Department
+            Organisasi
           </h1>
           <p className='text-muted-foreground'>
-            Master Department
+            Master Organisasi
           </p>
         </div>
         <div className="">

@@ -45,7 +45,12 @@ export const userRouter = createTRPCRouter({
           createdAt: "desc"
         },
         include: {
-          Department: true,
+          Department: {
+            include: {
+              Organisasi: true
+            }
+          },
+          DepartmentUnit: true,
           UserRole: {
             include: {
               role: true
@@ -57,7 +62,9 @@ export const userRouter = createTRPCRouter({
       return result.map((v) => ({
         ...v,
         role: v.UserRole.map((v) => v.role.name),
-        department: v.Department.name
+        organisasi: v.Department.Organisasi.name,
+        department: v.Department.name,
+        unit: v.DepartmentUnit?.name
       }))
     }),
 

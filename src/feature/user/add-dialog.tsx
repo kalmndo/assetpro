@@ -19,7 +19,8 @@ interface Props {
   data: {
     departments: SelectProps[],
     atasans: SelectProps[],
-    departmentUnits: SelectProps[]
+    departmentUnits: SelectProps[],
+    organisasis: SelectProps[]
   },
 }
 

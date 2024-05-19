@@ -17,7 +17,7 @@ const defaultValues = {
 
 export function Table({ data }: { data: any }) {
   const [dialog, setDialog] = useState<{ open: boolean | string, data: any }>({ open: false, data: defaultValues })
-  const { mutateAsync, isPending } = api.department.remove.useMutation()
+  const { mutateAsync, isPending } = api.organisasi.remove.useMutation()
   const router = useRouter()
 
   const onSubmit = async () => {
