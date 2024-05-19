@@ -33,7 +33,7 @@ export default function UploadAvatar({
       setUploading(true)
 
       fetch(
-        'https://assetpro.site' + '/api/upload',
+        `/api/upload`,
         {
           method: 'POST',
           headers: {
