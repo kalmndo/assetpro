@@ -1,4 +1,3 @@
-import { api } from "@/trpc/server";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,11 +7,9 @@ import {
   BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
 import Link from "next/link";
-import { Table } from "./_components/table";
+import Content from "./_components/content";
 
 export default async function Page() {
-  const data = await api.kodeAnggaran.getAll()
-  const departments = await api.department.getSelect()
 
   return (
     <div>
@@ -25,22 +22,26 @@ export default async function Page() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Kode Anggaran</BreadcrumbPage>
+            <BreadcrumbPage>Penomoran Otomatis</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
       <div className="my-4 flex justify-between">
         <div className="">
           <h1 className='text-2xl font-bold tracking-tight'>
-            Kode Anggaran
+            Penomoran Otomatis
           </h1>
-          <p className='text-muted-foreground'>
-            Data kode anggaran
-          </p>
         </div>
       </div>
-      <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
-        <Table data={data} departments={departments} />
+      <div className="rounded-sm border">
+        <div className="grid grid-cols-5 p-4">
+          <div className="col-span-3">
+            <p className="text-sm">Tentukan nomor yang digunakan untuk membuat penomoran tagihan. Nomor dibawah akan otomatis ditambah setiap dokumen baru dibuat.</p>
+          </div>
+        </div>
+        <div>
+          <Content />
+        </div>
       </div>
     </div>
   )
