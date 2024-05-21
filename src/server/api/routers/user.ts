@@ -70,11 +70,7 @@ export const userRouter = createTRPCRouter({
 
   getAtasanSelect: protectedProcedure
     .query(async ({ ctx }) => {
-      const userId = ctx.session.user.id
       const result = await ctx.db.user.findMany({
-        where: {
-          id: { not: userId }
-        },
         include: {
           Department: true
         }
@@ -109,6 +105,7 @@ export const userRouter = createTRPCRouter({
         title
       } = input
       const password = await bcrypt.hash("asdf1234", 10);
+
       try {
         await ctx.db.user.create({
           data: {
@@ -119,7 +116,7 @@ export const userRouter = createTRPCRouter({
             atasanId: atasan ? atasan : undefined,
             password,
             title,
-            departmentUnitId,
+            departmentUnitId: departmentUnitId ? departmentUnitId : undefined,
             UserRole: {
               createMany: role.length > 0 ? {
                 data: role.map((v) => ({

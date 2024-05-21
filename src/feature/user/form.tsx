@@ -101,6 +101,7 @@ export const Form = ({
 
   const departments = data.departments.filter((v) => v.organisasiId === form.watch("organisasiId"))
   const departmentUnits = data.departmentUnits.filter((v) => v.departmentId === form.watch("department"))
+  const atasans = data.atasans.filter((v) => v.value !== value?.id)
 
   return (
     <div className="relative">
@@ -182,7 +183,7 @@ export const Form = ({
           />
           <div className="space-y-2">
             <SearchSelect
-              data={data.atasans}
+              data={atasans}
               form={form}
               label="Atasan"
               name="atasan"
