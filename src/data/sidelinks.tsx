@@ -36,6 +36,12 @@ export const sidelinks: SideLink[] = [
     icon: <LayoutDashboard size={18} />
   },
   {
+    title: 'Daftar Aset',
+    label: '',
+    href: '/daftar-aset',
+    icon: <LayoutDashboard size={18} />
+  },
+  {
     title: 'Kartu Stok',
     label: '',
     href: '/kartu-stok',
@@ -123,6 +129,12 @@ export const sidelinks: SideLink[] = [
     href: '/',
     icon: <Warehouse size={18} />,
     sub: [
+      {
+        title: 'Permintaan',
+        label: '',
+        href: '/gudang/permintaan',
+        icon: <PackagePlus size={18} />,
+      },
       {
         title: 'Masuk',
         label: '',

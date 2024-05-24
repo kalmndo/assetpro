@@ -139,7 +139,6 @@ export const permintaanBarangRouter = createTRPCRouter({
         status: v.status
       }))
 
-      // TODO: 
       const isAtasan = userId === atasanId && status === getStatus(STATUS.PENGAJUAN.id).id
       const isImApprove = roles?.includes(ROLE.IM_APPROVE.id) && status === getStatus(STATUS.ATASAN_SETUJU.id).id
 
@@ -173,7 +172,8 @@ export const permintaanBarangRouter = createTRPCRouter({
         id: z.string(),
         qty: z.string(),
         uomId: z.string(),
-        kodeAnggaran: z.array(z.string())
+        kodeAnggaran: z.array(z.string()),
+        golongan: z.number()
       }))
     }))
     .mutation(async ({ ctx, input }) => {
@@ -212,7 +212,8 @@ export const permintaanBarangRouter = createTRPCRouter({
               id,
               qty,
               uomId,
-              kodeAnggaran
+              kodeAnggaran,
+              golongan
             } = b
 
             const pbbId = await tx.permintaanBarangBarang.create({
@@ -224,6 +225,22 @@ export const permintaanBarangRouter = createTRPCRouter({
                 qtyOrdered: 0,
                 qtyOut: 0,
                 uomId
+              },
+            })
+
+            await tx.permintaanBarangBarangGroup.upsert({
+              where: {
+                barangId: id
+              },
+              create: {
+                barangId: id,
+                qty: Number(qty),
+                permintaanBarang: [pbbId.id],
+                golongan
+              },
+              update: {
+                qty: { increment: Number(qty) },
+                permintaanBarang: { push: pbbId.id }
               }
             })
 
@@ -536,6 +553,77 @@ export const permintaanBarangRouter = createTRPCRouter({
           message: "Kemunkingan terjadi kesalahan sistem, silahkan coba lagi",
           cause: error,
         });
+      }
+    }),
+  checkKetersediaanByBarang: protectedProcedure
+    .query(async ({ ctx }) => {
+
+      const pbbg = await ctx.db.permintaanBarangBarangGroup.findMany()
+
+      if (!pbbg) {
+        return {
+          tersedia: [],
+          takTersedia: []
+        };
+      }
+
+      const filterGolongan = (golongan: number) => pbbg.filter((v) => v.golongan === golongan);
+      const [as, per] = [filterGolongan(1), filterGolongan(2)];
+      const barangIds = pbbg.map((v) => v.barangId);
+
+      const fetchBarangData = async (model: 'daftarAsetGroup' | 'kartuStok', ids: string[]) => {
+        // @ts-ignore
+        const result = await ctx.db[model].findMany({
+          where: { id: { in: ids } },
+          include: { MasterBarang: true }
+        })
+        return result
+      }
+
+      const [aset, persediaan] = await Promise.all([
+        fetchBarangData('daftarAsetGroup', barangIds),
+        fetchBarangData('kartuStok', barangIds)
+      ]);
+
+      const mapBarang = (barang: any, golonganData: any, qtyField: string) => {
+        return barang.map((v: any) => {
+          const permintaan = golonganData.find((a: any) => a.barangId === v.id);
+
+          return {
+            image: v.MasterBarang.image,
+            name: v.MasterBarang.name,
+            kode: v.MasterBarang.fullCode,
+            permintaan: permintaan.qty,
+            tersedia: v[qtyField],
+            golongan: permintaan.golongan === 1 ? "Aset" : "Persediaan"
+          };
+        });
+      }
+
+      const mapBarangTersedia = (barang: any, golonganData: any, qtyField: string) => {
+        return mapBarang(barang, golonganData, qtyField).filter((a: any) => a.tersedia > 0)
+      }
+
+      const mapBarangTakTersedia = (barang: any, golonganData: any, qtyField: string) => {
+        return mapBarang(barang, golonganData, qtyField).map((v: any) => ({
+          ...v,
+          permintaan: v.permintaan - v.tersedia
+        })).filter((a: any) => a.permintaan > 0)
+
+      }
+
+      const asetTersedia = mapBarangTersedia(aset, as, 'idle');
+      const persediaanTersedia = mapBarangTersedia(persediaan, per, 'qty');
+      const asetTakTersedia = mapBarangTakTersedia(aset, as, 'idle');
+      const persediaanTakTersedia = mapBarangTakTersedia(persediaan, per, 'qty');
+
+
+      const tersedia = [...asetTersedia, ...persediaanTersedia];
+      const takTersedia = [...asetTakTersedia, ...persediaanTakTersedia];
+
+      return {
+        tersedia,
+        takTersedia
       }
     })
 });

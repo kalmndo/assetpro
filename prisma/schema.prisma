@@ -97,6 +97,16 @@ model PermintaanBarangBarang {
     updatedAt DateTime @updatedAt
 }
 
+model PermintaanBarangBarangGroup {
+    barangId         String   @unique
+    qty              Int
+    permintaanBarang String[]
+    golongan         Int // 1 aset, 2 persediaang
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
 model PermintaanBarangBarangKodeAnggaran {
     id             String @id @default(cuid())
     pbbId          String
@@ -256,8 +266,11 @@ model MasterBarang {
     PermintaanBarangBarang PermintaanBarangBarang[]
     MasterBarangUnit       MasterBarangUnit[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt       DateTime          @default(now())
+    updatedAt       DateTime          @updatedAt
+    DaftarAset      DaftarAset[]
+    DaftarAsetGroup DaftarAsetGroup[]
+    KartuStok       KartuStok[]
 }
 
 model MasterBarangUnit {
@@ -331,6 +344,37 @@ model Notification {
 
     From User @relation(name: "From", fields: [fromId], references: [id])
     To   User @relation(name: "To", fields: [toId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model DaftarAset {
+    id       String @unique // No Inventaris
+    barangId String
+
+    MasterBarang MasterBarang @relation(fields: [barangId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model DaftarAsetGroup {
+    id   String @unique // MasterBarang 
+    idle Int
+    used Int
+
+    MasterBarang MasterBarang @relation(fields: [id], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model KartuStok {
+    id  String @unique // MasterBarang
+    qty Int
+
+    MasterBarang MasterBarang @relation(fields: [id], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
