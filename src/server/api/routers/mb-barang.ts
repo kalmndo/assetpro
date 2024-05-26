@@ -96,6 +96,7 @@ export const mbBarangRouter = createTRPCRouter({
     .input(z.object({
       id: z.string(),
       name: z.string(),
+      image: z.string().nullable(),
       code: z.string(),
       subSubKategoriId: z.string(),
       classCode: z.string()
@@ -104,6 +105,7 @@ export const mbBarangRouter = createTRPCRouter({
       const {
         id,
         name,
+        image,
         code,
         subSubKategoriId,
         classCode
@@ -117,6 +119,7 @@ export const mbBarangRouter = createTRPCRouter({
           },
           data: {
             name,
+            image,
             code: Number(code),
             subSubKategoriId,
             classCode,

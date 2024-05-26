@@ -7,8 +7,108 @@ import {
 } from "@/server/api/trpc";
 import checkKetersediaanByBarang from "../shared/check-ketersediaan-by-barang";
 import { STATUS } from "@/lib/status";
+import { TRPCError } from "@trpc/server";
+import { ROLE } from "@/lib/role";
 
 export const permintaanPembelianRouter = createTRPCRouter({
+  getAll: protectedProcedure
+    .query(async ({ ctx }) => {
+      const result = await ctx.db.permintaanPembelian.findMany({
+        orderBy: {
+          createdAt: "desc"
+        },
+        include: {
+          PermintaanPembelianBarang: true
+        }
+      })
+
+      return result.map((v) => ({
+        ...v,
+        jumlah: v.PermintaanPembelianBarang.length,
+        tanggal: v.createdAt.toLocaleDateString()
+      }))
+    }),
+  get: protectedProcedure
+    .input(
+      z.object({
+        id: z.string()
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { id } = input
+      const userId = ctx.session.user.id
+
+      const user = await ctx.db.user.findUnique({
+        where: {
+          id: userId
+        },
+        include: {
+          UserRole: true
+        }
+      })
+      if (!user) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Tidak ada user ini",
+        });
+      }
+
+      const roleIds = user.UserRole.map((v) => v.roleId)
+
+      const result = await ctx.db.permintaanPembelian.findUnique({
+        where: {
+          id
+        },
+        include: {
+          PBPP: { include: { Permintaan: true } },
+          PermintaanPembelianBarang: {
+            include: {
+              MasterBarang: {
+                include: {
+                  Uom: true
+                }
+              },
+              PBSPBB: true
+            }
+          }
+        }
+      })
+
+      if (!result) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Tidak ada form ini",
+        });
+      }
+
+      const isApprove = result.status === STATUS.PENGAJUAN.id && roleIds.some((v) => v === ROLE.PEMBELIAN_APPROVE.id)
+
+      const isSelect = result.status === STATUS.IM_APPROVE.id && roleIds.some((v) => v === ROLE.PEMBELIAN_SELECT_VENDOR.id)
+
+      const ims = result.PBPP.map((v) => ({
+        id: v.permintaanId,
+        no: v.Permintaan.no,
+      }))
+
+      const barang = result.PermintaanPembelianBarang.map((v) => ({
+        id: v.id,
+        image: v.MasterBarang.image,
+        name: v.MasterBarang.name,
+        kode: v.MasterBarang.fullCode,
+        jumlah: v.qty,
+        uom: v.MasterBarang.Uom.name
+      }))
+
+      return {
+        ...result,
+        tanggal: result.createdAt.toLocaleDateString(),
+        ims,
+        barang,
+        isApprove,
+        isSelect
+      }
+    })
+  ,
   create: protectedProcedure
     .input(z.array(z.string()))
     .mutation(async ({ ctx, input }) => {
@@ -107,6 +207,31 @@ export const permintaanPembelianRouter = createTRPCRouter({
       // console.log("takTersedia", takTersedia.flatMap((v) => v.permintaanBarang))
       console.log("tak", takTersedia)
 
+    }),
+  approve: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id } = input
+      try {
+        await ctx.db.permintaanPembelian.update({
+          where: {
+            id
+          },
+          data: {
+            status: STATUS.IM_APPROVE.id
+          }
+        })
+        return {
+          ok: true,
+          message: 'Berhasil menyetujui permintaan pembelian',
+        }
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Terjadi kesalahan server",
+          cause: error
+        });
+      }
     }),
 });
 

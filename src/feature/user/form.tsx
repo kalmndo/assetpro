@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import UploadAvatar from "@/components/upload-avatar"
+import { ROLE } from "@/lib/role"
 import { type SelectProps } from "@/lib/type"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { LoaderCircle } from "lucide-react"
@@ -35,15 +36,27 @@ const items: Items[] = [
     separator: true
   },
   {
-    id: "im-view",
-    label: "Internal Memo (view)",
+    id: ROLE.IM_READ.id,
+    label: ROLE.IM_READ.name,
   },
   {
-    id: "im-approve",
-    label: "Internal Memo (approve)",
+    id: ROLE.IM_APPROVE.id,
+    label: ROLE.IM_APPROVE.name,
   },
   {
     separator: true
+  },
+  {
+    id: ROLE.PEMBELIAN_READ.id,
+    label: ROLE.PEMBELIAN_READ.name,
+  },
+  {
+    id: ROLE.PEMBELIAN_APPROVE.id,
+    label: ROLE.PEMBELIAN_APPROVE.name,
+  },
+  {
+    id: ROLE.PEMBELIAN_SELECT_VENDOR.id,
+    label: ROLE.PEMBELIAN_SELECT_VENDOR.name,
   },
 ] as const
 
