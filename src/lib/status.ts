@@ -24,6 +24,11 @@ export const STATUS = {
     id: 'reject',
     name: 'Ditolak',
     color: '#dc2626'
+  },
+  PROCESS: {
+    id: 'process',
+    name: 'Dalam Proses',
+    color: '#dc2626'
   }
 }
 

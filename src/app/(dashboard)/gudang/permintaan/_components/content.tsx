@@ -14,7 +14,7 @@ import {
 import { Filter } from "lucide-react";
 import { useState } from "react";
 import { tersediaColumns } from "./tersedia-columns";
-import { takTersediaColumns } from "./tak-tersedia-columns";
+import TakTersediaTable from "./tak-tersedia-table";
 
 function TersediaTable({ data }: { data: any[] }) {
   return (
@@ -28,17 +28,7 @@ function TersediaTable({ data }: { data: any[] }) {
   )
 }
 
-function TakTersediaTable({ data }: { data: any[] }) {
-  return (
 
-    <DataTable
-      data={data}
-      columns={takTersediaColumns}
-      filter={{ column: 'name', placeholder: 'Nama ...' }}
-    // checkboxToolbarActions={checkboxToolbarActions}
-    />
-  )
-}
 
 export default function Content({ tersedia, takTersedia }: { tersedia: any[], takTersedia: any[] }) {
   const [position, setPosition] = useState('tersedia')
@@ -75,11 +65,12 @@ export default function Content({ tersedia, takTersedia }: { tersedia: any[], ta
           </DropdownMenu>
         </div>
       </div>
-      {position === 'tersedia' ?
+      {position === 'tersedia'
+        ?
         <TersediaTable data={tersedia} />
-        : <TakTersediaTable data={takTersedia} />
+        :
+        <TakTersediaTable data={takTersedia} />
       }
-
     </>
   )
 }

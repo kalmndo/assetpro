@@ -74,6 +74,7 @@ model PermintaanBarang {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    PBPP      PBPP[]
 }
 
 model PermintaanBarangBarang {
@@ -92,6 +93,18 @@ model PermintaanBarangBarang {
     PermintaanBarangBarangSplit        PermintaanBarangBarangSplit[]
     PermintaanBarangBarangHistory      PermintaanBarangBarangHistory[]
     PermintaanBarangBarangKodeAnggaran PermintaanBarangBarangKodeAnggaran[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model PermintaanBarangBarangHistory {
+    id     String @id @default(cuid())
+    pbbId  String
+    desc   String
+    status String
+
+    Barang PermintaanBarangBarang @relation(fields: [pbbId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -122,27 +135,84 @@ model PermintaanBarangBarangKodeAnggaran {
 model PermintaanBarangBarangSplit {
     id     String  @id @default(cuid())
     pbbId  String
-    desc   String
+    desc   String // catatan seperti sedang permintaan penwaran, evaluasi, po, dll
     status String
     qty    Int
     foto   String?
 
-    Barang PermintaanBarangBarang @relation(fields: [pbbId], references: [id])
+    Barang                             PermintaanBarangBarang               @relation(fields: [pbbId], references: [id])
+    PermintaanBarangBarangSplitHistory PermintaanBarangBarangSplitHistory[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    PBSPBB    PBSPBB[]
+}
+
+model PermintaanBarangBarangSplitHistory {
+    id            String @id @default(cuid())
+    barangSplitId String
+    formType      String // misal permintaan pembelian, evaluasi
+    formId        String // id dari form tersebut
+
+    BarangSplit PermintaanBarangBarangSplit @relation(fields: [barangSplitId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
 
-model PermintaanBarangBarangHistory {
+// --------------------------- PEMBELIAN --------------------------------
+
+model PermintaanPembelian {
     id     String @id @default(cuid())
-    pbbId  String
-    desc   String
+    no     String @unique
     status String
 
-    Barang PermintaanBarangBarang @relation(fields: [pbbId], references: [id])
+    createdAt                 DateTime                    @default(now())
+    updatedAt                 DateTime                    @updatedAt
+    PBPP                      PBPP[]
+    PermintaanPembelianBarang PermintaanPembelianBarang[]
+}
+
+model PermintaanPembelianBarang {
+    id       String @id @default(cuid())
+    formId   String
+    barangId String
+    qty      Int
+
+    PermintaanPembelian PermintaanPembelian @relation(fields: [formId], references: [id])
+    MasterBarang        MasterBarang        @relation(fields: [barangId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    PBSPBB    PBSPBB[]
+}
+
+model PBPP {
+    id           String @id @default(cuid())
+    permintaanId String
+    pembelianId  String
+
+    Permintaan PermintaanBarang    @relation(fields: [permintaanId], references: [id])
+    Pembelian  PermintaanPembelian @relation(fields: [pembelianId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("PB_PP")
+}
+
+model PBSPBB {
+    id                String @id @default(cuid())
+    barangSplitId     String
+    pembelianBarangId String
+
+    BarangSplit     PermintaanBarangBarangSplit @relation(fields: [barangSplitId], references: [id])
+    PembelianBarang PermintaanPembelianBarang   @relation(fields: [pembelianBarangId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("PBS_PBB")
 }
 
 // --------------------------- MASTER --------------------------------
@@ -266,11 +336,12 @@ model MasterBarang {
     PermintaanBarangBarang PermintaanBarangBarang[]
     MasterBarangUnit       MasterBarangUnit[]
 
-    createdAt       DateTime          @default(now())
-    updatedAt       DateTime          @updatedAt
-    DaftarAset      DaftarAset[]
-    DaftarAsetGroup DaftarAsetGroup[]
-    KartuStok       KartuStok[]
+    createdAt                 DateTime                    @default(now())
+    updatedAt                 DateTime                    @updatedAt
+    DaftarAset                DaftarAset[]
+    DaftarAsetGroup           DaftarAsetGroup[]
+    KartuStok                 KartuStok[]
+    PermintaanPembelianBarang PermintaanPembelianBarang[]
 }
 
 model MasterBarangUnit {

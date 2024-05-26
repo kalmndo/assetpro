@@ -7,6 +7,7 @@ import { TRPCError } from "@trpc/server";
 import { Prisma } from "@prisma/client";
 import { STATUS, getStatus } from "@/lib/status";
 import { ROLE } from "@/lib/role";
+import checkKetersediaanByBarang from "../shared/check-ketersediaan-by-barang";
 
 export const permintaanBarangRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -213,7 +214,6 @@ export const permintaanBarangRouter = createTRPCRouter({
               qty,
               uomId,
               kodeAnggaran,
-              golongan
             } = b
 
             const pbbId = await tx.permintaanBarangBarang.create({
@@ -228,21 +228,7 @@ export const permintaanBarangRouter = createTRPCRouter({
               },
             })
 
-            await tx.permintaanBarangBarangGroup.upsert({
-              where: {
-                barangId: id
-              },
-              create: {
-                barangId: id,
-                qty: Number(qty),
-                permintaanBarang: [pbbId.id],
-                golongan
-              },
-              update: {
-                qty: { increment: Number(qty) },
-                permintaanBarang: { push: pbbId.id }
-              }
-            })
+
 
             await tx.permintaanBarangBarangKodeAnggaran.createMany({
               data: kodeAnggaran.map((v) => {
@@ -358,7 +344,11 @@ export const permintaanBarangRouter = createTRPCRouter({
               status: status
             },
             include: {
-              PermintaanBarangBarang: true
+              PermintaanBarangBarang: {
+                include: {
+                  Barang: true
+                }
+              },
             }
           })
           const updateRejectBarangs = [...(update ?? []), ...(reject ?? [])].map((v) => v.id)
@@ -368,6 +358,7 @@ export const permintaanBarangRouter = createTRPCRouter({
 
           if (untouchedBarangs.length > 0) {
             for (const iterator of untouchedBarangs) {
+              const qty = Number(iterator.qty)
               await tx.permintaanBarangBarang.update({
                 where: {
                   id: iterator.id
@@ -376,6 +367,27 @@ export const permintaanBarangRouter = createTRPCRouter({
                   status: STATUS.IM_APPROVE.id,
                 }
               })
+
+              if (!isAtasan) {
+                const prevBarang = pb.PermintaanBarangBarang.find((v) => v.id === iterator.id)
+
+                await tx.permintaanBarangBarangGroup.upsert({
+                  where: {
+                    barangId: prevBarang?.barangId
+                  },
+                  create: {
+                    barangId: prevBarang!.barangId,
+                    qty,
+                    permintaanBarang: [prevBarang!.id],
+                    golongan: Number(prevBarang!.Barang.fullCode.split('.')[0])
+                  },
+                  update: {
+                    qty: { increment: Number(qty) },
+                    permintaanBarang: { push: prevBarang!.id }
+                  }
+                })
+              }
+
               await tx.permintaanBarangBarangHistory.createMany({
                 data: untouchedBarangs.map((v) => ({
                   pbbId: v.id,
@@ -388,17 +400,38 @@ export const permintaanBarangRouter = createTRPCRouter({
 
           if (update) {
             for (const iterator of update) {
+              const qty = Number(iterator.qty)
               await tx.permintaanBarangBarang.update({
                 where: {
                   id: iterator.id
                 },
                 data: {
                   status: STATUS.IM_APPROVE.id,
-                  qty: Number(iterator.qty),
+                  qty,
                   uomId: iterator.uomId
                 }
               })
+              if (!isAtasan) {
+                const prevBarang = pb.PermintaanBarangBarang.find((v) => v.id === iterator.id)
+
+                await tx.permintaanBarangBarangGroup.upsert({
+                  where: {
+                    barangId: prevBarang?.barangId
+                  },
+                  create: {
+                    barangId: prevBarang!.barangId,
+                    qty,
+                    permintaanBarang: [prevBarang!.id],
+                    golongan: Number(prevBarang!.Barang.fullCode.split('.')[0])
+                  },
+                  update: {
+                    qty: { increment: Number(qty) },
+                    permintaanBarang: { push: prevBarang!.id }
+                  }
+                })
+              }
             }
+
             await tx.permintaanBarangBarangHistory.createMany({
               data: update.map((v) => ({
                 pbbId: v.id,
@@ -567,63 +600,8 @@ export const permintaanBarangRouter = createTRPCRouter({
         };
       }
 
-      const filterGolongan = (golongan: number) => pbbg.filter((v) => v.golongan === golongan);
-      const [as, per] = [filterGolongan(1), filterGolongan(2)];
-      const barangIds = pbbg.map((v) => v.barangId);
+      const res = await checkKetersediaanByBarang(ctx, pbbg)
 
-      const fetchBarangData = async (model: 'daftarAsetGroup' | 'kartuStok', ids: string[]) => {
-        // @ts-ignore
-        const result = await ctx.db[model].findMany({
-          where: { id: { in: ids } },
-          include: { MasterBarang: true }
-        })
-        return result
-      }
-
-      const [aset, persediaan] = await Promise.all([
-        fetchBarangData('daftarAsetGroup', barangIds),
-        fetchBarangData('kartuStok', barangIds)
-      ]);
-
-      const mapBarang = (barang: any, golonganData: any, qtyField: string) => {
-        return barang.map((v: any) => {
-          const permintaan = golonganData.find((a: any) => a.barangId === v.id);
-
-          return {
-            image: v.MasterBarang.image,
-            name: v.MasterBarang.name,
-            kode: v.MasterBarang.fullCode,
-            permintaan: permintaan.qty,
-            tersedia: v[qtyField],
-            golongan: permintaan.golongan === 1 ? "Aset" : "Persediaan"
-          };
-        });
-      }
-
-      const mapBarangTersedia = (barang: any, golonganData: any, qtyField: string) => {
-        return mapBarang(barang, golonganData, qtyField).filter((a: any) => a.tersedia > 0)
-      }
-
-      const mapBarangTakTersedia = (barang: any, golonganData: any, qtyField: string) => {
-        return mapBarang(barang, golonganData, qtyField).map((v: any) => ({
-          ...v,
-          permintaan: v.permintaan - v.tersedia
-        })).filter((a: any) => a.permintaan > 0)
-
-      }
-
-      const asetTersedia = mapBarangTersedia(aset, as, 'idle');
-      const persediaanTersedia = mapBarangTersedia(persediaan, per, 'qty');
-      const asetTakTersedia = mapBarangTakTersedia(aset, as, 'idle');
-      const persediaanTakTersedia = mapBarangTakTersedia(persediaan, per, 'qty');
-
-
-      const tersedia = [...asetTersedia, ...persediaanTersedia];
-      const takTersedia = [...asetTakTersedia, ...persediaanTakTersedia];
-
-      return {
-        tersedia,
-        takTersedia
-      }
+      return res
     })
 });

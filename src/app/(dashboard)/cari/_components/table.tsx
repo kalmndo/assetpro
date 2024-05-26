@@ -21,7 +21,8 @@ export function Table({ data }: { data: any }) {
           kodeAnggaran: [],
           qty: '1',
           uom: v.original.uom,
-          uomId: v.original.uomId
+          uomId: v.original.uomId,
+          golongan: v.original.golongan === "Aset" ? 1 : 2
         }))
 
         // @ts-ignore
