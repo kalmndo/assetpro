@@ -172,6 +172,7 @@ model PermintaanPembelian {
     PBPP                      PBPP[]
     PermintaanPembelianBarang PermintaanPembelianBarang[]
     PermintaanPenawaran       PermintaanPenawaran[]
+    PenawaraanHargaBarangNego PenawaraanHargaBarangNego[]
 }
 
 model PermintaanPembelianBarang {
@@ -187,6 +188,7 @@ model PermintaanPembelianBarang {
     updatedAt                       DateTime                          @updatedAt
     PBSPBB                          PBSPBB[]
     PermintaanPenawaranBarangVendor PermintaanPenawaranBarangVendor[]
+    PenawaranHargaBarangVendor      PenawaranHargaBarangVendor[]
 }
 
 model PBPP {
@@ -231,6 +233,7 @@ model PermintaanPenawaran {
     createdAt                 DateTime                    @default(now())
     updatedAt                 DateTime                    @updatedAt
     PermintaanPenawaranVendor PermintaanPenawaranVendor[]
+    PenawaranHarga            PenawaranHarga[]
 }
 
 model PermintaanPenawaranVendor {
@@ -257,6 +260,62 @@ model PermintaanPenawaranBarangVendor {
 
     PembelianBarang PermintaanPembelianBarang @relation(fields: [pembelianBarangId], references: [id])
     Vendor          PermintaanPenawaranVendor @relation(fields: [vendorId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+// --------------------------- PERMINTAAN PENAWARAN --------------------------------
+
+model PenawaranHarga {
+    id          String    @id @default(cuid())
+    no          String    @unique
+    status      String
+    penawaranId String
+    deadline    DateTime?
+
+    PenawaranHarga PermintaanPenawaran @relation(fields: [penawaranId], references: [id])
+
+    createdAt            DateTime               @default(now())
+    updatedAt            DateTime               @updatedAt
+    PenawaranHargaVendor PenawaranHargaVendor[]
+}
+
+model PenawaraanHargaBarangNego {
+    id                String @id @default(cuid())
+    pembelianBarangId String
+    hargaNego         Int
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    PembelianBarang PermintaanPembelian @relation(fields: [pembelianBarangId], references: [id])
+}
+
+model PenawaranHargaVendor {
+    id          String @id @default(cuid())
+    url         String
+    vendorId    String
+    penawaranId String
+
+    Vendor          Vendor         @relation(fields: [vendorId], references: [id])
+    PenawaraanHarga PenawaranHarga @relation(fields: [penawaranId], references: [id])
+
+    createdAt                  DateTime                     @default(now())
+    updatedAt                  DateTime                     @updatedAt
+    PenawaranHargaBarangVendor PenawaranHargaBarangVendor[]
+}
+
+model PenawaranHargaBarangVendor {
+    id                String  @id @default(cuid())
+    vendorId          String
+    pembelianBarangId String
+    harga             Int?
+    totalHarga        Int?
+    catatan           String?
+
+    PembelianBarang PermintaanPembelianBarang @relation(fields: [pembelianBarangId], references: [id])
+    Vendor          PenawaranHargaVendor      @relation(fields: [vendorId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -300,6 +359,7 @@ model Vendor {
     createdAt                 DateTime                    @default(now())
     updatedAt                 DateTime                    @updatedAt
     PermintaanPenawaranVendor PermintaanPenawaranVendor[]
+    PenawaranHargaVendor      PenawaranHargaVendor[]
 }
 
 model DepartmentUnit {

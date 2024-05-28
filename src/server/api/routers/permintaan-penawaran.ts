@@ -4,6 +4,7 @@ import { z } from "zod";
 import { STATUS } from "@/lib/status";
 import sendWhatsAppMessage from "@/lib/send-whatsapp";
 import { v4 as uuidv4 } from 'uuid'
+import formatPhoneNumber from "@/lib/formatPhoneNumber";
 
 export const permintaanPenawaranRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -145,60 +146,77 @@ export const permintaanPenawaranRouter = createTRPCRouter({
         }));
       };
 
-      const url = uuidv4()
-      const message =
-        `
+
+
+      try {
+
+        await ctx.db.$transaction(async (tx) => {
+          const penawaranResult = await tx.permintaanPenawaran.update({
+            where: {
+              id
+            },
+            data: {
+              deadline,
+              status: STATUS.SELESAI.id
+            }
+          })
+
+          for (const { vendorId, barangIds } of vendors()) {
+            const url = uuidv4()
+
+            const result = await tx.permintaanPenawaranVendor.create({
+              data: {
+                url: '',
+                vendorId,
+                penawaranId: penawaranResult.id,
+                PermintaanPenawaranBarangVendor: {
+                  createMany: {
+                    data: barangIds.map((v) => ({
+                      pembelianBarangId: v,
+                    }))
+                  }
+                }
+              },
+              include: {
+                PermintaanPenawaranBarangVendor: {
+                  include: {
+                    PembelianBarang: {
+                      include: {
+                        MasterBarang: true
+                      }
+                    }
+                  }
+                },
+                Vendor: true
+              }
+            })
+            const barang = result.PermintaanPenawaranBarangVendor.map((v) => v.PembelianBarang.MasterBarang.name)
+
+            const message = `
 *ASSETPRO - YAYASAN ALFIAN HUSIN*
       
 Permintaan penawaran harga barang.
-1. Printer
-2. Ram ssd
+${barang.map((v, i) => `${i + 1}. ${v}`).join('\n')}
 
 Silahkan klik link berikut untuk mengirim penawaran harga.
-https://assetpro.site/vendor/pp/${url}
-      `
-      await sendWhatsAppMessage('+6281272035456', message)
+https://assetpro.site/vendor/pp/${url}`
 
-      // try {
+            sendWhatsAppMessage(formatPhoneNumber(result.Vendor.nohp), message)
+          }
+          await tx.penawaranHarga.create({
+            data: {
+              no: "1",
+              status: STATUS.MENUNGGU.id,
+              penawaranId: penawaranResult.id
+            }
+          })
 
-      //   await ctx.db.$transaction(async (tx) => {
-      //     const penawaranResult = await tx.permintaanPenawaran.update({
-      //       where: {
-      //         id
-      //       },
-      //       data: {
-      //         deadline,
-      //         status: STATUS.SELESAI.id
-      //       }
-      //     })
 
-      //     for (const { vendorId, barangIds } of vendors()) {
-      //       await tx.permintaanPenawaranVendor.create({
-      //         data: {
-      //           url: '',
-      //           vendorId,
-      //           penawaranId: penawaranResult.id,
-      //           PermintaanPenawaranBarangVendor: {
-      //             createMany: {
-      //               data: barangIds.map((v) => ({
-      //                 pembelianBarangId: v,
-      //               }))
-      //             }
-      //           }
-      //         },
-      //         include: {
-      //           PermintaanPenawaranBarangVendor: true
-      //         }
-      //       })
+        })
 
-      //     }
-      // CREATE PENAWARAN HARGA STATUS WAITING
+      } catch (error) {
 
-      //   })
-
-      // } catch (error) {
-
-      // }
+      }
 
     })
 })
