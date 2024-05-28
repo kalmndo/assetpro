@@ -4,14 +4,10 @@ import Link from "next/link";
 import { api } from "@/trpc/server";
 import { getStatus } from "@/lib/status";
 import { Table } from "./_components/table";
-import ApproveDialog from "./_components/approve-dialog";
 
 export default async function Page({ params: { id } }: { params: { id: string } }) {
-  const data = await api.permintaanPembelian.get({ id })
-  console.log("data", data)
-
-  const { name: status, color } = getStatus(data.status)
-
+  const data = await api.permintaanPenawaran.get({ id })
+  const { color, name: status } = getStatus(data.status)
 
   return (
     <div>
@@ -23,19 +19,19 @@ export default async function Page({ params: { id } }: { params: { id: string } 
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/permintaan-pembelian">Permintaan Pembelian</Link>
+              <Link href="/permintaan-penawaran">Permintaan Penawaran</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Detail Permintaan Pembelian</BreadcrumbPage>
+            <BreadcrumbPage>Detail Permintaan Penawaran</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
       <div className="my-4 flex justify-between">
         <div className="">
           <h1 className='text-2xl font-bold tracking-tight'>
-            Form Permintaan Pembelian Barang
+            Form Permintaan Penawaran
           </h1>
         </div>
         <div className="">
@@ -59,35 +55,18 @@ export default async function Page({ params: { id } }: { params: { id: string } 
               <p className="font-semibold">{data.tanggal}</p>
             </div>
             <div className="space-y-2">
-              <p className="text-sm">Internal Memo</p>
-              {data.ims.map((v) => (
-                <div key={v.id}>
-                  <Link href={`/permintaan-barang/${v.id}`} className="col-span-2 text-blue-600 font-semibold text-xs hover:underline">
-                    {v.no}
-                  </Link>
-                </div>
-              ))}
-              {/* <p className="text-sm">{data.perihal}</p> */}
+              <p className="text-sm">Permintaan Pembelian</p>
+              <Link href={`/pengadaan/permintaan-pembelian/${data.permintaanPembelian.id}`} className="col-span-2 text-blue-600 font-semibold text-xs hover:underline">
+                {data.permintaanPembelian.no}
+              </Link>
             </div>
           </div>
-          {/* <div className="space-y-4">
-            <p className="text-sm">Pemohon</p>
-            <Avatar className='w-14 h-14'>
-              <AvatarImage src={data.pemohon.image} alt="@shadcn" />
-              <AvatarFallback>{getInitials(data.pemohon.name)}</AvatarFallback>
-            </Avatar> 
-            <p className="font-semibold">{data.pemohon.name}</p>
-            <div className="text-sm">
-              <p>{data.pemohon.title}</p>
-              <p>{data.pemohon.department} - {data.pemohon.departmentUnit}</p>
-            </div>
-          </div> */}
         </div>
         <div className="p-4">
           <Table data={data} />
-          <div className="my-4 flex justify-end">
+          {/* <div className="my-4 flex justify-end">
             {data.isApprove && <ApproveDialog id={data.id} />}
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

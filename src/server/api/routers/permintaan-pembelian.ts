@@ -213,14 +213,26 @@ export const permintaanPembelianRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id } = input
       try {
-        await ctx.db.permintaanPembelian.update({
-          where: {
-            id
-          },
-          data: {
-            status: STATUS.IM_APPROVE.id
-          }
+        await ctx.db.$transaction(async (tx) => {
+          await ctx.db.permintaanPembelian.update({
+            where: {
+              id
+            },
+            data: {
+              status: STATUS.IM_APPROVE.id
+            }
+          })
+
+          await tx.permintaanPenawaran.create({
+            data: {
+              no: '1',
+              status: STATUS.MENUNGGU.id,
+              pembelianId: id
+            }
+          })
+
         })
+
         return {
           ok: true,
           message: 'Berhasil menyetujui permintaan pembelian',

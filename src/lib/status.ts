@@ -18,7 +18,7 @@ export const STATUS = {
   IM_APPROVE: {
     id: 'approve',
     name: 'Disetujui',
-    color: 'bg-green-600'
+    color: '#15803c'
   },
   IM_REJECT: {
     id: 'reject',
@@ -28,6 +28,16 @@ export const STATUS = {
   PROCESS: {
     id: 'process',
     name: 'Dalam Proses',
+    color: '#dc2626'
+  },
+  MENUNGGU: {
+    id: 'menunggu',
+    name: 'Menunggu',
+    color: '#dc2626'
+  },
+  SELESAI: {
+    id: 'selesai',
+    name: 'Selesai',
     color: '#dc2626'
   }
 }

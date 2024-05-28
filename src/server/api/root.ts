@@ -14,6 +14,7 @@ import { departmentUnitRouter } from "./routers/department-unit";
 import { kodeAnggaranRouter } from "./routers/kode-anggaran";
 import { organisasiRouter } from "./routers/organisasi";
 import { permintaanPembelianRouter } from "./routers/permintaan-pembelian";
+import { permintaanPenawaranRouter } from "./routers/permintaan-penawaran";
 
 /**
  * This is the primary router for your server.
@@ -35,7 +36,8 @@ export const appRouter = createTRPCRouter({
   mUom: mUomRouter,
   cariBarang: cariBarangRouter,
   permintaanBarang: permintaanBarangRouter,
-  permintaanPembelian: permintaanPembelianRouter
+  permintaanPembelian: permintaanPembelianRouter,
+  permintaanPenawaran: permintaanPenawaranRouter
 });
 
 // export type definition of API
