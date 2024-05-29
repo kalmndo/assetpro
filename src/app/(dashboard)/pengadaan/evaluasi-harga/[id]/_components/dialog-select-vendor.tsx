@@ -44,6 +44,7 @@ export default function DialogSelectVendor({
   const [selection, setSelection] = useState({})
 
   const onSubmit = async () => {
+    setBarang((prev) => prev)
     // setBarang((prev) => {
     //   // @ts-ignore
     //   const value = prev.map((v) => {

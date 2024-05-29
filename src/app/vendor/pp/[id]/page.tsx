@@ -1,10 +1,8 @@
 "use server"
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/trpc/server";
-import { STATUS, getStatus } from "@/lib/status";
+import { getStatus } from "@/lib/status";
 import Table from "./_components/table";
-import { atom } from "jotai";
-import { splitAtom } from "jotai/utils";
 
 export default async function Page({ params: { id } }: { params: { id: string } }) {
   const data = await api.vendor.getPermintaanPenawaran({ id })
