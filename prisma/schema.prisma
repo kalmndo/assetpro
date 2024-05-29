@@ -172,7 +172,6 @@ model PermintaanPembelian {
     PBPP                      PBPP[]
     PermintaanPembelianBarang PermintaanPembelianBarang[]
     PermintaanPenawaran       PermintaanPenawaran[]
-    PenawaraanHargaBarangNego PenawaraanHargaBarangNego[]
 }
 
 model PermintaanPembelianBarang {
@@ -189,6 +188,7 @@ model PermintaanPembelianBarang {
     PBSPBB                          PBSPBB[]
     PermintaanPenawaranBarangVendor PermintaanPenawaranBarangVendor[]
     PenawaranHargaBarangVendor      PenawaranHargaBarangVendor[]
+    PenawaranHargaBarangNego        PenawaranHargaBarangNego?
 }
 
 model PBPP {
@@ -274,22 +274,22 @@ model PenawaranHarga {
     penawaranId String
     deadline    DateTime?
 
-    PenawaranHarga PermintaanPenawaran @relation(fields: [penawaranId], references: [id])
+    PermintaanPenawaran PermintaanPenawaran @relation(fields: [penawaranId], references: [id])
 
     createdAt            DateTime               @default(now())
     updatedAt            DateTime               @updatedAt
     PenawaranHargaVendor PenawaranHargaVendor[]
 }
 
-model PenawaraanHargaBarangNego {
-    id                String @id @default(cuid())
-    pembelianBarangId String
+model PenawaranHargaBarangNego {
+    id                String  @id @default(cuid())
+    pembelianBarangId String? @unique
     hargaNego         Int
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    PembelianBarang PermintaanPembelian @relation(fields: [pembelianBarangId], references: [id])
+    PembelianBarang PermintaanPembelianBarang? @relation(fields: [pembelianBarangId], references: [id])
 }
 
 model PenawaranHargaVendor {
@@ -316,6 +316,17 @@ model PenawaranHargaBarangVendor {
 
     PembelianBarang PermintaanPembelianBarang @relation(fields: [pembelianBarangId], references: [id])
     Vendor          PenawaranHargaVendor      @relation(fields: [vendorId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+// --------------------------- EVALUASI --------------------------------
+model Evaluasi {
+    id       String    @id @default(cuid())
+    no       String    @unique
+    status   String
+    deadline DateTime?
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

@@ -106,7 +106,8 @@ export const permintaanPenawaranRouter = createTRPCRouter({
         barang,
         status: result.status,
         tanggal: result.createdAt.toLocaleDateString(),
-        getVendors: getVendors ?? []
+        getVendors: getVendors ?? [],
+        deadline: result.deadline?.toLocaleDateString()
       }
     }),
   send: protectedProcedure
@@ -166,7 +167,7 @@ export const permintaanPenawaranRouter = createTRPCRouter({
 
             const result = await tx.permintaanPenawaranVendor.create({
               data: {
-                url: '',
+                url,
                 vendorId,
                 penawaranId: penawaranResult.id,
                 PermintaanPenawaranBarangVendor: {

@@ -6,7 +6,7 @@ import { getStatus } from "@/lib/status";
 import { Table } from "./_components/table";
 
 export default async function Page({ params: { id } }: { params: { id: string } }) {
-  const data = await api.permintaanPenawaran.get({ id })
+  const data = await api.penawaranHarga.get({ id })
   const { color, name: status } = getStatus(data.status)
 
   return (
@@ -19,19 +19,19 @@ export default async function Page({ params: { id } }: { params: { id: string } 
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/permintaan-penawaran">Permintaan Penawaran</Link>
+              <Link href="/penawaran-harga">Penawaran Harga</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Detail Permintaan Penawaran</BreadcrumbPage>
+            <BreadcrumbPage>Detail Penawaran Harga</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
       <div className="my-4 flex justify-between">
         <div className="">
           <h1 className='text-2xl font-bold tracking-tight'>
-            Form Permintaan Penawaran
+            Form Penawaran Harga
           </h1>
         </div>
         <div className="">
@@ -55,17 +55,23 @@ export default async function Page({ params: { id } }: { params: { id: string } 
               <p className="font-semibold">{data.tanggal}</p>
             </div>
             <div className="space-y-2">
-              <p className="text-sm">Permintaan Pembelian</p>
-              <Link href={`/pengadaan/permintaan-pembelian/${data.permintaanPembelian.id}`} className="col-span-2 text-blue-600 font-semibold text-xs hover:underline">
-                {data.permintaanPembelian.no}
+              <p className="text-sm">Permintaan Penawaran</p>
+              <Link href={`/pengadaan/permintaan-penawaran/${data.permintaanPenawaran.id}`} className="col-span-2 text-blue-600 font-semibold text-xs hover:underline">
+                {data.permintaanPenawaran.no}
               </Link>
             </div>
           </div>
           <div className="col-span-1 space-y-4">
-            {data.deadline &&
+            {data.deadline
+              ?
               <div className="space-y-2">
-                <p className="text-sm">Batas waktu vendor kirim harga penawaran</p>
-                <p className="font-semibold">{data.deadline}</p>
+                <p className="text-sm">Batas waktu vendor respon penawaran harga</p>
+                <p className="font-semibold">{data.penawaranDeadline}</p>
+              </div>
+              :
+              <div className="space-y-2">
+                <p className="text-sm">Kirim penawaran harga pada</p>
+                <p className="font-semibold">{data.penawaranDeadline}</p>
               </div>
             }
           </div>
