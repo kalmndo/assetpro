@@ -60,6 +60,7 @@ export const penawaranHargaRouter = createTRPCRouter({
                     include: {
                       PenawaranHargaBarangNego: true,
                       PermintaanPenawaranBarangVendor: {
+                        where: { harga: { not: null } },
                         include: {
                           Vendor: {
                             include: {
@@ -122,7 +123,9 @@ export const penawaranHargaRouter = createTRPCRouter({
         status: result.status,
         tanggal: result.createdAt.toLocaleDateString(),
         getVendors: getVendors ?? [],
-        canSend: isTodayOrAfter(result.PermintaanPenawaran.deadline),
+        // TODO: hapus ini
+        canSend: true,
+        // canSend: isTodayOrAfter(result.PermintaanPenawaran.deadline),
         penawaranDeadline: result.PermintaanPenawaran.deadline?.toLocaleDateString(),
         deadline: result.deadline?.toLocaleDateString()
       }
@@ -281,7 +284,7 @@ Melakukan penawaran harga pada barang.
 ${barang.map((v, i) => `${i + 1}. ${v}`).join('\n')}
 
 Silahkan klik link berikut untuk mengirim penawaran harga.
-https://assetpro.site/vendor/ph/${url}`
+https://assetpro.site/vendor/ph/${result.id}`
 
             sendWhatsAppMessage(formatPhoneNumber(result.Vendor.whatsapp), message)
           }
@@ -289,6 +292,11 @@ https://assetpro.site/vendor/ph/${url}`
 
 
         })
+
+        return {
+          ok: true,
+          message: 'Berhasil mengirim harga penawaran'
+        }
 
       } catch (error) {
         throw new TRPCError({

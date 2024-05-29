@@ -3,10 +3,11 @@ import { DataTable } from "@/components/data-table";
 import { columns } from "./columns";
 import { useSetAtom, } from "jotai";
 import { cartsAtom } from "@/data/cart";
+import { useState } from "react";
 
 export function Table({ data }: { data: any }) {
   const setCarts = useSetAtom(cartsAtom)
-
+  const [selection, setSelection] = useState({})
 
   const checkboxToolbarActions = [
     {
@@ -45,6 +46,8 @@ export function Table({ data }: { data: any }) {
         filter={{ column: 'name', placeholder: 'Nama ...' }}
         columnVisibilityDefaultState={{ kategori: false, subKategori: false, subSubKategori: false }}
         checkboxToolbarActions={checkboxToolbarActions}
+        rowSelection={selection}
+        setRowSelection={setSelection}
       />
     </div>
   )

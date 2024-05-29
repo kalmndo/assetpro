@@ -139,6 +139,7 @@ export default function TakTersediaTable({ data }: { data: any[] }) {
   function handleDialogClose() {
     setDialog({ open: false, data: [] })
   }
+  const [selection, setSelection] = useState({})
   const checkboxToolbarActions = [
     {
       title: 'Pembelian',
@@ -161,6 +162,8 @@ export default function TakTersediaTable({ data }: { data: any[] }) {
         columns={takTersediaColumns}
         filter={{ column: 'name', placeholder: 'Nama ...' }}
         checkboxToolbarActions={checkboxToolbarActions}
+        rowSelection={selection}
+        setRowSelection={setSelection}
       />
       <FormDialog
         data={dialog.data}

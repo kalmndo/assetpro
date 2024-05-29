@@ -13,8 +13,6 @@ export const schema = z.object({
   kode: z.string(),
   qty: z.number(),
   uom: z.string(),
-  jumlahVendor: z.number(),
-  hargaNego: z.number().nullish()
 })
 
 export type Schema = z.infer<typeof schema>
@@ -64,38 +62,5 @@ export const columns: ColumnDef<Schema>[] = [
     enableSorting: false,
     enableHiding: false,
   },
-  {
-    accessorKey: 'jumlahVendor',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Jumlah vendor ' />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className='flex space-x-4'>
-          <span className={`max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem] `}>
-            {row.getValue('jumlahVendor')}
-          </span>
-        </div>
-      )
-    },
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: 'hargaNego',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Harga Penawaran' />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className='flex space-x-4'>
-          <span className={`max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem] `}>
-            Rp {row.original.hargaNego?.toLocaleString("id-ID")}
-          </span>
-        </div>
-      )
-    },
-    enableSorting: false,
-    enableHiding: false,
-  },
+
 ]

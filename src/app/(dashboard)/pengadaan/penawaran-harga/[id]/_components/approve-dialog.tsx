@@ -37,9 +37,8 @@ export default function ApproveDialog({
         // ini karena qty string jadi number
         barang
       })
-      // const result = await mutateAsync({ id })
-      // toast.success(result.message)
-      // router.refresh()
+      toast.success(result.message)
+      router.refresh()
       setOpen(false)
     } catch (error: any) {
       toast.error(error.message)

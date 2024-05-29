@@ -7,7 +7,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button";
-import { type RouterOutputs } from "@/trpc/react";
 import { type Dispatch, type SetStateAction, useState, useEffect } from "react";
 import { DataTable } from "@/components/data-table";
 import { columns } from "./columns-select-vendor";
@@ -18,8 +17,8 @@ export default function DialogSelectVendor({
   data,
   open,
   onOpenChange,
-  setBarang
   // @ts-ignore
+  setBarang
 }: {
   data: any,
   // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
@@ -93,7 +92,7 @@ export default function DialogSelectVendor({
           </div>
           <div className="space-y-1 text-right">
             <Label className="font-semibold">Harga penawaran total</Label>
-            <p>{data.qty * harga}</p>
+            <p>Rp {(data.qty * harga).toLocaleString("id-ID")}</p>
           </div>
         </div>
         <DataTable

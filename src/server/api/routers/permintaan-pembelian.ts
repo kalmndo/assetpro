@@ -125,7 +125,7 @@ export const permintaanPembelianRouter = createTRPCRouter({
       await ctx.db.$transaction(async (tx) => {
         const permPem = await tx.permintaanPembelian.create({
           data: {
-            no: '12',
+            no: Math.random().toString(),
             status: "pengajuan"
           }
         })
@@ -158,14 +158,19 @@ export const permintaanPembelianRouter = createTRPCRouter({
               groupPermintaanBarangLeft.push(iterator.id)
 
             }
+            const data = {
+              qtyOrdered: iterator.beli,
+            };
+
+            if (iterator.status === 'approve') {
+              // @ts-ignore
+              data.status = { set: STATUS.PROCESS.id };
+            }
             await tx.permintaanBarangBarang.update({
               where: {
                 id: iterator.id
               },
-              data: {
-                qtyOrdered: iterator.beli,
-                status: iterator.status === 'approve' ? { set: STATUS.PROCESS.id } : {}
-              }
+              data
             })
             const splitResult = await tx.permintaanBarangBarangSplit.create({
               data: {
@@ -225,7 +230,7 @@ export const permintaanPembelianRouter = createTRPCRouter({
 
           await tx.permintaanPenawaran.create({
             data: {
-              no: '1',
+              no: Math.random().toString(),
               status: STATUS.MENUNGGU.id,
               pembelianId: id
             }

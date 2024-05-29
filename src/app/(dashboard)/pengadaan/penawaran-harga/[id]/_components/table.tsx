@@ -33,7 +33,7 @@ export function Table({
             id: 'actions',
             cell: ({ row }) => (
               <DataTableRowActions>
-                <DropdownMenuItem onSelect={() => setDialog({ open: true, data: row.original })}>Pilih Vendor</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setDialog({ open: true, data: row.original })}>Input penawaran</DropdownMenuItem>
               </DataTableRowActions>
             ),
             enableSorting: false,

@@ -41,7 +41,7 @@ export const columns: ColumnDef<Schema>[] = [
       return (
         <div className='flex space-x-4'>
           <span className={`max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem] `}>
-            {row.getValue('harga')}
+            Rp {row.original.harga?.toLocaleString('id-ID')}
           </span>
         </div>
       )
@@ -58,7 +58,7 @@ export const columns: ColumnDef<Schema>[] = [
       return (
         <div className='flex space-x-4'>
           <span className={`max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem] `}>
-            {row.getValue('total')}
+            Rp {row.original.total?.toLocaleString('id-ID')}
           </span>
         </div>
       )

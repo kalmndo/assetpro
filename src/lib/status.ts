@@ -33,12 +33,12 @@ export const STATUS = {
   MENUNGGU: {
     id: 'menunggu',
     name: 'Menunggu',
-    color: '#dc2626'
+    color: '#f59f0b'
   },
   SELESAI: {
     id: 'selesai',
     name: 'Selesai',
-    color: '#dc2626'
+    color: '#15803c'
   }
 }
 

@@ -9,6 +9,7 @@ export default withAuth(
     const isAuth = !!token
     const isAuthPage =
       req.nextUrl.pathname === '/' ||
+      req.nextUrl.pathname.startsWith("/vendor") ||
       req.nextUrl.pathname.startsWith("/forgot-password")
 
     if (isAuthPage) {

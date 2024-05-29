@@ -35,11 +35,9 @@ export default function ApproveDialog({
         deadline: date!,
         barang
       })
-      console.log("result", result)
-      // const result = await mutateAsync({ id })
-      // toast.success(result.message)
-      // router.refresh()
-      // setOpen(false)
+      toast.success(result.message)
+      router.refresh()
+      setOpen(false)
     } catch (error: any) {
       toast.error(error.message)
     }

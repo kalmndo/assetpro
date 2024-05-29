@@ -200,13 +200,13 @@ Permintaan penawaran harga barang.
 ${barang.map((v, i) => `${i + 1}. ${v}`).join('\n')}
 
 Silahkan klik link berikut untuk mengirim penawaran harga.
-https://assetpro.site/vendor/pp/${url}`
+https://assetpro.site/vendor/pp/${result.id}`
 
             sendWhatsAppMessage(formatPhoneNumber(result.Vendor.nohp), message)
           }
           await tx.penawaranHarga.create({
             data: {
-              no: "1",
+              no: Math.random().toString(),
               status: STATUS.MENUNGGU.id,
               penawaranId: penawaranResult.id
             }
@@ -214,9 +214,16 @@ https://assetpro.site/vendor/pp/${url}`
 
 
         })
+        return {
+          ok: true,
+          message: 'Berhasil mengirim permintaan penawaran'
+        }
 
       } catch (error) {
-
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Tidak ada form ini",
+        });
       }
 
     })

@@ -237,10 +237,11 @@ model PermintaanPenawaran {
 }
 
 model PermintaanPenawaranVendor {
-    id          String @id @default(cuid())
+    id          String  @id @default(cuid())
     url         String
     vendorId    String
     penawaranId String
+    status      Boolean @default(false)
 
     Vendor    Vendor              @relation(fields: [vendorId], references: [id])
     Penawaran PermintaanPenawaran @relation(fields: [penawaranId], references: [id])
@@ -293,10 +294,11 @@ model PenawaranHargaBarangNego {
 }
 
 model PenawaranHargaVendor {
-    id          String @id @default(cuid())
+    id          String  @id @default(cuid())
     url         String
     vendorId    String
     penawaranId String
+    status      Boolean @default(false)
 
     Vendor          Vendor         @relation(fields: [vendorId], references: [id])
     PenawaraanHarga PenawaranHarga @relation(fields: [penawaranId], references: [id])
