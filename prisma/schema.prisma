@@ -44,11 +44,10 @@ model User {
     updatedAt        DateTime           @updatedAt
     PermintaanBarang PermintaanBarang[]
 
-    NotificationFrom   Notification[]       @relation("From")
-    NotificationTo     Notification[]       @relation("To")
-    MasterEvaluasiUser MasterEvaluasiUser[]
-    EvaluasiBarang     EvaluasiBarang[]
-    EvaluasiUser       EvaluasiUser[]
+    NotificationFrom           Notification[]               @relation("From")
+    NotificationTo             Notification[]               @relation("To")
+    MasterEvaluasiUser         MasterEvaluasiUser[]
+    EvaluasiVendorTerpilihUser EvaluasiVendorTerpilihUser[]
 }
 
 model UserRole {
@@ -192,7 +191,7 @@ model PermintaanPembelianBarang {
     PermintaanPenawaranBarangVendor PermintaanPenawaranBarangVendor[]
     PenawaranHargaBarangVendor      PenawaranHargaBarangVendor[]
     PenawaranHargaBarangNego        PenawaranHargaBarangNego?
-    EvaluasiBarangTerpilih          EvaluasiBarangTerpilih?
+    EvaluasiBarang                  EvaluasiBarang?
 }
 
 model PBPP {
@@ -270,7 +269,7 @@ model PermintaanPenawaranBarangVendor {
     updatedAt DateTime @updatedAt
 }
 
-// --------------------------- PERMINTAAN PENAWARAN --------------------------------
+// --------------------------- PENAWARAN HARGA --------------------------------
 
 model PenawaranHarga {
     id          String    @id @default(cuid())
@@ -324,66 +323,62 @@ model PenawaranHargaBarangVendor {
     PembelianBarang PermintaanPembelianBarang @relation(fields: [pembelianBarangId], references: [id])
     Vendor          PenawaranHargaVendor      @relation(fields: [vendorId], references: [id])
 
-    createdAt      DateTime         @default(now())
-    updatedAt      DateTime         @updatedAt
-    EvaluasiBarang EvaluasiBarang[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 // --------------------------- EVALUASI --------------------------------
+
 model Evaluasi {
-    id               String    @id @default(cuid())
-    no               String    @unique
+    id               String @id @default(cuid())
+    no               String @unique
     status           String
-    deadline         DateTime?
     penawaranHargaId String
 
     PenawaranHarga PenawaranHarga @relation(fields: [penawaranHargaId], references: [id])
 
-    createdAt      DateTime         @default(now())
-    updatedAt      DateTime         @updatedAt
-    EvaluasiBarang EvaluasiBarang[]
-    EvaluasiUser   EvaluasiUser[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    EvaluasiVendorTerpilihUser EvaluasiVendorTerpilihUser[]
+    EvaluasiBarang             EvaluasiBarang[]
 }
 
-model EvaluasiUser {
-    id         String @id @default(cuid())
-    userId     String
+model EvaluasiBarang {
+    id                String  @id @default(cuid())
+    evaluasiId        String
+    pembelianBarangId String? @unique
+
+    PembelianBarang PermintaanPembelianBarang? @relation(fields: [pembelianBarangId], references: [id])
+    Evaluasi        Evaluasi                   @relation(fields: [evaluasiId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model EvaluasiVendorTerpilihUser {
+    id         String  @id @default(cuid())
     evaluasiId String
+    userId     String
+    isTerpilih Boolean @default(false)
 
     User     User     @relation(fields: [userId], references: [id])
     Evaluasi Evaluasi @relation(fields: [evaluasiId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    EvaluasiBarang EvaluasiBarang[]
+    createdAt                    DateTime                       @default(now())
+    updatedAt                    DateTime                       @updatedAt
+    EvaluasiVendorTerpilihVendor EvaluasiVendorTerpilihVendor[]
 }
 
-model EvaluasiBarang {
-    id                         String @id @default(cuid())
-    evaluasiUserId             String
-    penawaranHargaBarangVendor String
+model EvaluasiVendorTerpilihVendor {
+    id       String @id @default(cuid())
+    vendorId String
+    userId   String
+    barangId String
 
-    EvaluasiUser               EvaluasiUser               @relation(fields: [evaluasiUserId], references: [id])
-    PenawaranHargaBarangVendor PenawaranHargaBarangVendor @relation(fields: [penawaranHargaBarangVendorId], references: [id])
-
-    createdAt                    DateTime  @default(now())
-    updatedAt                    DateTime  @updatedAt
-    penawaranHargaBarangVendorId String
-    User                         User?     @relation(fields: [userId], references: [id])
-    userId                       String?
-    Evaluasi                     Evaluasi? @relation(fields: [evaluasiId], references: [id])
-    evaluasiId                   String?
-}
-
-model EvaluasiBarangTerpilih {
-    id                String  @id @default(cuid())
-    pembelianBarangId String? @unique
-    harga             Int
-    vendorId          String
-
-    Vendor          Vendor                     @relation(fields: [vendorId], references: [id])
-    PembelianBarang PermintaanPembelianBarang? @relation(fields: [pembelianBarangId], references: [id])
+    Barang MasterBarang               @relation(fields: [barangId], references: [id])
+    Vendor Vendor                     @relation(fields: [vendorId], references: [id])
+    User   EvaluasiVendorTerpilihUser @relation(fields: [userId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -435,11 +430,11 @@ model Vendor {
     nohp     String
     email    String
 
-    createdAt                 DateTime                    @default(now())
-    updatedAt                 DateTime                    @updatedAt
-    PermintaanPenawaranVendor PermintaanPenawaranVendor[]
-    PenawaranHargaVendor      PenawaranHargaVendor[]
-    EvaluasiBarangTerpilih    EvaluasiBarangTerpilih[]
+    createdAt                    DateTime                       @default(now())
+    updatedAt                    DateTime                       @updatedAt
+    PermintaanPenawaranVendor    PermintaanPenawaranVendor[]
+    PenawaranHargaVendor         PenawaranHargaVendor[]
+    EvaluasiVendorTerpilihVendor EvaluasiVendorTerpilihVendor[]
 }
 
 model DepartmentUnit {
@@ -536,12 +531,13 @@ model MasterBarang {
     PermintaanBarangBarang PermintaanBarangBarang[]
     MasterBarangUnit       MasterBarangUnit[]
 
-    createdAt                 DateTime                    @default(now())
-    updatedAt                 DateTime                    @updatedAt
-    DaftarAset                DaftarAset[]
-    DaftarAsetGroup           DaftarAsetGroup[]
-    KartuStok                 KartuStok[]
-    PermintaanPembelianBarang PermintaanPembelianBarang[]
+    createdAt                    DateTime                       @default(now())
+    updatedAt                    DateTime                       @updatedAt
+    DaftarAset                   DaftarAset[]
+    DaftarAsetGroup              DaftarAsetGroup[]
+    KartuStok                    KartuStok[]
+    PermintaanPembelianBarang    PermintaanPembelianBarang[]
+    EvaluasiVendorTerpilihVendor EvaluasiVendorTerpilihVendor[]
 }
 
 model MasterBarangUnit {

@@ -56,36 +56,23 @@ export const evaluasiHargaRouter = createTRPCRouter({
           id
         },
         include: {
-          PenawaranHarga: {
+          PenawaranHarga: true,
+          EvaluasiBarang: {
             include: {
-              PermintaanPenawaran: {
+              PembelianBarang: {
                 include: {
-                  Pembelian: {
+                  PenawaranHargaBarangVendor: {
                     include: {
-                      PermintaanPembelianBarang: {
+                      Vendor: {
                         include: {
-                          EvaluasiBarangTerpilih: {
-                            include: {
-                              Vendor: true
-                            }
-                          },
-                          PenawaranHargaBarangNego: true,
-                          PenawaranHargaBarangVendor: {
-                            include: {
-                              Vendor: {
-                                include: {
-                                  Vendor: true
-                                }
-                              }
-                            }
-                          },
-                          MasterBarang: {
-                            include: {
-                              Uom: true
-                            }
-                          },
+                          Vendor: true
                         }
                       }
+                    }
+                  },
+                  MasterBarang: {
+                    include: {
+                      Uom: true
                     }
                   }
                 }
@@ -108,23 +95,19 @@ export const evaluasiHargaRouter = createTRPCRouter({
         getVendors = await ctx.db.vendor.findMany()
       }
 
-      const barang = result.PenawaranHarga.PermintaanPenawaran.Pembelian.PermintaanPembelianBarang.map((v) => ({
+      const barang = result.EvaluasiBarang.map((v) => ({
         id: v.id,
-        name: v.MasterBarang.name,
-        kode: v.MasterBarang.fullCode,
-        image: v.MasterBarang.image ?? '',
-        uom: v.MasterBarang.Uom.name,
-        qty: v.qty,
-        vendorTerpilihId: v.EvaluasiBarangTerpilih?.Vendor.id ?? '',
-        vendorTerpilih: v.EvaluasiBarangTerpilih?.Vendor.name ?? '',
-        vendorTerpilihHarga: v.EvaluasiBarangTerpilih?.harga ?? 0,
-        vendorTerpilihTotal: v.EvaluasiBarangTerpilih ? v.EvaluasiBarangTerpilih.harga * v.qty : 0,
-        vendor: v.PenawaranHargaBarangVendor.map((a) => ({
+        name: v.PembelianBarang!.MasterBarang.name,
+        kode: v.PembelianBarang!.MasterBarang.fullCode,
+        image: v.PembelianBarang!.MasterBarang.image ?? '',
+        uom: v.PembelianBarang!.MasterBarang.Uom.name,
+        qty: v.PembelianBarang!.qty,
+        vendor: v.PembelianBarang?.PenawaranHargaBarangVendor.map((a) => ({
           id: a.Vendor.Vendor.id,
           name: a.Vendor.Vendor.name,
           harga: a.harga,
           total: a.totalHarga
-        }))
+        })),
       }))
 
       return {
@@ -138,13 +121,15 @@ export const evaluasiHargaRouter = createTRPCRouter({
         status: result.status,
         tanggal: result.createdAt.toLocaleDateString(),
         getVendors: getVendors ?? [],
+        // currentUserEvaluasi: '', boolean
         // TODO: hapus ini
         canSend: true,
         // canSend: isTodayOrAfter(result.PermintaanPenawaran.deadline),
-        penawaranDeadline: result.PenawaranHarga.PermintaanPenawaran.deadline?.toLocaleDateString(),
-        deadline: result.deadline?.toLocaleDateString()
+        penawaranDeadline: result.PenawaranHarga.deadline?.toLocaleDateString(),
+        // deadline: result.deadline?.toLocaleDateString()
       }
     }),
+  // isCreatePo,
   send: protectedProcedure
     .input(
       z.object({

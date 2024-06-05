@@ -289,8 +289,20 @@ https://assetpro.site/vendor/ph/${result.id}`
             sendWhatsAppMessage(formatPhoneNumber(result.Vendor.whatsapp), message)
           }
           // EVALUASI CREATE
+          const evaluasi = await tx.evaluasi.create({
+            data: {
+              no: "12",
+              status: "12",
+              penawaranHargaId: penawaranResult.id,
+            },
+          })
 
-
+          await tx.evaluasiBarang.createMany({
+            data: barang.map((v) => ({
+              evaluasiId: evaluasi.id,
+              pembelianBarangId: v.id
+            }))
+          })
         })
 
         return {
