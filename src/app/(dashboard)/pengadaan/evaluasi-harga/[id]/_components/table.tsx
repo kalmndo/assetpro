@@ -25,7 +25,7 @@ export function Table({
   return (
     <div>
       <DataTable
-        data={barang}
+        data={barang as any}
         columns={[
           ...columns,
           {
@@ -45,10 +45,10 @@ export function Table({
         open={dialog.open}
         data={dialog.data}
         onOpenChange={handleCloseDialog}
-        setBarang={setBarang}
+        setBarang={setBarang as any}
       />
       <div className="py-4 flex justify-end">
-        {data.status === STATUS.MENUNGGU.id && <ApproveDialog
+        {data.canApprove && <ApproveDialog
           id={data.id}
           barang={barang}
         />}

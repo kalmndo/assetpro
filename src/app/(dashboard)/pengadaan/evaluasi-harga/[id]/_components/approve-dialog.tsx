@@ -5,13 +5,21 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button";
-import { type RouterOutputs } from "@/trpc/react";
+import { api, type RouterOutputs } from "@/trpc/react";
 import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
-import { DatePickerWithPresets } from "@/components/date-picker-with-preset";
+import { toast } from "sonner";
+
+const defaultData = {
+  isCreatePo: false,
+  message: '',
+  nilai: 0,
+  title: '',
+  total: 0,
+  button: ''
+}
 
 export default function ApproveDialog({
   id,
@@ -20,59 +28,85 @@ export default function ApproveDialog({
   id: string,
   barang: RouterOutputs['evaluasiHarga']['get']['barang']
 }) {
-  console.log('id', id)
   const [date, setDate] = useState<Date>()
-  const [open, setOpen] = useState(false)
-  // const { mutateAsync, isPending } = api.evaluasiHarga.send.useMutation()
-  // const { mutateAsync, isPending } = api.permintaanPembelian.approve.useMutation()
+  const [dialog, setDialog] = useState({ open: false, data: defaultData as RouterOutputs['evaluasiHarga']['checkEvaluasi'] })
+  const { mutateAsync: check, isPending: checkPending } = api.evaluasiHarga.checkEvaluasi.useMutation()
+  const { mutateAsync: send, isPending: sendPending } = api.evaluasiHarga.send.useMutation()
+
 
   async function onSubmit() {
-    // try {
-    //   const result = await mutateAsync({
-    //     id,
-    //     deadline: date!,
-    //     barang
-    //   })
-    //   toast.success(result.message)
-    //   router.refresh()
-    //   setOpen(false)
-    // } catch (error: any) {
-    //   toast.error(error.message)
-    // }
+    try {
+      const result = await send({
+        id,
+        barangs: barang.map((v) => ({
+          barangId: v.id,
+          vendorId: v.vendorTerpilihId!
+        }))
+      })
+
+      if (result.ok) {
+        setDialog({ open: false, data: defaultData })
+      }
+
+      toast.success(result.message)
+
+    } catch (error: any) {
+      toast.error(error.message)
+    }
   }
 
-  function disabled() {
-    let isDisabled = true
-    const vendorTerpilihArr = barang.map((v) => v.vendorTerpilih)
-    for (const v of vendorTerpilihArr) {
-      isDisabled = v.length > 0 ? false : true
+  async function onCheckClicked() {
+    try {
+      const result = await check({
+        ids: barang.map((v) => v.vendorTerpilihId!)
+      })
+
+      if (result) {
+        setDialog({ open: true, data: result })
+      }
+
+    } catch (error: any) {
+      toast.error(error.message)
     }
-    return isDisabled
   }
+
+  const handleCloseDialog = () => {
+    setDialog({ open: false, data: defaultData })
+  }
+
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button disabled={disabled()} size="lg">Kirim Penawaran</Button>
-      </DialogTrigger>
+    <Dialog open={dialog.open} onOpenChange={handleCloseDialog}>
+      <Button
+        onClick={onCheckClicked}
+        size="lg"
+        disabled={barang.some((v) => !v.vendorTerpilihId) || checkPending}
+      >
+        {checkPending
+          ? <LoaderCircle className="animate-spin" />
+          : "Submit Evaluasi"
+        }
+      </Button>
       <DialogContent >
         <DialogHeader>
-          <DialogTitle>Kirim penawaran ke vendor</DialogTitle>
+          <DialogTitle>{dialog.data.title}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <p className="text-sm">Silahka isi tanggal batas waktu akhir vendor dapat mengisi harga penawaran?</p>
-          <DatePickerWithPresets date={date} setDate={setDate} />
+          <p className="text-sm">Nilai evalusi : Rp {dialog.data.nilai.toLocaleString("id-ID")}</p>
+          <p className="text-sm">Total harga : Rp {dialog.data.total.toLocaleString("id-ID")}</p>
+
+          <p className="text-sm">{dialog.data.message}</p>
         </div>
         <DialogFooter>
           <Button
             type="submit"
             size="sm"
             onClick={onSubmit}
-            disabled={false}
+            disabled={sendPending}
           >
-            {false ?
+            {sendPending ?
               <LoaderCircle className="animate-spin" />
-              :
-              "Evaluasi"
+              : dialog.data.button
             }
           </Button>
         </DialogFooter>

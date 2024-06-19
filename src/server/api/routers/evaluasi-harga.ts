@@ -2,10 +2,9 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { STATUS } from "@/lib/status";
-import sendWhatsAppMessage from "@/lib/send-whatsapp";
-import { v4 as uuidv4 } from 'uuid'
-import formatPhoneNumber from "@/lib/formatPhoneNumber";
-// import isTodayOrAfter from "@/lib/isTodayOrAfter";
+import isTodayOrAfter from "@/lib/isTodayOrAfter";
+import { type PrismaClient } from "@prisma/client";
+import { type DefaultArgs } from "@prisma/client/runtime/library";
 
 export const evaluasiHargaRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -50,6 +49,7 @@ export const evaluasiHargaRouter = createTRPCRouter({
     }))
     .query(async ({ ctx, input }) => {
       const { id } = input
+      const userId = ctx.session.user.id
 
       const result = await ctx.db.evaluasi.findFirst({
         where: {
@@ -57,8 +57,22 @@ export const evaluasiHargaRouter = createTRPCRouter({
         },
         include: {
           PenawaranHarga: true,
+          EvaluasiVendorTerpilihUser: {
+            include: {
+              EvaluasiVendorTerpilihVendor: true
+            }
+          },
           EvaluasiBarang: {
             include: {
+              PenawaranHargaBarangVendor: {
+                include: {
+                  Vendor: {
+                    include: {
+                      Vendor: true
+                    }
+                  }
+                }
+              },
               PembelianBarang: {
                 include: {
                   PenawaranHargaBarangVendor: {
@@ -89,26 +103,45 @@ export const evaluasiHargaRouter = createTRPCRouter({
         });
       }
 
+      const usersSelectedVendor = result.EvaluasiVendorTerpilihUser
+
+      const evaluasiUsers = await ctx.db.masterEvaluasiUser.findMany({
+        include: {
+          User: true
+        }
+      })
+
+      const sortedEvaluasiUsers = evaluasiUsers.sort((a, b) => a.nilai - b.nilai)
+
+      const canApprove = sortedEvaluasiUsers[usersSelectedVendor.length]?.User.id === userId && isTodayOrAfter(result.PenawaranHarga.deadline)
+
       let getVendors
 
       if (result.status === STATUS.MENUNGGU.id) {
         getVendors = await ctx.db.vendor.findMany()
       }
 
-      const barang = result.EvaluasiBarang.map((v) => ({
-        id: v.id,
-        name: v.PembelianBarang!.MasterBarang.name,
-        kode: v.PembelianBarang!.MasterBarang.fullCode,
-        image: v.PembelianBarang!.MasterBarang.image ?? '',
-        uom: v.PembelianBarang!.MasterBarang.Uom.name,
-        qty: v.PembelianBarang!.qty,
-        vendor: v.PembelianBarang?.PenawaranHargaBarangVendor.map((a) => ({
-          id: a.Vendor.Vendor.id,
-          name: a.Vendor.Vendor.name,
-          harga: a.harga,
-          total: a.totalHarga
-        })),
-      }))
+      const barang = result.EvaluasiBarang.map((v) => {
+
+        return ({
+          id: v.id,
+          name: v.PembelianBarang!.MasterBarang.name,
+          kode: v.PembelianBarang!.MasterBarang.fullCode,
+          image: v.PembelianBarang!.MasterBarang.image ?? '',
+          uom: v.PembelianBarang!.MasterBarang.Uom.name,
+          qty: v.PembelianBarang!.qty,
+          vendorTerpilihId: v.penawaranHargaBarangVendorId,
+          vendorTerpilih: v.PenawaranHargaBarangVendor?.Vendor.Vendor.name,
+          vendorTerpilihHarga: v.PenawaranHargaBarangVendor?.harga,
+          vendorTerpilihTotal: v.PenawaranHargaBarangVendor?.totalHarga,
+          vendor: v.PembelianBarang?.PenawaranHargaBarangVendor.map((a) => ({
+            id: a.id,
+            name: a.Vendor.Vendor.name,
+            harga: a.harga,
+            total: a.totalHarga
+          })),
+        })
+      })
 
       return {
         id: result.id,
@@ -121,190 +154,147 @@ export const evaluasiHargaRouter = createTRPCRouter({
         status: result.status,
         tanggal: result.createdAt.toLocaleDateString(),
         getVendors: getVendors ?? [],
-        // currentUserEvaluasi: '', boolean
-        // TODO: hapus ini
-        canSend: true,
-        // canSend: isTodayOrAfter(result.PermintaanPenawaran.deadline),
+        canApprove,
         penawaranDeadline: result.PenawaranHarga.deadline?.toLocaleDateString(),
         // deadline: result.deadline?.toLocaleDateString()
       }
     }),
-  // isCreatePo,
+  checkEvaluasi: protectedProcedure
+    .input(z.object({
+      ids: z.array(z.string())
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { ids } = input
+      const userId = ctx.session.user.id
+
+      const result = await isCreatePo(ctx.db, ids, userId)
+
+      return result
+    }),
   send: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        deadline: z.date(),
-        barang: z.array(z.object({
-          id: z.string({ description: "Permintaan pembelian barang id" }),
-          hargaNego: z.string()
-        }))
-      })
-    )
+    .input(z.object({
+      id: z.string(),
+      barangs: z.array(z.object({
+        barangId: z.string(),
+        vendorId: z.string()
+      }))
+    }))
     .mutation(async ({ ctx, input }) => {
       const {
         id,
-        deadline,
-        barang
+        barangs
       } = input
 
+      const userId = ctx.session.user.id
+
+      const vendorIds = barangs.map((v) => v.vendorId)
+
+      const { isCreatePo: isPO } = await isCreatePo(ctx.db, vendorIds, userId)
+
+      console.log("barangs", barangs)
+
       try {
-
         await ctx.db.$transaction(async (tx) => {
-          const penawaranResult = await tx.penawaranHarga.update({
-            where: {
-              id
-            },
+          const evaluasiUser = await tx.evaluasiVendorTerpilihUser.create({
             data: {
-              deadline,
-              status: STATUS.SELESAI.id
+              evaluasiId: id,
+              userId
             }
           })
 
-          for (const { id, hargaNego } of barang) {
-            await tx.penawaranHargaBarangNego.create({
+          for (const { barangId, vendorId } of barangs) {
+            await tx.evaluasiVendorTerpilihVendor.create({
               data: {
-                pembelianBarangId: id,
-                hargaNego: Number(hargaNego)
+                barangId,
+                vendorId,
+                userId: evaluasiUser.id
+              }
+            })
+
+            await tx.evaluasiBarang.update({
+              where: {
+                id: barangId,
+              },
+              data: {
+                penawaranHargaBarangVendorId: vendorId
               }
             })
           }
-
-          const asdf = await tx.permintaanPenawaranBarangVendor.findMany({
-            where: {
-              pembelianBarangId: {
-                in: barang.map((v) => v.id)
-              },
-            },
-            include: {
-              Vendor: {
-                include: {
-                  Vendor: true
-                }
-              }
-            }
-          })
-
-          const groupByPembelianBarangId = () => {
-            return asdf.reduce((acc, item) => {
-              // @ts-ignore
-              if (!acc[item.pembelianBarangId]) {
-                // @ts-ignore
-                acc[item.pembelianBarangId] = [];
-              }
-              // @ts-ignore
-              acc[item.pembelianBarangId].push(item);
-              return acc;
-            }, {});
-          };
-
-          const groupedItems = groupByPembelianBarangId();
-
-          const getTheLowestPrice = (): Record<string, number | null> => {
-            const result: Record<string, number | null> = {};
-
-            for (const key in groupedItems) {
-              if (groupedItems.hasOwnProperty(key)) {
-                // @ts-ignore
-                const items = groupedItems[key];
-
-                // Sort items by harga in ascending order, ignoring null values
-                const sortedItems = items
-                  .filter((item: any) => item.harga !== null)
-                  .sort((a: any, b: any) => (a.harga as number) - (b.harga as number));
-
-                // Get the three lowest prices
-                result[key] = sortedItems.slice(0, 3).map((v: any) => ({
-                  ...v,
-                  vendor: v.Vendor.Vendor
-                }));
-              }
-            }
-
-            return result;
-          };
-
-          const lowestPrices = getTheLowestPrice();
-
-          function getUniqueVendors() {
-            const vendorsMap = new Map();
-
-            for (const key in lowestPrices) {
-              // @ts-ignore
-              lowestPrices[key].forEach(item => {
-                const vendor = item.vendor;
-                if (!vendorsMap.has(vendor.id)) {
-                  vendorsMap.set(vendor.id, {
-                    ...vendor,
-                    pembelianBarangId: []
-                  });
-                }
-                vendorsMap.get(vendor.id).pembelianBarangId.push(item.pembelianBarangId);
-              });
-            }
-
-            return Array.from(vendorsMap.values());
-          }
-
-          for (const { id, pembelianBarangId } of getUniqueVendors()) {
-            const url = uuidv4()
-
-            const result = await tx.penawaranHargaVendor.create({
-              data: {
-                url,
-                vendorId: id,
-                penawaranId: penawaranResult.id,
-                PenawaranHargaBarangVendor: {
-                  createMany: {
-                    data: pembelianBarangId.map((v: string) => ({
-                      pembelianBarangId: v,
-                    }))
-                  }
-                }
-              },
-              include: {
-                PenawaranHargaBarangVendor: {
-                  include: {
-                    PembelianBarang: {
-                      include: {
-                        MasterBarang: true
-                      }
-                    }
-                  }
-                },
-                Vendor: true
-              }
-            })
-            const barang = result.PenawaranHargaBarangVendor.map((v) => v.PembelianBarang.MasterBarang.name)
-
-            const message = `
-          *ASSETPRO - YAYASAN ALFIAN HUSIN*
-
-Melakukan penawaran harga pada barang.
-${barang.map((v, i) => `${i + 1}. ${v}`).join('\n')}
-
-Silahkan klik link berikut untuk mengirim penawaran harga.
-https://assetpro.site/vendor/ph/${result.id}`
-
-            sendWhatsAppMessage(formatPhoneNumber(result.Vendor.whatsapp), message)
-          }
-          // EVALUASI CREATE
-
-
         })
+
+        if (isPO) {
+          // create PO
+          return {
+            ok: true,
+            message: 'Berhasil membuat PO'
+          }
+        }
 
         return {
           ok: true,
-          message: 'Berhasil mengirim harga penawaran'
+          message: 'Berhasil meneruskan evaluasi'
         }
-
       } catch (error) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Tidak ada form ini",
+          code: "INTERNAL_SERVER_ERROR",
+          // @ts-ignore
+          message: error.message,
           cause: error
         });
       }
+
     })
 })
 
+async function isCreatePo(
+  db: PrismaClient<{
+    log: ("warn" | "error")[];
+  }, never, DefaultArgs>,
+  ids: string[],
+  userId: string
+) {
+  const result = await db.penawaranHargaBarangVendor.findMany({
+    where: {
+      id: {
+        in: ids
+      }
+    }
+  })
+
+  const totalHarga = result.map((v) => v.totalHarga).reduce((acc, curr) => acc! + curr!, 0)!
+
+  const masterEvaluasiUser = await db.masterEvaluasiUser.findMany({
+    orderBy: {
+      nilai: 'asc'
+    },
+    include: {
+      User: true
+    }
+  })
+
+  const userIndex = masterEvaluasiUser.findIndex((v) => v.userId === userId)
+  const lastEvaluasi = masterEvaluasiUser.length === userIndex + 1
+  const exceeded = totalHarga <= masterEvaluasiUser[userIndex]!.nilai
+
+  if (lastEvaluasi || exceeded) {
+    const reason = lastEvaluasi ? 'Karena anda user evaluasi terakhir maka' : 'Nilai harga total dari vendor yang anda pilih lebih kecil dari nilai evaluasi mu, maka'
+
+    return {
+      isCreatePo: true,
+      nilai: masterEvaluasiUser[userIndex]!.nilai,
+      total: totalHarga,
+      title: 'Apakah anda yakin?',
+      message: `${reason} anda akan membuat PO dan mengirim PO kepada vendor, aksi ini tidak dapat dibatalkan.`,
+      button: 'Yakin dan kirim PO'
+    }
+  } else {
+    return {
+      isCreatePo: false,
+      nilai: masterEvaluasiUser[userIndex]!.nilai,
+      total: totalHarga,
+      title: 'Meneruskan Evaluasi',
+      message: `Diteruskan kepada ${masterEvaluasiUser[userIndex + 1]?.User.name} karena total harga dari vendor yang anda pilih lebih besar dari nilai evaluasi mu`,
+      button: 'Teruskan'
+    }
+  }
+}

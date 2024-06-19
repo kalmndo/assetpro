@@ -23,7 +23,15 @@ export const ROLE = {
   PEMBELIAN_SELECT_VENDOR: {
     id: 'pembelian-select-approve',
     name: 'Permintaan Pembelian (select vendor)',
-  }
+  },
+  EVALUASI_HARGA_READ: {
+    id: 'evaluasi-read',
+    name: 'Evaluasi Harga (view)',
+  },
+  EVALUASI_HARGA_APPROVE: {
+    id: 'evaluasi-approve',
+    name: 'Evaluasi Harga (approve)',
+  },
 }
 
 export const getStatus = (id: string) => {

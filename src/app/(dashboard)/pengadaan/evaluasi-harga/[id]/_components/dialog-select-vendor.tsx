@@ -44,41 +44,27 @@ export default function DialogSelectVendor({
   const [selection, setSelection] = useState({})
 
   const onSubmit = async () => {
-    setBarang((prev) => prev)
-    // setBarang((prev) => {
-    //   // @ts-ignore
-    //   const value = prev.map((v) => {
-    //     if (v.id === data.id) {
-    //       // @ts-ignore
-    //       const vendorTerpilih = Object.keys(selection).map((index) => v.vendor[index])
-    //       console.log("bara", vendorTerpilih)
-    //       return {
-    //         ...v,
-    //       };
-    //     }
-    //     return v;
-    //   })
-    //   return prev
-    // });
+    // setBarang((prev) => prev)
+    const vendorTerpilih = data.vendor[Number(Object.keys(selection)[0])]
+    setBarang((prev) => {
+      const value = prev.map((v) => {
+        if (v.id === data.id) {
+          return {
+            ...v,
+            vendorTerpilihId: vendorTerpilih.id,
+            vendorTerpilih: vendorTerpilih.name,
+            vendorTerpilihHarga: vendorTerpilih.harga,
+            vendorTerpilihTotal: vendorTerpilih.total
+          }
 
-    // setSelection({})
-    // onOpenChange()
+        }
+        return v
+      })
+      return value
+    })
+    setSelection({})
+    onOpenChange()
   };
-
-  // useEffect(() => {
-  //   if (open) {
-  //     setSelection(vendors.reduce((acc, vendor, index) => {
-  //       if (vendorIds.includes(vendor.id)) {
-  //         // @ts-ignore
-  //         acc[index] = true;
-  //       }
-  //       return acc;
-  //     }, {}))
-  //   } else {
-  //     setSelection({})
-  //   }
-
-  // }, [open, vendorIds, vendors])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

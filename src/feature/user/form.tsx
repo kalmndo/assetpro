@@ -58,6 +58,17 @@ const items: Items[] = [
     id: ROLE.PEMBELIAN_SELECT_VENDOR.id,
     label: ROLE.PEMBELIAN_SELECT_VENDOR.name,
   },
+  {
+    separator: true
+  },
+  {
+    id: ROLE.EVALUASI_HARGA_READ.id,
+    label: ROLE.EVALUASI_HARGA_READ.name,
+  },
+  {
+    id: ROLE.EVALUASI_HARGA_APPROVE.id,
+    label: ROLE.EVALUASI_HARGA_APPROVE.name,
+  },
 ] as const
 
 const formSchema = z.object({

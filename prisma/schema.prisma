@@ -322,9 +322,11 @@ model PenawaranHargaBarangVendor {
 
     PembelianBarang PermintaanPembelianBarang @relation(fields: [pembelianBarangId], references: [id])
     Vendor          PenawaranHargaVendor      @relation(fields: [vendorId], references: [id])
+    EvaluasiBarang  EvaluasiBarang?
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt                    DateTime                       @default(now())
+    updatedAt                    DateTime                       @updatedAt
+    EvaluasiVendorTerpilihVendor EvaluasiVendorTerpilihVendor[]
 }
 
 // --------------------------- EVALUASI --------------------------------
@@ -345,15 +347,18 @@ model Evaluasi {
 }
 
 model EvaluasiBarang {
-    id                String  @id @default(cuid())
-    evaluasiId        String
-    pembelianBarangId String? @unique
+    id                           String  @id @default(cuid())
+    evaluasiId                   String
+    pembelianBarangId            String? @unique
+    penawaranHargaBarangVendorId String? @unique
 
-    PembelianBarang PermintaanPembelianBarang? @relation(fields: [pembelianBarangId], references: [id])
-    Evaluasi        Evaluasi                   @relation(fields: [evaluasiId], references: [id])
+    PembelianBarang            PermintaanPembelianBarang?  @relation(fields: [pembelianBarangId], references: [id])
+    PenawaranHargaBarangVendor PenawaranHargaBarangVendor? @relation(fields: [penawaranHargaBarangVendorId], references: [id])
+    Evaluasi                   Evaluasi                    @relation(fields: [evaluasiId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt                    DateTime                       @default(now())
+    updatedAt                    DateTime                       @updatedAt
+    EvaluasiVendorTerpilihVendor EvaluasiVendorTerpilihVendor[]
 }
 
 model EvaluasiVendorTerpilihUser {
@@ -376,8 +381,8 @@ model EvaluasiVendorTerpilihVendor {
     userId   String
     barangId String
 
-    Barang MasterBarang               @relation(fields: [barangId], references: [id])
-    Vendor Vendor                     @relation(fields: [vendorId], references: [id])
+    Barang EvaluasiBarang             @relation(fields: [barangId], references: [id])
+    Vendor PenawaranHargaBarangVendor @relation(fields: [vendorId], references: [id])
     User   EvaluasiVendorTerpilihUser @relation(fields: [userId], references: [id])
 
     createdAt DateTime @default(now())
@@ -430,11 +435,10 @@ model Vendor {
     nohp     String
     email    String
 
-    createdAt                    DateTime                       @default(now())
-    updatedAt                    DateTime                       @updatedAt
-    PermintaanPenawaranVendor    PermintaanPenawaranVendor[]
-    PenawaranHargaVendor         PenawaranHargaVendor[]
-    EvaluasiVendorTerpilihVendor EvaluasiVendorTerpilihVendor[]
+    createdAt                 DateTime                    @default(now())
+    updatedAt                 DateTime                    @updatedAt
+    PermintaanPenawaranVendor PermintaanPenawaranVendor[]
+    PenawaranHargaVendor      PenawaranHargaVendor[]
 }
 
 model DepartmentUnit {
@@ -531,13 +535,12 @@ model MasterBarang {
     PermintaanBarangBarang PermintaanBarangBarang[]
     MasterBarangUnit       MasterBarangUnit[]
 
-    createdAt                    DateTime                       @default(now())
-    updatedAt                    DateTime                       @updatedAt
-    DaftarAset                   DaftarAset[]
-    DaftarAsetGroup              DaftarAsetGroup[]
-    KartuStok                    KartuStok[]
-    PermintaanPembelianBarang    PermintaanPembelianBarang[]
-    EvaluasiVendorTerpilihVendor EvaluasiVendorTerpilihVendor[]
+    createdAt                 DateTime                    @default(now())
+    updatedAt                 DateTime                    @updatedAt
+    DaftarAset                DaftarAset[]
+    DaftarAsetGroup           DaftarAsetGroup[]
+    KartuStok                 KartuStok[]
+    PermintaanPembelianBarang PermintaanPembelianBarang[]
 }
 
 model MasterBarangUnit {

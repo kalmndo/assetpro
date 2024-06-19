@@ -55,13 +55,19 @@ const master = [
       {
         name: 'Vendor',
         logo: <Layout />,
-        to: 'master/',
+        to: 'master/vendor',
         desc: 'deskripsi',
       },
       {
         name: 'Teknisi',
         logo: <Layout />,
-        to: 'master/',
+        to: 'master/teknisi',
+        desc: 'deskripsi',
+      },
+      {
+        name: 'Evaluasi Harga',
+        logo: <Layout />,
+        to: 'master/evaluasi',
         desc: 'deskripsi',
       },
     ]
@@ -165,6 +171,5 @@ export default function Content({ }) {
         </Fragment>
       ))}
     </div>
-
   )
 }

@@ -291,7 +291,7 @@ https://assetpro.site/vendor/ph/${result.id}`
           // EVALUASI CREATE
           const evaluasi = await tx.evaluasi.create({
             data: {
-              no: "12",
+              no: Math.random().toString(),
               status: "12",
               penawaranHargaId: penawaranResult.id,
             },
