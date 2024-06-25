@@ -327,6 +327,7 @@ model PenawaranHargaBarangVendor {
     createdAt                    DateTime                       @default(now())
     updatedAt                    DateTime                       @updatedAt
     EvaluasiVendorTerpilihVendor EvaluasiVendorTerpilihVendor[]
+    PoBarang                     PoBarang[]
 }
 
 // --------------------------- EVALUASI --------------------------------
@@ -344,6 +345,7 @@ model Evaluasi {
 
     EvaluasiVendorTerpilihUser EvaluasiVendorTerpilihUser[]
     EvaluasiBarang             EvaluasiBarang[]
+    PO                         PO[]
 }
 
 model EvaluasiBarang {
@@ -400,6 +402,34 @@ model MasterEvaluasiUser {
     updatedAt DateTime @updatedAt
 }
 
+// --------------------------- PURCHASE ORDER --------------------------------
+
+model PO {
+    id         String @id @default(cuid())
+    no         String @unique
+    evaluasiId String
+    vendorId   String
+
+    Evaluasi Evaluasi @relation(fields: [evaluasiId], references: [id])
+    Vendor   Vendor   @relation(fields: [vendorId], references: [id])
+
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt
+    PoBarang  PoBarang[]
+}
+
+model PoBarang {
+    id       String @id @default(cuid())
+    poId     String
+    barangId String
+
+    PO     PO                         @relation(fields: [poId], references: [id])
+    Barang PenawaranHargaBarangVendor @relation(fields: [barangId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
 // --------------------------- MASTER --------------------------------
 
 model Organisasi {
@@ -439,6 +469,7 @@ model Vendor {
     updatedAt                 DateTime                    @updatedAt
     PermintaanPenawaranVendor PermintaanPenawaranVendor[]
     PenawaranHargaVendor      PenawaranHargaVendor[]
+    PO                        PO[]
 }
 
 model DepartmentUnit {

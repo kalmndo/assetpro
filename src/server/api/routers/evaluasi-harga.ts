@@ -191,8 +191,6 @@ export const evaluasiHargaRouter = createTRPCRouter({
 
       const { isCreatePo: isPO } = await isCreatePo(ctx.db, vendorIds, userId)
 
-      console.log("barangs", barangs)
-
       try {
         await ctx.db.$transaction(async (tx) => {
           const evaluasiUser = await tx.evaluasiVendorTerpilihUser.create({
@@ -220,15 +218,63 @@ export const evaluasiHargaRouter = createTRPCRouter({
               }
             })
           }
-        })
 
-        if (isPO) {
-          // create PO
-          return {
-            ok: true,
-            message: 'Berhasil membuat PO'
+          if (isPO) {
+            // group kan dengan vendor yang sama
+            const penawaranHargaBarangVendors = await tx.penawaranHargaBarangVendor.findMany({
+              where: {
+                id: { in: barangs.map((v) => v.vendorId) }
+              },
+              include: {
+                Vendor: {
+                  include: {
+                    Vendor: true
+                  }
+                }
+              }
+            })
+
+            const toBeGrouped = penawaranHargaBarangVendors.map((v) => ({
+              vendorId: v.Vendor.Vendor.id,
+              barangId: v.id
+            }))
+
+            const groupedData: any[] = Object.values(toBeGrouped.reduce((acc, { vendorId, barangId }) => {
+              // @ts-ignore
+              if (!acc[vendorId]) {
+                // @ts-ignore
+                acc[vendorId] = { vendorId, barangs: [] };
+              }
+              // @ts-ignore
+              acc[vendorId].barangs.push(barangId);
+              return acc;
+            }, {}));
+
+            for (const value of groupedData) {
+              const po = await tx.pO.create({
+                data: {
+                  evaluasiId: id,
+                  no: Math.random().toString(),
+                  vendorId: value.vendorId
+                }
+              })
+
+              for (const barang of value.barangs) {
+                await tx.poBarang.create({
+                  data: {
+                    poId: po.id,
+                    barangId: barang
+                  }
+                })
+              }
+            }
+
+            return {
+              ok: true,
+              message: 'Berhasil membuat PO'
+            }
           }
-        }
+        })
 
         return {
           ok: true,

@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button";
-import { type Dispatch, type SetStateAction, useState } from "react";
+import { type Dispatch, type SetStateAction, useState, useEffect } from "react";
 import { DataTable } from "@/components/data-table";
 import { columns } from "./columns-select-vendor";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -41,10 +41,10 @@ export default function DialogSelectVendor({
     }[];
   }[]>>
 }) {
+  // submit dissabled if there is no selection
   const [selection, setSelection] = useState({})
 
   const onSubmit = async () => {
-    // setBarang((prev) => prev)
     const vendorTerpilih = data.vendor[Number(Object.keys(selection)[0])]
     setBarang((prev) => {
       const value = prev.map((v) => {
@@ -65,6 +65,13 @@ export default function DialogSelectVendor({
     setSelection({})
     onOpenChange()
   };
+
+  useEffect(() => {
+    if (data.selectionDefault) {
+      setSelection(data.selectionDefault)
+
+    }
+  }, [data.selectionDefault, setSelection])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

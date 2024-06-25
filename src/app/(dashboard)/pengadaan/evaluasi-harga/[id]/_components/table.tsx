@@ -8,7 +8,6 @@ import { DataTableRowActions } from "@/components/data-table/row-actions";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import ApproveDialog from "./approve-dialog";
-import { STATUS } from "@/lib/status";
 
 export function Table({
   data,
@@ -32,7 +31,19 @@ export function Table({
             id: 'actions',
             cell: ({ row }) => (
               <DataTableRowActions>
-                <DropdownMenuItem onSelect={() => setDialog({ open: true, data: row.original })}>Pilih Vendor</DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => {
+                    // @ts-ignore
+                    const vendorTerpilihIndex = row.original.vendor?.map((v) => v.id).findIndex((id) => id === row.original.vendorTerpilihId)
+                    setDialog({
+                      open: true,
+                      data: {
+                        ...row.original,
+                        selectionDefault: { [vendorTerpilihIndex]: true }
+                      }
+                    })
+                  }}
+                >Pilih Vendor</DropdownMenuItem>
               </DataTableRowActions>
             ),
             enableSorting: false,

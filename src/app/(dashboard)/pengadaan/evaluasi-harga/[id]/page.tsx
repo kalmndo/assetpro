@@ -61,14 +61,14 @@ export default async function Page({ params: { id } }: { params: { id: string } 
               </Link>
             </div>
           </div>
-          <div className="col-span-1 space-y-4">
+          {/* <div className="col-span-1 space-y-4">
             {data.deadline &&
               <div className="space-y-2">
                 <p className="text-sm">Batas waktu vendor kirim harga penawaran</p>
                 <p className="font-semibold">{data.deadline}</p>
               </div>
             }
-          </div>
+          </div> */}
         </div>
         <div className="p-4">
           <Table data={data} />
