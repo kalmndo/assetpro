@@ -25,7 +25,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`permintaan-penawaran/${row.original.id}`} className='flex w-full'>
+        <Link href={`purchase-order/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('no')}
           </span>
@@ -42,7 +42,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`permintaan-penawaran/${row.original.id}`} className='flex w-full'>
+        <Link href={`purchase-order/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('jumlah')}
           </span>
@@ -57,7 +57,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`permintaan-penawaran/${row.original.id}`} className='flex w-full'>
+        <Link href={`purchase-order/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('tanggal')}
           </span>
@@ -73,7 +73,7 @@ export const columns: ColumnDef<Schema>[] = [
     cell: ({ row }) => {
       const { color, name } = getStatus(row.getValue('status'))
       return (
-        <Link href={`permintaan-penawaran/${row.original.id}`} className='flex w-full'>
+        <Link href={`purchase-order/${row.original.id}`} className='flex w-full'>
           <span style={{ color }} className='max-w-32 truncate font-semibold sm:max-w-72 md:max-w-[31rem]'>
             {name}
           </span>

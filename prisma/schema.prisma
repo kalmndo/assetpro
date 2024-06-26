@@ -409,6 +409,7 @@ model PO {
     no         String @unique
     evaluasiId String
     vendorId   String
+    status     String
 
     Evaluasi Evaluasi @relation(fields: [evaluasiId], references: [id])
     Vendor   Vendor   @relation(fields: [vendorId], references: [id])

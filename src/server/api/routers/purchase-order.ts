@@ -23,6 +23,59 @@ export const purchaseOrderRouter = createTRPCRouter({
         tanggal: v.createdAt.toLocaleDateString()
       }))
     }),
+  get: protectedProcedure
+    .input(z.object({
+      id: z.string()
+    }))
+    .query(async ({ ctx, input }) => {
+      const { id } = input
+      const result = await ctx.db.pO.findUnique({
+        where: { id },
+        include: {
+          PoBarang: {
+            include: {
+              Barang: {
+                include: {
+                  PembelianBarang: {
+                    include: {
+                      MasterBarang: {
+                        include: {
+                          Uom: true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          Evaluasi: true,
+          Vendor: true
+        }
+      })
+
+      if (!result) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Tidak ada form ini",
+        });
+      }
+
+      return {
+        ...result,
+        tanggal: result.createdAt.toLocaleDateString("id-ID"),
+        noEvaluasi: result.Evaluasi.no,
+        vendor: {
+          name: result.Vendor.name,
+        },
+        barang: result.PoBarang.map((v) => ({
+          ...v.Barang.PembelianBarang.MasterBarang,
+          kode: v.Barang.PembelianBarang.MasterBarang.fullCode,
+          qty: v.Barang.PembelianBarang.qty,
+          uom: v.Barang.PembelianBarang.MasterBarang.Uom.name
+        }))
+      }
+    }),
   getSelect: protectedProcedure
     .query(async ({ ctx }) => {
       const result = await ctx.db.organisasi.findMany({
