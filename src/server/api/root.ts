@@ -19,6 +19,7 @@ import { penawaranHargaRouter } from "./routers/penawaran-harga";
 import { vendorRouter } from "./routers/vendor";
 import { evaluasiHargaRouter } from "./routers/evaluasi-harga";
 import { mEvaluasiRouter } from "./routers/m-evaluasi";
+import { purchaseOrderRouter } from "./routers/purchase-order";
 
 /**
  * This is the primary router for your server.
@@ -45,6 +46,7 @@ export const appRouter = createTRPCRouter({
   permintaanPenawaran: permintaanPenawaranRouter,
   penawaranHarga: penawaranHargaRouter,
   evaluasiHarga: evaluasiHargaRouter,
+  po: purchaseOrderRouter,
   vendor: vendorRouter
 });
 
