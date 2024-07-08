@@ -138,13 +138,13 @@ export const sidelinks: SideLink[] = [
       {
         title: 'Masuk',
         label: '',
-        href: '/gudang/barang-masuk',
+        href: '/gudang/masuk',
         icon: <PackagePlus size={18} />,
       },
       {
         title: 'Keluar',
         label: '',
-        href: '/gudang/barang-keluar',
+        href: '/gudang/keluar',
         icon: <PackageMinus size={18} />,
       },
     ]

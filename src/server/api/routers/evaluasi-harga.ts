@@ -255,6 +255,7 @@ export const evaluasiHargaRouter = createTRPCRouter({
                 data: {
                   evaluasiId: id,
                   no: Math.random().toString(),
+                  status: 'waiting', // TODO: Ganti ini dam
                   vendorId: value.vendorId
                 }
               })
@@ -263,6 +264,7 @@ export const evaluasiHargaRouter = createTRPCRouter({
                 await tx.poBarang.create({
                   data: {
                     poId: po.id,
+                    status: 0,
                     barangId: barang
                   }
                 })

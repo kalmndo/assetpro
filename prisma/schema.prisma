@@ -417,19 +417,73 @@ model PO {
     createdAt DateTime   @default(now())
     updatedAt DateTime   @updatedAt
     PoBarang  PoBarang[]
+    Fttb      Fttb[]
 }
 
 model PoBarang {
     id       String @id @default(cuid())
     poId     String
     barangId String
+    status   Int // 0 waiting, 1 done
 
     PO     PO                         @relation(fields: [poId], references: [id])
     Barang PenawaranHargaBarangVendor @relation(fields: [barangId], references: [id])
 
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt
+    FttbItem  FttbItem[]
+}
+
+// --------------------------- FTTB --------------------------------
+
+model Fttb {
+    id   String @id @default(cuid())
+    no   String
+    poId String
+
+    Po PO @relation(fields: [poId], references: [id])
+
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt
+    FttbItem  FttbItem[]
+}
+
+model FttbItem {
+    id         String @id @default(cuid())
+    fttbId     String
+    poBarangId String
+
+    Fttb     Fttb     @relation(fields: [fttbId], references: [id])
+    PoBarang PoBarang @relation(fields: [poBarangId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    DaftarAset         DaftarAset[]
+    FttbItemKartuStock FttbItemKartuStock[]
+}
+
+model FttbItemKartuStock {
+    id          String @id @default(cuid())
+    kartuStokId String
+    fttbItemId  String
+
+    FttbItem  FttbItem  @relation(fields: [fttbItemId], references: [id])
+    KartuStok KartuStok @relation(fields: [kartuStokId], references: [id])
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
+
+// --------------------------- FTKB --------------------------------
+
+// model Ftkb {
+//     id String @id @default(cuid())
+//     no String
+
+//     createdAt DateTime @default(now())
+//     updatedAt DateTime @updatedAt
+// }
 
 // --------------------------- MASTER --------------------------------
 
@@ -652,10 +706,12 @@ model Notification {
 }
 
 model DaftarAset {
-    id       String @unique // No Inventaris
-    barangId String
+    id         String @unique // No Inventaris
+    barangId   String
+    fttbItemId String
 
     MasterBarang MasterBarang @relation(fields: [barangId], references: [id])
+    FttbItem     FttbItem     @relation(fields: [fttbItemId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -680,4 +736,6 @@ model KartuStok {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    FttbItemKartuStock FttbItemKartuStock[]
 }
