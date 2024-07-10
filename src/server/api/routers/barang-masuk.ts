@@ -1,3 +1,4 @@
+import { STATUS } from "@/lib/status";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -19,6 +20,7 @@ export const barangMasukRouter = createTRPCRouter({
       })
 
       return result.map((v) => ({
+        id: v.id,
         no: v.no,
         jumlah: v.FttbItem.length,
         createdAt: v.createdAt.toLocaleDateString()
@@ -39,11 +41,82 @@ export const barangMasukRouter = createTRPCRouter({
         golonganId: v.golonganId
       }))
     }),
+  get: protectedProcedure
+    .input(z.object({
+      id: z.string()
+    }))
+    .query(async ({ ctx, input }) => {
+      const { id } = input
+
+      const result = await ctx.db.fttb.findUnique({
+        where: {
+          id
+        },
+        include: {
+          Po: true,
+          FttbItem: {
+            include: {
+              DaftarAset: true,
+              PoBarang: {
+                include: {
+                  Barang: {
+                    include: {
+                      PembelianBarang: {
+                        include: {
+                          MasterBarang: {
+                            include: { Uom: true }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      })
+
+      if (!result) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something wrong",
+        });
+      }
+
+      const barangs = result.FttbItem.map((v) => {
+        const qty = v.PoBarang.Barang.PembelianBarang.qty
+        const masterBarang = v.PoBarang.Barang.PembelianBarang.MasterBarang
+
+        const barang = {
+          id: masterBarang.id,
+          name: masterBarang.name,
+          image: masterBarang.image,
+          uom: masterBarang.Uom.name,
+        }
+
+        const type = Number(masterBarang.fullCode.split('.')[0])
+
+        return {
+          ...barang,
+          qty,
+          type,
+          no: v.DaftarAset.map((v) => v.id)
+        }
+      })
+
+      return {
+        ...result,
+        tanggal: result.createdAt.toLocaleDateString(),
+        aset: barangs.filter((v) => v.type === 1),
+        persediaan: barangs.filter((v) => v.type === 2)
+      }
+    }),
   findByPo: protectedProcedure
     .query(async ({ ctx, }) => {
       const result = await ctx.db.pO.findMany({
         where: {
-          status: 'waiting'
+          status: STATUS.MENUNGGU.id
         },
         include: {
           PoBarang: {

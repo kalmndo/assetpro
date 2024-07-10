@@ -3,12 +3,15 @@ import { type ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/data-table/column-header'
 import { z } from 'zod'
 import Link from 'next/link'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { getInitials } from '@/lib/utils'
 
 export const schema = z.object({
   id: z.string(),
-  no: z.string(),
-  jumlah: z.string(),
-  createdAt: z.string(),
+  qty: z.number(),
+  uom: z.string(),
+  name: z.string(),
+  image: z.string().nullable()
 })
 
 export type Schema = z.infer<typeof schema>
@@ -16,23 +19,28 @@ export type Schema = z.infer<typeof schema>
 
 export const columns: ColumnDef<Schema>[] = [
   {
-    accessorKey: 'no',
+    accessorKey: 'barang',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Nomor' />
+      <DataTableColumnHeader column={column} title='Barang' />
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`masuk/${row.original.id}`} className='flex w-full'>
+        <div className='flex space-x-2 items-center'>
+          <Avatar className='rounded-sm w-12 h-12'>
+            {/* @ts-ignore */}
+            <AvatarImage src={row.original.image} alt="@shadcn" />
+            <AvatarFallback>{getInitials(row.original.name)}</AvatarFallback>
+          </Avatar>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('no')}
+            {row.original.name}
           </span>
-        </Link>
+        </div>
       )
     },
     enableHiding: false,
   },
   {
-    accessorKey: 'jumlah',
+    accessorKey: 'qty',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Jumlah Barang' />
     ),
@@ -40,25 +48,11 @@ export const columns: ColumnDef<Schema>[] = [
       return (
         <Link href={`masuk/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('jumlah')}
-          </span>
-        </Link>
-      )
-    },
-  },
-  {
-    accessorKey: 'createdAt',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Tanggal' />
-    ),
-    cell: ({ row }) => {
-      return (
-        <Link href={`masuk/${row.original.id}`} className='flex w-full'>
-          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('createdAt')}
+            {row.getValue('qty')} {row.original.uom}
           </span>
         </Link>
       )
     },
   },
 ]
+
