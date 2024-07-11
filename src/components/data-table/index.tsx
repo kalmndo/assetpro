@@ -14,6 +14,8 @@ import {
   getSortedRowModel,
   useReactTable,
   type RowSelectionState,
+  type Row,
+  getExpandedRowModel,
 } from '@tanstack/react-table'
 
 import {
@@ -39,6 +41,8 @@ interface DataTableProps<TData, TValue> {
   isPagintation?: boolean
   rowSelection?: RowSelectionState
   setRowSelection?: React.Dispatch<React.SetStateAction<RowSelectionState>>
+  renderSubComponent?: (props: { row: Row<TData> }) => React.ReactElement
+  getRowCanExpand?: (row: Row<TData>) => boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -50,7 +54,9 @@ export function DataTable<TData, TValue>({
   checkboxToolbarActions,
   isPagintation = true,
   rowSelection = {},
-  setRowSelection
+  setRowSelection,
+  renderSubComponent,
+  getRowCanExpand
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(columnVisibilityDefaultState)
@@ -77,6 +83,8 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    getRowCanExpand,
+    getExpandedRowModel: getExpandedRowModel()
   })
 
   return (
@@ -105,19 +113,29 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
+                <React.Fragment
                   key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
+                  <TableRow
+                    data-state={row.getIsSelected() && 'selected'}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                  {row.getIsExpanded() && (
+                    <TableRow>
+                      <TableCell colSpan={row.getVisibleCells().length}>
+                        {renderSubComponent?.({ row })}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
               ))
             ) : (
               <TableRow>

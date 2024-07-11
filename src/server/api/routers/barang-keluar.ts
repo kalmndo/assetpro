@@ -4,8 +4,113 @@ import {
 } from "@/server/api/trpc";
 import { z } from "zod";
 import checkKetersediaanByBarang from "../shared/check-ketersediaan-by-barang";
+import { STATUS } from "@/lib/status";
+import { TRPCError } from "@trpc/server";
 
 export const barangKeluarRouter = createTRPCRouter({
+  getAll: protectedProcedure
+    .query(async ({ ctx }) => {
+      const result = await ctx.db.ftkb.findMany({
+        include: {
+          FtkbItem: true
+        }
+      })
+
+      return result.map((v) => ({
+        ...v,
+        jumlah: v.FtkbItem.length,
+        createdAt: v.createdAt.toLocaleDateString(),
+      }))
+    }),
+  get: protectedProcedure
+    .input(z.object({
+      id: z.string()
+    }))
+    .query(async ({ ctx, input }) => {
+      const { id } = input
+
+      const result = await ctx.db.ftkb.findUnique({
+        where: {
+          id
+        },
+        include: {
+          FtkbItem: {
+            include: {
+              Barang: {
+                include: {
+                  Uom: true
+                }
+              },
+              FtkbItemPemohon: {
+                include: {
+                  IM: {
+                    include: {
+                      Pemohon: true
+                    }
+                  },
+                  FtkbItemPemohonAset: {
+                    include: {
+                      DaftarAset: true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      })
+
+      if (!result) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something wrong",
+        });
+      }
+
+      const barangs = result.FtkbItem.map((v) => {
+        const qty = v.qty
+        const masterBarang = v.Barang
+
+        const type = Number(masterBarang.fullCode.split('.')[0])
+
+        const barang = {
+          id: masterBarang.id,
+          name: masterBarang.name,
+          image: masterBarang.image,
+          uom: masterBarang.Uom.name,
+        }
+
+        const pemohon = v.FtkbItemPemohon.map((v) => {
+          const asetIds = v.FtkbItemPemohonAset.map((v) => v.daftarAsetId)
+
+          return {
+            id: v.id,
+            imId: v.IM.id,
+            noIm: v.IM.no,
+            name: v.IM.Pemohon.name,
+            image: v.IM.Pemohon.image,
+            qty: v.qty,
+            asetIds: type === 1 ? asetIds : []
+          }
+        })
+
+
+        return {
+          ...barang,
+          qty,
+          type,
+          pemohon,
+          no: ['']
+        }
+      })
+
+      return {
+        ...result,
+        tanggal: result.createdAt.toLocaleDateString(),
+        aset: barangs.filter((v) => v.type === 1),
+        persediaan: barangs.filter((v) => v.type === 2)
+      }
+    }),
   create: protectedProcedure
     .input(z.array(z.string()))
     .mutation(async ({ ctx, input }) => {
@@ -24,6 +129,7 @@ export const barangKeluarRouter = createTRPCRouter({
           const ftkb = await tx.ftkb.create({
             data: {
               no: Math.random().toString(),
+              status: STATUS.MENUNGGU.id
             }
           })
 
@@ -31,7 +137,8 @@ export const barangKeluarRouter = createTRPCRouter({
             const ftkbItem = await tx.ftkbItem.create({
               data: {
                 barangId: value.id,
-                ftkbId: ftkb.id
+                ftkbId: ftkb.id,
+                qty: value.tersedia
               }
             })
 

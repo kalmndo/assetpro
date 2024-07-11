@@ -480,8 +480,9 @@ model FttbItemKartuStock {
 // --------------------------- FTKB --------------------------------
 
 model Ftkb {
-    id String @id @default(cuid())
-    no String
+    id     String @id @default(cuid())
+    no     String
+    status String
 
     createdAt DateTime   @default(now())
     updatedAt DateTime   @updatedAt
@@ -492,6 +493,7 @@ model FtkbItem {
     id       String @id @default(cuid())
     ftkbId   String
     barangId String
+    qty      Int
 
     Ftkb   Ftkb         @relation(fields: [ftkbId], references: [id])
     Barang MasterBarang @relation(fields: [barangId], references: [id])
