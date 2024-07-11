@@ -379,7 +379,8 @@ export const permintaanBarangRouter = createTRPCRouter({
                     barangId: prevBarang!.barangId,
                     qty,
                     permintaanBarang: [prevBarang!.id],
-                    golongan: Number(prevBarang!.Barang.fullCode.split('.')[0])
+                    golongan: Number(prevBarang!.Barang.fullCode.split('.')[0]),
+                    ordered: 0
                   },
                   update: {
                     qty: { increment: Number(qty) },
@@ -422,7 +423,8 @@ export const permintaanBarangRouter = createTRPCRouter({
                     barangId: prevBarang!.barangId,
                     qty,
                     permintaanBarang: [prevBarang!.id],
-                    golongan: Number(prevBarang!.Barang.fullCode.split('.')[0])
+                    golongan: Number(prevBarang!.Barang.fullCode.split('.')[0]),
+                    ordered: 0
                   },
                   update: {
                     qty: { increment: Number(qty) },
@@ -600,7 +602,7 @@ export const permintaanBarangRouter = createTRPCRouter({
         };
       }
 
-      const res = await checkKetersediaanByBarang(ctx, pbbg)
+      const res = await checkKetersediaanByBarang(ctx.db, pbbg)
 
       return res
     })

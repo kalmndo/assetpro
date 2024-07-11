@@ -74,9 +74,10 @@ model PermintaanBarang {
     Ruang                  MasterRuang              @relation(fields: [ruangId], references: [id])
     PermintaanBarangBarang PermintaanBarangBarang[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    PBPP      PBPP[]
+    createdAt       DateTime          @default(now())
+    updatedAt       DateTime          @updatedAt
+    PBPP            PBPP[]
+    FtkbItemPemohon FtkbItemPemohon[]
 }
 
 model PermintaanBarangBarang {
@@ -117,6 +118,7 @@ model PermintaanBarangBarangGroup {
     qty              Int
     permintaanBarang String[]
     golongan         Int // 1 aset, 2 persediaang
+    ordered          Int
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -477,13 +479,53 @@ model FttbItemKartuStock {
 
 // --------------------------- FTKB --------------------------------
 
-// model Ftkb {
-//     id String @id @default(cuid())
-//     no String
+model Ftkb {
+    id String @id @default(cuid())
+    no String
 
-//     createdAt DateTime @default(now())
-//     updatedAt DateTime @updatedAt
-// }
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt
+    FtkbItem  FtkbItem[]
+}
+
+model FtkbItem {
+    id       String @id @default(cuid())
+    ftkbId   String
+    barangId String
+
+    Ftkb   Ftkb         @relation(fields: [ftkbId], references: [id])
+    Barang MasterBarang @relation(fields: [barangId], references: [id])
+
+    createdAt       DateTime          @default(now())
+    updatedAt       DateTime          @updatedAt
+    FtkbItemPemohon FtkbItemPemohon[]
+}
+
+model FtkbItemPemohon {
+    id         String @id @default(cuid())
+    imId       String
+    ftkbItemId String
+    qty        Int
+
+    FtkbItem FtkbItem         @relation(fields: [ftkbItemId], references: [id])
+    IM       PermintaanBarang @relation(fields: [imId], references: [id])
+
+    createdAt           DateTime              @default(now())
+    updatedAt           DateTime              @updatedAt
+    FtkbItemPemohonAset FtkbItemPemohonAset[]
+}
+
+model FtkbItemPemohonAset {
+    id                String @id @default(cuid())
+    ftkbItemPemohonId String
+    daftarAsetId      String
+
+    FtkbItemPemohon FtkbItemPemohon @relation(fields: [ftkbItemPemohonId], references: [id])
+    DaftarAset      DaftarAset      @relation(fields: [daftarAsetId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
 
 // --------------------------- MASTER --------------------------------
 
@@ -627,6 +669,7 @@ model MasterBarang {
     DaftarAsetGroup           DaftarAsetGroup[]
     KartuStok                 KartuStok[]
     PermintaanPembelianBarang PermintaanPembelianBarang[]
+    FtkbItem                  FtkbItem[]
 }
 
 model MasterBarangUnit {
@@ -713,14 +756,16 @@ model DaftarAset {
     MasterBarang MasterBarang @relation(fields: [barangId], references: [id])
     FttbItem     FttbItem     @relation(fields: [fttbItemId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt           DateTime              @default(now())
+    updatedAt           DateTime              @updatedAt
+    FtkbItemPemohonAset FtkbItemPemohonAset[]
 }
 
 model DaftarAsetGroup {
-    id   String @unique // MasterBarang 
-    idle Int
-    used Int
+    id     String @unique // MasterBarang 
+    idle   Int
+    used   Int
+    booked Int
 
     MasterBarang MasterBarang @relation(fields: [id], references: [id])
 

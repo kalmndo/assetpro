@@ -26,21 +26,6 @@ export const barangMasukRouter = createTRPCRouter({
         createdAt: v.createdAt.toLocaleDateString()
       }))
     }),
-  getSelect: protectedProcedure
-    .query(async ({ ctx }) => {
-      const result = await ctx.db.masterBarangKategori.findMany({
-        orderBy: {
-          createdAt: "desc"
-        },
-      })
-
-      return result.map((v) => ({
-        label: v.name,
-        value: v.id,
-        code: v.code,
-        golonganId: v.golonganId
-      }))
-    }),
   get: protectedProcedure
     .input(z.object({
       id: z.string()
@@ -306,83 +291,4 @@ export const barangMasukRouter = createTRPCRouter({
         });
       }
     }),
-  update: protectedProcedure
-    .input(z.object({
-      id: z.string(),
-      name: z.string(),
-      code: z.string(),
-      golonganId: z.string(),
-      classCode: z.string()
-    }))
-    .mutation(async ({ ctx, input }) => {
-      const {
-        id,
-        name,
-        code,
-        golonganId,
-        classCode
-      } = input
-
-      try {
-
-        await ctx.db.masterBarangKategori.update({
-          where: {
-            id
-          },
-          data: {
-            name,
-            code: Number(code),
-            golonganId,
-            classCode,
-            fullCode: `${classCode}.${code}`
-          },
-        })
-        return {
-          ok: true,
-          message: 'Berhasil mengubah kategori'
-        }
-      } catch (error) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError) {
-          if (error.code === 'P2002') {
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "Kode kategori ini sudah ada, harap ubah.",
-              cause: error,
-            });
-          }
-        }
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Kemunkingan terjadi kesalahan sistem, silahkan coba lagi",
-          cause: error,
-        });
-      }
-    }),
-
-  remove: protectedProcedure
-    .input(z.object({
-      id: z.string(),
-    }))
-    .mutation(async ({ ctx, input }) => {
-      const {
-        id,
-      } = input
-
-      try {
-        await ctx.db.masterBarangKategori.delete({
-          where: { id },
-        })
-        return {
-          ok: true,
-          message: 'Berhasil menghapus kategori'
-        }
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Kemunkingan terjadi kesalahan sistem, silahkan coba lagi",
-          cause: error,
-        });
-      }
-    }),
-
 });

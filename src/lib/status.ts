@@ -39,6 +39,11 @@ export const STATUS = {
     id: 'selesai',
     name: 'Selesai',
     color: '#15803c'
+  },
+  BARANG: {
+    id: 'in',
+    name: 'Barang di terima di gudang',
+    color: '#15803c'
   }
 }
 

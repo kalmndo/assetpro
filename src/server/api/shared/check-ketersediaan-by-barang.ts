@@ -37,7 +37,7 @@ export default async function checkKetersediaanByBarang(ctx: any, barangGroupRes
   const barangIds = barangGroupResult.map((v) => v.barangId)
   const permintaanBarangIds = barangGroupResult.flatMap((v) => v.permintaanBarang)
 
-  const permintaanBarangResult = await ctx.db.permintaanBarangBarang.findMany({
+  const permintaanBarangResult = await ctx.permintaanBarangBarang.findMany({
     where: {
       id: { in: permintaanBarangIds }
     },
@@ -67,14 +67,16 @@ export default async function checkKetersediaanByBarang(ctx: any, barangGroupRes
 
   const [groupGolonganAset, groupGolonganPersediaan] = [filterGolongan(1), filterGolongan(2)];
 
-
   const fetchKetersediaan = async (model: 'daftarAsetGroup' | 'kartuStok', ids: string[]) => {
     // @ts-ignore
-    const result = await ctx.db[model].findMany({
+    const result = await ctx[model].findMany({
       where: { id: { in: ids } },
       include: {
         MasterBarang: {
-          include: { Uom: true }
+          include: {
+            Uom: true,
+            DaftarAset: true
+          }
         }
       }
     })
@@ -89,25 +91,26 @@ export default async function checkKetersediaanByBarang(ctx: any, barangGroupRes
   const mapBarang = (barang: any, golonganData: any, qtyField: string) => {
     return barang.map((v: any) => {
       const permintaan = golonganData.find((a: any) => a.barangId === v.id);
-      let quota = permintaan.qty as number
 
       const permintaanBarang = permintaan.permintaanBarang.map((item: any) => {
-        const qty = item.qty - item.qtyOrdered - item.qtyOut
-        const beli = quota - qty
-        quota = quota - beli
-
+        // const qty = item.qty - item.qtyOrdered - item.qtyOut
         return ({
           id: item.id,
           name: item.Permintaan.Pemohon.name,
           im: item.Permintaan.no,
           href: item.Permintaan.id,
           barangId: v.MasterBarang.id,
-          qty: `${qty} ${v.MasterBarang.Uom.name}`,
-          permintaan: qty,
+          qty: `${item.qty} ${v.MasterBarang.Uom.name}`,
+          permintaan: item.qty,
+          qtyOrdered: item.qtyOrdered,
+          qtyOut: item.qtyOut,
           imStatus: item.Permintaan.status,
-          status: item.status
+          status: item.status,
+          createdAt: item.createdAt,
         })
       }) as CheckKetersediaanByBarangResult[]
+
+      const permintaanBarangId = permintaanBarang.map((v) => v.id)
 
 
       return {
@@ -117,22 +120,59 @@ export default async function checkKetersediaanByBarang(ctx: any, barangGroupRes
         kode: v.MasterBarang.fullCode,
         permintaan: permintaan.qty,
         uom: v.MasterBarang.Uom.name,
-        tersedia: v[qtyField],
+        tersedia: qtyField === 'idle' ? v[qtyField] - v.booked : v[qtyField],
+        ordered: permintaan.ordered,
         golongan: permintaan.golongan === 1 ? "Aset" : "Persediaan",
         permintaanBarang,
-        imQty: permintaan.permintaanBarang.length
+        permintaanBarangId,
+        imQty: permintaan.permintaanBarang.length,
+        noInventaris: v.MasterBarang?.DaftarAset.map((v: any) => v.id)
       };
     });
   }
 
   const mapBarangTersedia = (barang: any, golonganData: any, qtyField: string) => {
-    return mapBarang(barang, golonganData, qtyField).filter((a: any) => a.tersedia > 0)
+    return mapBarang(barang, golonganData, qtyField).map((v: any) => {
+      let quota = v.tersedia
+      // @ts-ignore
+      v.permintaanBarang.sort((a: any, b: any) => new Date(a.createdAt) - new Date(b.createdAt))
+      const noInventarisArr = v.noInventaris
+
+      const permintaanBarang = v.permintaanBarang.map((item: any) => {
+        let toTransfer = 0
+        let noInventaris
+        quota = quota - toTransfer
+
+        if (quota > 0) {
+          if (quota >= item.permintaan) {
+            toTransfer = item.permintaan;
+            noInventaris = noInventarisArr.splice(0, item.permintaan)
+
+            quota -= item.permintaan;
+          } else {
+            toTransfer = quota;
+            quota = 0;
+          }
+        }
+
+        return {
+          ...item,
+          toTransfer,
+          noInventaris
+        }
+      }).filter((v: any) => v.toTransfer > 0)
+
+      return ({
+        ...v,
+        permintaanBarang,
+        imQty: permintaanBarang.length
+      })
+    })
   }
 
   const mapBarangTakTersedia = (barang: any, golonganData: any, qtyField: string) => {
     return mapBarang(barang, golonganData, qtyField).map((v: any) => {
-      const permintaan = v.permintaan - v.tersedia
-
+      const permintaan = v.permintaan - v.ordered
       let quota = permintaan
 
       const permintaanBarang = v.permintaanBarang.map((item: any) => {
@@ -154,14 +194,16 @@ export default async function checkKetersediaanByBarang(ctx: any, barangGroupRes
           ...item,
           qtyOrder: `${beli} ${v.uom}`,
           beli,
+          permintaan: item.permintaan - item.qtyOrdered
         })
-      })
+      }).filter((v: any) => v.permintaan > 0)
 
       return ({
         ...v,
         permintaan,
         qty: `${permintaan} Pcs`,
-        permintaanBarang
+        permintaanBarang,
+        imQty: permintaanBarang.length
       })
     }).filter((a: any) => a.permintaan > 0)
   }

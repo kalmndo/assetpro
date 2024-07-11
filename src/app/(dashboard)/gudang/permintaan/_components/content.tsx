@@ -1,6 +1,4 @@
 "use client"
-
-import { DataTable } from "@/components/data-table";
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -13,22 +11,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Filter } from "lucide-react";
 import { useState } from "react";
-import { tersediaColumns } from "./tersedia-columns";
 import TakTersediaTable from "./tak-tersedia-table";
-
-function TersediaTable({ data }: { data: any[] }) {
-  return (
-
-    <DataTable
-      data={data}
-      columns={tersediaColumns}
-      filter={{ column: 'name', placeholder: 'Nama ...' }}
-    // checkboxToolbarActions={checkboxToolbarActions}
-    />
-  )
-}
-
-
+import TersediaTable from "./tersedia-table";
 
 export default function Content({ tersedia, takTersedia }: { tersedia: any[], takTersedia: any[] }) {
   const [position, setPosition] = useState('tersedia')

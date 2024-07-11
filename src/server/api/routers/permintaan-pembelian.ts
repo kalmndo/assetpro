@@ -117,7 +117,7 @@ export const permintaanPembelianRouter = createTRPCRouter({
           barangId: { in: input }
         }
       })
-      const { takTersedia } = await checkKetersediaanByBarang(ctx, barangGroupResult)
+      const { takTersedia } = await checkKetersediaanByBarang(ctx.db, barangGroupResult)
       const barangs = takTersedia.flatMap((v) => v.permintaanBarang)
       const im = imToUpdateStatus(barangs)
 
@@ -202,16 +202,11 @@ export const permintaanPembelianRouter = createTRPCRouter({
               barangId: value.id,
             },
             data: {
-              qty: { decrement: value.permintaan },
-              permintaanBarang: { set: groupPermintaanBarangLeft }
+              ordered: { increment: value.permintaan },
             }
           })
         }
       })
-
-      // console.log("takTersedia", takTersedia.flatMap((v) => v.permintaanBarang))
-      console.log("tak", takTersedia)
-
     }),
   approve: protectedProcedure
     .input(z.object({ id: z.string() }))
@@ -255,9 +250,3 @@ export const permintaanPembelianRouter = createTRPCRouter({
 function imToUpdateStatus(data: any): string[] {
   return [...new Set(data.filter((item: any) => item.imStatus === 'approve').map((item: any) => item.href))] as string[]
 }
-
-
-// TODO: Nanti untuk keluar barang gini aja dam
-// di form draft keluar barang, bagi atas bawah table nya aset dan persediaan
-// aset pilih dulu no inventaris nya tapi permintaan pertama yang di dahului
-// saat terima barang ada no inventaris nah disitu udah di book untuk user siapa, coba tampilkan untuk barang keluar
