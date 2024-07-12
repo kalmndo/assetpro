@@ -271,12 +271,32 @@ export const evaluasiHargaRouter = createTRPCRouter({
               }
             }
 
+            await tx.evaluasi.update({
+              where: {
+                id
+              },
+              data: {
+                status: STATUS.SELESAI.id
+              }
+            })
+
             return {
               ok: true,
               message: 'Berhasil membuat PO'
             }
+          } else {
+            await tx.evaluasi.update({
+              where: {
+                id
+              },
+              data: {
+                status: STATUS.PROCESS.id
+              }
+            })
           }
         })
+
+
 
         return {
           ok: true,
