@@ -2,15 +2,13 @@ import { Separator } from "@/components/ui/separator";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import Link from "next/link";
 import { api } from "@/trpc/server";
-import { STATUS, getStatus } from "@/lib/status";
-import { DataTable } from "@/components/data-table";
-import { columns } from "./_components/columns";
+import { getStatus } from "@/lib/status";
 import Aset from "./_components/aset";
 import Persediaan from "./_components/persediaan";
 
 export default async function Page({ params: { id } }: { params: { id: string } }) {
   const data = await api.barangKeluar.get({ id })
-  const { color, name: status } = getStatus(STATUS.MENUNGGU.id)
+  const { color, name: status } = getStatus(data.status)
 
   return (
     <div>

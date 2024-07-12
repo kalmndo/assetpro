@@ -122,14 +122,11 @@ export const barangKeluarRouter = createTRPCRouter({
             }
           })
           const { tersedia } = await checkKetersediaanByBarang(tx, barangGroupResult)
-          // console.log('tersedia', JSON.stringify(tersedia, null, 2))
-          // update permintaanBarangBarangGroup
-          // update im
 
           const ftkb = await tx.ftkb.create({
             data: {
               no: Math.random().toString(),
-              status: STATUS.MENUNGGU.id
+              status: STATUS.SELESAI.id
             }
           })
 
@@ -160,6 +157,17 @@ export const barangKeluarRouter = createTRPCRouter({
                 await tx.ftkbItemPemohonAset.createMany({
                   data: p.noInventaris.map((v: any) => ({ ftkbItemPemohonId: ftkbItemPemohon.id, daftarAsetId: v }))
                 })
+
+                for (const noInv of p.noInventaris) {
+                  await tx.daftarAset.update({
+                    where: {
+                      id: noInv
+                    },
+                    data: {
+                      penggunaId: p.pemohonId
+                    }
+                  })
+                }
               }
             }
 

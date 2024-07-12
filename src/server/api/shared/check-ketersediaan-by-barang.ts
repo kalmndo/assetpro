@@ -96,6 +96,7 @@ export default async function checkKetersediaanByBarang(ctx: any, barangGroupRes
         // const qty = item.qty - item.qtyOrdered - item.qtyOut
         return ({
           id: item.id,
+          pemohonId: item.Permintaan.Pemohon.name,
           name: item.Permintaan.Pemohon.name,
           im: item.Permintaan.no,
           href: item.Permintaan.id,
