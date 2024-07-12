@@ -163,7 +163,7 @@ export const barangMasukRouter = createTRPCRouter({
             where: {
               id: {
                 in: items.map((v) => v)
-              }
+              },
             },
             include: {
               Barang: {
@@ -269,6 +269,37 @@ export const barangMasukRouter = createTRPCRouter({
               })
             }
           }
+
+          const poResult = await tx.pO.findFirst({
+            where: {
+              id: poId
+            },
+            include: {
+              PoBarang: true
+            }
+          })
+
+          if (!poResult) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Something wrong",
+            });
+          }
+
+          const poBarangStatuses = poResult.PoBarang.map((v) => v.status)
+          const isDone = poBarangStatuses.every((v) => v === 1)
+
+          if (isDone) {
+            await tx.pO.update({
+              where: {
+                id: poId
+              },
+              data: {
+                status: STATUS.SELESAI.id
+              }
+            })
+          }
+
         })
         return {
           ok: true,

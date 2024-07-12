@@ -61,18 +61,20 @@ export const purchaseOrderRouter = createTRPCRouter({
         });
       }
 
+      const vendor = result.Vendor
+
       return {
         ...result,
         tanggal: result.createdAt.toLocaleDateString("id-ID"),
         noEvaluasi: result.Evaluasi.no,
-        vendor: {
-          name: result.Vendor.name,
-        },
+        vendor,
         barang: result.PoBarang.map((v) => ({
           ...v.Barang.PembelianBarang.MasterBarang,
           kode: v.Barang.PembelianBarang.MasterBarang.fullCode,
           qty: v.Barang.PembelianBarang.qty,
-          uom: v.Barang.PembelianBarang.MasterBarang.Uom.name
+          uom: v.Barang.PembelianBarang.MasterBarang.Uom.name,
+          harga: v.Barang.harga?.toLocaleString("id-ID"),
+          totalHarga: v.Barang.totalHarga?.toLocaleString("id-ID")
         }))
       }
     }),

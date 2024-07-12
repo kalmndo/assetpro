@@ -255,7 +255,7 @@ export const evaluasiHargaRouter = createTRPCRouter({
                 data: {
                   evaluasiId: id,
                   no: Math.random().toString(),
-                  status: 'waiting', // TODO: Ganti ini dam
+                  status: STATUS.MENUNGGU.id,
                   vendorId: value.vendorId
                 }
               })
