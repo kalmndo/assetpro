@@ -43,6 +43,7 @@ export default function DialogApprove({
       })
 
       toast.success(result.message)
+      onOpenChange()
       router.refresh()
     } catch (error: any) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access

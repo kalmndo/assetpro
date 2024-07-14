@@ -58,17 +58,36 @@ export const mbBarangRouter = createTRPCRouter({
       } = input
 
       try {
-        await ctx.db.masterBarang.create({
-          data: {
-            name,
-            image,
-            code: Number(code),
-            subSubKategoriId,
-            classCode,
-            fullCode: `${classCode}.${code}`,
-            uomId,
-            deskripsi
-          },
+        await ctx.db.$transaction(async (tx) => {
+          const masterBarang = await tx.masterBarang.create({
+            data: {
+              name,
+              image,
+              code: Number(code),
+              subSubKategoriId,
+              classCode,
+              fullCode: `${classCode}.${code}`,
+              uomId,
+              deskripsi
+            },
+          })
+          if (Number(classCode.split('.')[0]) === 1) {
+            await tx.daftarAsetGroup.create({
+              data: {
+                booked: 0,
+                idle: 0,
+                used: 0,
+                id: masterBarang.id
+              }
+            })
+          } else {
+            await tx.kartuStok.create({
+              data: {
+                qty: 0,
+                id: masterBarang.id
+              }
+            })
+          }
         })
         return {
           ok: true,
