@@ -49,6 +49,7 @@ model User {
     MasterEvaluasiUser         MasterEvaluasiUser[]
     EvaluasiVendorTerpilihUser EvaluasiVendorTerpilihUser[]
     DaftarAset                 DaftarAset[]
+    Perbaikan                  Perbaikan[]
 }
 
 model UserRole {
@@ -530,6 +531,45 @@ model FtkbItemPemohonAset {
     updatedAt DateTime @updatedAt
 }
 
+// --------------------------- PERBAIKAN --------------------------------
+
+model Perbaikan {
+    id             String  @id @default(cuid())
+    userId         String
+    teknisiId      String?
+    deskripsi      String
+    asetId         String
+    status         String
+    catatanTeknisi String?
+
+    User User       @relation(fields: [userId], references: [id])
+    Aset DaftarAset @relation(fields: [asetId], references: [id])
+
+    createdAt         DateTime            @default(now())
+    updatedAt         DateTime            @updatedAt
+    PerbaikanExternal PerbaikanExternal[]
+}
+
+model PerbaikanExternal {
+    id          String @id @default(cuid())
+    perbaikanId String
+    vendorId    String
+    status      String
+
+    Perbaikan Perbaikan @relation(fields: [perbaikanId], references: [id])
+    Vendor    Vendor    @relation(fields: [vendorId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model PerbaikanChat {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
 // --------------------------- MASTER --------------------------------
 
 model Organisasi {
@@ -570,6 +610,7 @@ model Vendor {
     PermintaanPenawaranVendor PermintaanPenawaranVendor[]
     PenawaranHargaVendor      PenawaranHargaVendor[]
     PO                        PO[]
+    PerbaikanExternal         PerbaikanExternal[]
 }
 
 model DepartmentUnit {
@@ -764,6 +805,7 @@ model DaftarAset {
     createdAt           DateTime              @default(now())
     updatedAt           DateTime              @updatedAt
     FtkbItemPemohonAset FtkbItemPemohonAset[]
+    Perbaikan           Perbaikan[]
 }
 
 model DaftarAsetGroup {
