@@ -130,6 +130,7 @@ export const permintaanBarangRouter = createTRPCRouter({
         id: v.id,
         name: v.Barang.name,
         image: v.Barang.image ?? '',
+        deskripsi: v.Barang.deskripsi,
         kode: v.Barang.fullCode,
         jumlah: String(v.qty),
         uom: {
