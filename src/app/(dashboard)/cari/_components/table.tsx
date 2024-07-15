@@ -19,6 +19,7 @@ export function Table({ data }: { data: any }) {
           image: v.original.image,
           kode: v.original.kode,
           name: v.original.name,
+          deskripsi: v.original.deskripsi,
           kodeAnggaran: [],
           qty: '1',
           uom: v.original.uom,

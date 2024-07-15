@@ -4,6 +4,7 @@ export type CartType = {
   id: string
   image: string
   name: string
+  deskripsi: string
   kode: string
   qty: string
   uom: string

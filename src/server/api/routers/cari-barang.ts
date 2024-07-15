@@ -38,6 +38,7 @@ export const cariBarangRouter = createTRPCRouter({
         id: v.id,
         image: v.image ?? '',
         name: v.name,
+        deskripsi: v.deskripsi,
         kode: v.fullCode,
         uom: v.Uom.name,
         uomId: v.uomId,

@@ -130,7 +130,8 @@ export default function Content({
             <TableHeader>
               <TableRow>
                 <TableHead>Barang</TableHead>
-                <TableHead >Satuan</TableHead>
+                <TableHead>Deskripsi</TableHead>
+                <TableHead className="">Satuan</TableHead>
                 <TableHead className="w-40">jumlah</TableHead>
                 <TableHead className="w-80 ">Kode Anggaran</TableHead>
                 <TableHead className="w-10"></TableHead>

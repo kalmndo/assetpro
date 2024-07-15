@@ -36,6 +36,9 @@ export default function Barang({
         </div>
       </TableCell>
       <TableCell>
+        {cart.deskripsi}
+      </TableCell>
+      <TableCell>
         {cart.uom}
       </TableCell>
       <TableCell>

@@ -206,6 +206,7 @@ export function Table({
       />
       <DialogDetail
         open={dialog.open === 'detail'}
+        data={dialog.data}
         onOpenChange={handleDialogClose}
       />
     </div>
