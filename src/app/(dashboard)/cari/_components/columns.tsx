@@ -10,7 +10,8 @@ export const schema = z.object({
   name: z.string(),
   fullCode: z.string(),
   golongan: z.string(),
-  image: z.string().nullable()
+  image: z.string().nullable(),
+  deskripsi: z.string()
 })
 
 export type Schema = z.infer<typeof schema>
@@ -61,6 +62,21 @@ export const columns: ColumnDef<Schema>[] = [
       )
     },
     enableHiding: false,
+  },
+  {
+    accessorKey: 'deskripsi',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Deskripsi' />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className='flex space-x-2'>
+          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
+            {row.getValue('deskripsi')}
+          </span>
+        </div>
+      )
+    },
   },
   {
     accessorKey: 'kode',

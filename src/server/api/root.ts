@@ -23,6 +23,7 @@ import { purchaseOrderRouter } from "./routers/purchase-order";
 import { barangMasukRouter } from "./routers/barang-masuk";
 import { barangKeluarRouter } from "./routers/barang-keluar";
 import { perbaikanRouter } from "./routers/perbaikan";
+import { notificationRouter } from "./routers/notification";
 
 /**
  * This is the primary router for your server.
@@ -31,6 +32,7 @@ import { perbaikanRouter } from "./routers/perbaikan";
  */
 export const appRouter = createTRPCRouter({
   user: userRouter,
+  notification: notificationRouter,
   organisasi: organisasiRouter,
   department: departmentRouter,
   departmentUnit: departmentUnitRouter,
