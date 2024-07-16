@@ -21,6 +21,7 @@ export default function DialogDetail({
   onOpenChange(): void
 }) {
   const { color, name: status } = getStatus(data.status)
+  console.log("data", data)
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -69,7 +70,17 @@ export default function DialogDetail({
                 <p key={v} className="text-sm">- {v}</p>
               ))}
             </TabsContent>
-
+            <TabsContent value='persetujuan'>
+              <div className="w-full max-w-4xl mx-auto ">
+                <div className="relative pl-6 after:absolute after:inset-y-0 after:left-0 after:w-px after:bg-muted-foreground/20">
+                  <div className="grid gap-8">
+                    {data.persetujuan?.map((v: any) => (
+                      <div className="grid gap-2 text-sm relative" key={v.id} dangerouslySetInnerHTML={{ __html: v.desc }}></div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
       </DialogContent>

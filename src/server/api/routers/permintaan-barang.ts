@@ -8,6 +8,7 @@ import { Prisma } from "@prisma/client";
 import { STATUS, getStatus } from "@/lib/status";
 import { ROLE } from "@/lib/role";
 import checkKetersediaanByBarang from "../shared/check-ketersediaan-by-barang";
+import formatDate from "@/lib/formatDate";
 
 export const permintaanBarangRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -92,7 +93,8 @@ export const permintaanBarangRouter = createTRPCRouter({
             include: {
               Uom: true,
               Barang: true,
-              PermintaanBarangBarangKodeAnggaran: true
+              PermintaanBarangBarangKodeAnggaran: true,
+              PermintaanBarangBarangHistory: true
             }
           }
         }
@@ -124,8 +126,6 @@ export const permintaanBarangRouter = createTRPCRouter({
         PermintaanBarangBarang
       } = result
 
-
-
       const barang = PermintaanBarangBarang.filter((v) => v.status !== STATUS.IM_REJECT.id).map((v) => ({
         id: v.id,
         name: v.Barang.name,
@@ -138,7 +138,8 @@ export const permintaanBarangRouter = createTRPCRouter({
           name: v.Uom.name
         },
         kodeAnggaran: v.PermintaanBarangBarangKodeAnggaran.map((v) => v.kodeAnggaranId),
-        status: v.status
+        status: v.status,
+        persetujuan: v.PermintaanBarangBarangHistory
       }))
 
       const isAtasan = userId === atasanId && status === getStatus(STATUS.PENGAJUAN.id).id
@@ -391,11 +392,22 @@ export const permintaanBarangRouter = createTRPCRouter({
               }
 
               await tx.permintaanBarangBarangHistory.createMany({
-                data: untouchedBarangs.map((v) => ({
-                  pbbId: v.id,
-                  desc: "Setuju",
-                  status: STATUS.IM_APPROVE.id
-                }))
+                data: untouchedBarangs.map((v) => {
+                  const { monthName, day, hours, minutes } = formatDate(v.createdAt)
+                  return ({
+                    pbbId: v.id,
+                    desc: `
+<div class="grid gap-2 text-sm relative">
+<div class="aspect-square w-3 bg-primary rounded-full absolute left-0 translate-x-[-29.5px] z-10 top-1" />
+<div class="font-medium">${day}, ${monthName} ${hours}:${minutes} WIB</div>
+<div class="">${user?.name} menyutujui permintaan barang</div>
+<div class="text-muted-foreground">
+Menyutujui permintaan barang
+</div>
+</div>`,
+                    status: STATUS.IM_APPROVE.id
+                  })
+                })
               })
             }
           }
@@ -436,12 +448,25 @@ export const permintaanBarangRouter = createTRPCRouter({
             }
 
             await tx.permintaanBarangBarangHistory.createMany({
-              data: update.map((v) => ({
-                pbbId: v.id,
-                // TODO: TO STRING REACT ELEMENT
-                desc: "Menyetujui dan melakukan perubahan barang",
-                status: STATUS.IM_APPROVE.id
-              }))
+              data: update.map((v) => {
+                const { day, hours, minutes, monthName } = formatDate(new Date())
+                return ({
+                  pbbId: v.id,
+                  desc: ` 
+<div class="grid gap-2 text-sm relative">
+<div class="aspect-square w-3 bg-primary rounded-full absolute left-0 translate-x-[-29.5px] z-10 top-1" />
+<div class="font-medium">${day}, ${monthName} ${hours}:${minutes} WIB</div>
+<div class="">${user?.name} menyutuji dan melakukan perubahan</div>
+<div class="text-muted-foreground">
+Menyutujui permintaan dan melakukan perubahan jumlah item menjadi ${v.qty}
+</div>
+<div class="text-muted-foreground">
+Catatan: ${v.catatan}
+</div>
+</div>`,
+                  status: STATUS.IM_APPROVE.id
+                })
+              })
             })
           }
 
@@ -458,11 +483,24 @@ export const permintaanBarangRouter = createTRPCRouter({
             }
 
             await tx.permintaanBarangBarangHistory.createMany({
-              data: reject.map((v) => ({
-                pbbId: v.id,
-                desc: v.catatan,
-                status: STATUS.IM_REJECT.id
-              }))
+              data: reject.map((v) => {
+                const { day, hours, minutes, monthName } = formatDate(new Date())
+                return ({
+                  pbbId: v.id,
+                  desc:
+                    `
+<div class="grid gap-2 text-sm relative">
+<div class="aspect-square w-3 bg-primary rounded-full absolute left-0 translate-x-[-29.5px] z-10 top-1" />
+<div class="font-medium">${day}, ${monthName} ${hours}:${minutes} WIB</div>
+<div class="">${user?.name} menolak permintaan barang</div>
+<div class="text-muted-foreground">
+Catatan: ${v.catatan}
+</div>
+</div>
+`,
+                  status: STATUS.IM_REJECT.id
+                })
+              })
             })
           }
 

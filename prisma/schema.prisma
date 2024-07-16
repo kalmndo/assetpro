@@ -103,6 +103,7 @@ model PermintaanBarangBarang {
     updatedAt DateTime @updatedAt
 }
 
+// Persetujuan History
 model PermintaanBarangBarangHistory {
     id     String @id @default(cuid())
     pbbId  String

@@ -39,7 +39,7 @@ export default function DialogApprove({
         // @ts-ignore
         update: perubahans.map((v) => ({ id: v.id, qty: v.qtyUpdate, uomId: v.uomUpdate.id, catatan: v.catatan })),
         // @ts-ignore
-        reject: penolakans.map((v) => ({ id: v.id, catatan: 'asdf' }))
+        reject: penolakans.map((v) => ({ id: v.id, catatan: v.catatan }))
       })
 
       toast.success(result.message)
