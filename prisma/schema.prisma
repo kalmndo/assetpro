@@ -142,7 +142,6 @@ model PermintaanBarangBarangKodeAnggaran {
 model PermintaanBarangBarangSplit {
     id     String  @id @default(cuid())
     pbbId  String
-    desc   String // catatan seperti sedang permintaan penwaran, evaluasi, po, dll
     status String
     qty    Int
     foto   String?
@@ -159,7 +158,8 @@ model PermintaanBarangBarangSplitHistory {
     id            String @id @default(cuid())
     barangSplitId String
     formType      String // misal permintaan pembelian, evaluasi
-    formId        String // id dari form tersebut
+    formNo        String @default("")
+    desc          String @default("")
 
     BarangSplit PermintaanBarangBarangSplit @relation(fields: [barangSplitId], references: [id])
 

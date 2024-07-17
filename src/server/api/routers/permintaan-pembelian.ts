@@ -175,13 +175,13 @@ export const permintaanPembelianRouter = createTRPCRouter({
             const splitResult = await tx.permintaanBarangBarangSplit.create({
               data: {
                 pbbId: iterator.id,
-                desc: "Permintaan pembelian",
                 qty: iterator.beli,
                 status: 'order',
                 PermintaanBarangBarangSplitHistory: {
                   create: {
-                    formId: permPem.id,
+                    formNo: permPem.no,
                     formType: 'permintaan-pembelian',
+                    desc: 'Permintaan pembelian'
                   }
                 }
               },

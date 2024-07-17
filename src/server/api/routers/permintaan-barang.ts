@@ -94,7 +94,12 @@ export const permintaanBarangRouter = createTRPCRouter({
               Uom: true,
               Barang: true,
               PermintaanBarangBarangKodeAnggaran: true,
-              PermintaanBarangBarangHistory: true
+              PermintaanBarangBarangHistory: true,
+              PermintaanBarangBarangSplit: {
+                include: {
+                  PermintaanBarangBarangSplitHistory: true
+                }
+              }
             }
           }
         }
@@ -139,7 +144,14 @@ export const permintaanBarangRouter = createTRPCRouter({
         },
         kodeAnggaran: v.PermintaanBarangBarangKodeAnggaran.map((v) => v.kodeAnggaranId),
         status: v.status,
-        persetujuan: v.PermintaanBarangBarangHistory
+        persetujuan: v.PermintaanBarangBarangHistory,
+        riwayat: v.PermintaanBarangBarangSplit.map((v) => ({
+          id: v.id,
+          qty: v.qty,
+          status: v.status,
+          histories: v.PermintaanBarangBarangSplitHistory
+
+        }))
       }))
 
       const isAtasan = userId === atasanId && status === getStatus(STATUS.PENGAJUAN.id).id
