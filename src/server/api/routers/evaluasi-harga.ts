@@ -189,10 +189,27 @@ export const evaluasiHargaRouter = createTRPCRouter({
 
       const vendorIds = barangs.map((v) => v.vendorId)
 
-      const { isCreatePo: isPO } = await isCreatePo(ctx.db, vendorIds, userId)
 
       try {
         await ctx.db.$transaction(async (tx) => {
+          const { isCreatePo: isPO, nextUser, currentUser } = await isCreatePo(ctx.db, vendorIds, userId)
+
+          const evaluasi = await tx.evaluasi.findFirst({
+            where: {
+              id
+            },
+            include: {
+              EvaluasiBarang: true
+            }
+          })
+
+          const permintaanPembelianBarangIds = evaluasi?.EvaluasiBarang.map((v) => v.pembelianBarangId) as string[]
+
+          const pBSPBB = await tx.pBSPBB.findMany({
+            where: {
+              pembelianBarangId: { in: permintaanPembelianBarangIds }
+            }
+          })
           const evaluasiUser = await tx.evaluasiVendorTerpilihUser.create({
             data: {
               evaluasiId: id,
@@ -219,6 +236,7 @@ export const evaluasiHargaRouter = createTRPCRouter({
             })
           }
 
+
           if (isPO) {
             // group kan dengan vendor yang sama
             const penawaranHargaBarangVendors = await tx.penawaranHargaBarangVendor.findMany({
@@ -236,17 +254,18 @@ export const evaluasiHargaRouter = createTRPCRouter({
 
             const toBeGrouped = penawaranHargaBarangVendors.map((v) => ({
               vendorId: v.Vendor.Vendor.id,
-              barangId: v.id
+              barangId: v.id,
+              pembelianBarangId: v.pembelianBarangId
             }))
 
-            const groupedData: any[] = Object.values(toBeGrouped.reduce((acc, { vendorId, barangId }) => {
+            const groupedData: any[] = Object.values(toBeGrouped.reduce((acc, { vendorId, barangId, pembelianBarangId }) => {
               // @ts-ignore
               if (!acc[vendorId]) {
                 // @ts-ignore
                 acc[vendorId] = { vendorId, barangs: [] };
               }
               // @ts-ignore
-              acc[vendorId].barangs.push(barangId);
+              acc[vendorId].barangs.push({ barangId, pembelianBarangId });
               return acc;
             }, {}));
 
@@ -260,12 +279,22 @@ export const evaluasiHargaRouter = createTRPCRouter({
                 }
               })
 
-              for (const barang of value.barangs) {
+              for (const val of value.barangs) {
+                for (const { barangSplitId } of pBSPBB.filter((v) => v.pembelianBarangId === val.pembelianBarangId)) {
+                  await tx.permintaanBarangBarangSplitHistory.create({
+                    data: {
+                      formType: "evaluasi",
+                      barangSplitId,
+                      formNo: po?.no,
+                      desc: `Dievaluasi dan di buat PO oleh ${currentUser}`
+                    }
+                  })
+                }
                 await tx.poBarang.create({
                   data: {
                     poId: po.id,
                     status: 0,
-                    barangId: barang
+                    barangId: val.barangId
                   }
                 })
               }
@@ -285,6 +314,17 @@ export const evaluasiHargaRouter = createTRPCRouter({
               message: 'Berhasil membuat PO'
             }
           } else {
+
+            for (const { barangSplitId } of pBSPBB) {
+              await tx.permintaanBarangBarangSplitHistory.create({
+                data: {
+                  formType: "evaluasi",
+                  barangSplitId,
+                  formNo: evaluasi?.no,
+                  desc: `Dievaluasi oleh ${currentUser} dan diteruskan ke ${nextUser}`
+                }
+              })
+            }
             await tx.evaluasi.update({
               where: {
                 id
@@ -353,7 +393,8 @@ async function isCreatePo(
       total: totalHarga,
       title: 'Apakah anda yakin?',
       message: `${reason} anda akan membuat PO dan mengirim PO kepada vendor, aksi ini tidak dapat dibatalkan.`,
-      button: 'Yakin dan kirim PO'
+      button: 'Yakin dan kirim PO',
+      currentUser: masterEvaluasiUser[userIndex]?.User.name
     }
   } else {
     return {
@@ -362,7 +403,9 @@ async function isCreatePo(
       total: totalHarga,
       title: 'Meneruskan Evaluasi',
       message: `Diteruskan kepada ${masterEvaluasiUser[userIndex + 1]?.User.name} karena total harga dari vendor yang anda pilih lebih besar dari nilai evaluasi mu`,
-      button: 'Teruskan'
+      button: 'Teruskan',
+      currentUser: masterEvaluasiUser[userIndex]?.User.name,
+      nextUser: masterEvaluasiUser[userIndex + 1]?.User.name
     }
   }
 }

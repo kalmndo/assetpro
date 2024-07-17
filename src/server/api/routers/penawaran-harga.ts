@@ -161,6 +161,25 @@ export const penawaranHargaRouter = createTRPCRouter({
             }
           })
 
+          const permintaanPembelianBarangIds = barang.map((v) => v.id)
+
+          const pBSPBB = await tx.pBSPBB.findMany({
+            where: {
+              pembelianBarangId: { in: permintaanPembelianBarangIds }
+            }
+          })
+
+          for (const { barangSplitId } of pBSPBB) {
+            await tx.permintaanBarangBarangSplitHistory.create({
+              data: {
+                formType: "penawaran-harga",
+                barangSplitId,
+                formNo: penawaranResult.no,
+                desc: "Permintaan penawaran harga ke vendor"
+              }
+            })
+          }
+
           for (const { id, hargaNego } of barang) {
             await tx.penawaranHargaBarangNego.create({
               data: {

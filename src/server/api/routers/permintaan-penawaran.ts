@@ -149,9 +149,14 @@ export const permintaanPenawaranRouter = createTRPCRouter({
 
 
 
+
+
+
       try {
 
         await ctx.db.$transaction(async (tx) => {
+
+
           const penawaranResult = await tx.permintaanPenawaran.update({
             where: {
               id
@@ -161,6 +166,25 @@ export const permintaanPenawaranRouter = createTRPCRouter({
               status: STATUS.SELESAI.id
             }
           })
+
+          const permintaanPembelianBarangIds = barang.map((v) => v.id)
+
+          const pBSPBB = await tx.pBSPBB.findMany({
+            where: {
+              pembelianBarangId: { in: permintaanPembelianBarangIds }
+            }
+          })
+
+          for (const { barangSplitId } of pBSPBB) {
+            await tx.permintaanBarangBarangSplitHistory.create({
+              data: {
+                formType: "permintaan-penawaran",
+                barangSplitId,
+                formNo: penawaranResult.no,
+                desc: "Permintaan harga penawaran ke vendor"
+              }
+            })
+          }
 
           for (const { vendorId, barangIds } of vendors()) {
             const url = uuidv4()

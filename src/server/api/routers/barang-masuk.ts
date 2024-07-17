@@ -190,6 +190,22 @@ export const barangMasukRouter = createTRPCRouter({
             const masterBarangId = value.Barang.PembelianBarang.MasterBarang.id
             const qty = value.Barang.PembelianBarang.qty
 
+            const pBSPBB = await tx.pBSPBB.findMany({
+              where: {
+                pembelianBarangId: value.Barang.pembelianBarangId
+              }
+            })
+
+            for (const { barangSplitId } of pBSPBB) {
+              await tx.permintaanBarangBarangSplitHistory.create({
+                data: {
+                  formType: "barang-masuk",
+                  barangSplitId,
+                  formNo: fttb.no,
+                  desc: "Barang telah diterima di gudang"
+                }
+              })
+            }
             // aset
 
             if (type === 1) {

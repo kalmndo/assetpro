@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import formatDate from "@/lib/formatDate"
@@ -83,23 +84,25 @@ export default function DialogDetail({
               </div>
             </TabsContent>
             <TabsContent value='riwayat'>
-              <div className="w-full max-w-4xl mx-auto ">
-                <div className="relative pl-6 after:absolute after:inset-y-0 after:left-0 after:w-px after:bg-muted-foreground/20">
-                  <div className="grid gap-8">
-                    {data.riwayat?.[0].histories?.map((v: any, i: number) => {
-                      const { day, hours, minutes, monthName } = formatDate(v.createdAt)
-                      return (
-                        <div key={i} className="grid gap-2 text-sm relative">
-                          <div className="aspect-square w-3 bg-primary rounded-full absolute left-0 translate-x-[-29.5px] z-10 top-1"></div>
-                          <div className="font-medium">{day}, {monthName} {hours}:{minutes} WIB</div>
-                          <div className="font-semibold">{v.desc}</div>
-                          <div className="text-sm text-blue-700">{v.formNo}</div>
-                        </div>
-                      )
-                    })}
+              <ScrollArea className="h-[400px]">
+                <div className="w-full max-w-4xl mx-auto ml-4">
+                  <div className="relative pl-6 after:absolute after:inset-y-0 after:left-0 after:w-px after:bg-muted-foreground/20">
+                    <div className="grid gap-8">
+                      {data.riwayat?.[0].histories?.map((v: any, i: number) => {
+                        const { day, hours, minutes, monthName } = formatDate(v.createdAt)
+                        return (
+                          <div key={i} className="grid gap-2 text-sm relative">
+                            <div className="aspect-square w-3 bg-primary rounded-full absolute left-0 translate-x-[-29.5px] z-10 top-1"></div>
+                            <div className="font-medium">{day}, {monthName} {hours}:{minutes} WIB</div>
+                            <div className="font-semibold">{v.desc}</div>
+                            <div className="text-sm text-blue-700">{v.formNo}</div>
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </ScrollArea>
             </TabsContent>
           </Tabs>
         </div>

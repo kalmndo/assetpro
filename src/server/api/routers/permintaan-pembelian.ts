@@ -214,7 +214,7 @@ export const permintaanPembelianRouter = createTRPCRouter({
       const { id } = input
       try {
         await ctx.db.$transaction(async (tx) => {
-          await ctx.db.permintaanPembelian.update({
+          const permintaanPembelian = await tx.permintaanPembelian.update({
             where: {
               id
             },
@@ -222,6 +222,32 @@ export const permintaanPembelianRouter = createTRPCRouter({
               status: STATUS.IM_APPROVE.id
             }
           })
+
+          const result = await tx.permintaanPembelianBarang.findMany({
+            where: {
+              formId: id
+            },
+            include: {
+              PBSPBB: {
+                include: {
+
+                }
+              }
+            }
+          })
+
+          const barangSplitIds = result.flatMap((v) => v.PBSPBB.flatMap((aa) => aa.barangSplitId))
+
+          for (const value of barangSplitIds) {
+            await tx.permintaanBarangBarangSplitHistory.create({
+              data: {
+                desc: 'Permintaan pembelian disetujui',
+                formNo: permintaanPembelian.no,
+                formType: 'permintaan-pembelian',
+                barangSplitId: value
+              }
+            })
+          }
 
           await tx.permintaanPenawaran.create({
             data: {
