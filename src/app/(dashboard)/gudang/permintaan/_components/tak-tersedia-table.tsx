@@ -29,6 +29,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { api } from "@/trpc/react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 function FormDialog({
   open,
@@ -40,17 +42,19 @@ function FormDialog({
   data: any[]
 }) {
   const { mutateAsync, isPending } = api.permintaanPembelian.create.useMutation()
+  const router = useRouter()
 
   const onSubmit = async () => {
     try {
-      await mutateAsync(data.map((v) => v.id))
-
-    } catch (error) {
-      console.log("error", error)
-
+      const result = await mutateAsync(data.map((v) => v.id))
+      onOpenChange()
+      toast.success(result.message)
+      router.refresh()
+    } catch (error: any) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+      toast.error(error.message)
     }
   }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="overflow-y-scroll max-h-[80vh]" >

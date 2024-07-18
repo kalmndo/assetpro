@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/table"
 import { api } from "@/trpc/react"
 import { tersediaColumns } from "./tersedia-columns"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 function FormDialog({
   open,
@@ -40,23 +42,17 @@ function FormDialog({
   data: any[]
 }) {
   const { mutateAsync, isPending } = api.barangKeluar.create.useMutation()
-  // const [expandedRows, setExpandedRows] = useState([])
-
-  // const toggleRowExpansion = (index) => {
-  //   if (expandedRows.includes(index)) {
-  //     setExpandedRows(expandedRows.filter((i) => i !== index))
-  //   } else {
-  //     setExpandedRows([...expandedRows, index])
-  //   }
-  // }
+  const router = useRouter()
 
   const onSubmit = async () => {
     try {
-      await mutateAsync(data.map((v) => v.id))
-
-    } catch (error) {
-      console.log("error", error)
-
+      const result = await mutateAsync(data.map((v) => v.id))
+      onOpenChange()
+      toast.success(result.message)
+      router.refresh()
+    } catch (error: any) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+      toast.error(error.message)
     }
   }
 

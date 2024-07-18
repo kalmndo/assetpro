@@ -224,8 +224,16 @@ export const barangKeluarRouter = createTRPCRouter({
           }
 
         })
+        return {
+          ok: true,
+          message: 'Berhasil membuat form keluar barang'
+        }
       } catch (error) {
-        console.log("error", error)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Kemunkingan terjadi kesalahan sistem, silahkan coba lagi",
+          cause: error,
+        });
       }
     })
 });

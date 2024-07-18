@@ -121,92 +121,103 @@ export const permintaanPembelianRouter = createTRPCRouter({
       const barangs = takTersedia.flatMap((v) => v.permintaanBarang)
       const im = imToUpdateStatus(barangs)
 
-      // TODO: NOTIFIKASI KE USER
-      await ctx.db.$transaction(async (tx) => {
-        const permPem = await tx.permintaanPembelian.create({
-          data: {
-            no: Math.random().toString(),
-            status: "pengajuan"
-          }
-        })
-        for (const iterator of im) {
-          await tx.permintaanBarang.update({
-            where: {
-              id: iterator
-            },
+      try {
+        await ctx.db.$transaction(async (tx) => {
+          const permPem = await tx.permintaanPembelian.create({
             data: {
-              status: STATUS.PROCESS.id
+              no: Math.random().toString(),
+              status: "pengajuan"
             }
           })
-        }
-        await tx.pBPP.createMany({
-          data: im.map((v) => ({ permintaanId: v, pembelianId: permPem.id }))
-        })
-
-        for (const value of takTersedia) {
-          const ppb = await tx.permintaanPembelianBarang.create({
-            data: {
-              barangId: value.id,
-              formId: permPem.id,
-              qty: value.permintaan
-            }
-          })
-          const groupPermintaanBarangLeft: string[] = []
-
-          for (const iterator of value.permintaanBarang) {
-            if (iterator.permintaan !== iterator.beli) {
-              groupPermintaanBarangLeft.push(iterator.id)
-
-            }
-            const data = {
-              qtyOrdered: iterator.beli,
-            };
-
-            if (iterator.status === 'approve') {
-              // @ts-ignore
-              data.status = { set: STATUS.PROCESS.id };
-            }
-            await tx.permintaanBarangBarang.update({
+          for (const iterator of im) {
+            await tx.permintaanBarang.update({
               where: {
-                id: iterator.id
+                id: iterator
               },
-              data
-            })
-            const splitResult = await tx.permintaanBarangBarangSplit.create({
               data: {
-                pbbId: iterator.id,
-                qty: iterator.beli,
-                status: 'order',
-                PermintaanBarangBarangSplitHistory: {
-                  create: {
-                    formNo: permPem.no,
-                    formType: 'permintaan-pembelian',
-                    desc: 'Permintaan pembelian'
-                  }
-                }
-              },
-              include: {
-                PermintaanBarangBarangSplitHistory: true
-              }
-            })
-            await tx.pBSPBB.create({
-              data: {
-                barangSplitId: splitResult.id,
-                pembelianBarangId: ppb.id
+                status: STATUS.PROCESS.id
               }
             })
           }
-
-          await tx.permintaanBarangBarangGroup.update({
-            where: {
-              barangId: value.id,
-            },
-            data: {
-              ordered: { increment: value.permintaan },
-            }
+          await tx.pBPP.createMany({
+            data: im.map((v) => ({ permintaanId: v, pembelianId: permPem.id }))
           })
+
+          for (const value of takTersedia) {
+            const ppb = await tx.permintaanPembelianBarang.create({
+              data: {
+                barangId: value.id,
+                formId: permPem.id,
+                qty: value.permintaan
+              }
+            })
+            const groupPermintaanBarangLeft: string[] = []
+
+            for (const iterator of value.permintaanBarang) {
+              if (iterator.permintaan !== iterator.beli) {
+                groupPermintaanBarangLeft.push(iterator.id)
+
+              }
+              const data = {
+                qtyOrdered: iterator.beli,
+              };
+
+              if (iterator.status === 'approve') {
+                // @ts-ignore
+                data.status = { set: STATUS.PROCESS.id };
+              }
+              await tx.permintaanBarangBarang.update({
+                where: {
+                  id: iterator.id
+                },
+                data
+              })
+              const splitResult = await tx.permintaanBarangBarangSplit.create({
+                data: {
+                  pbbId: iterator.id,
+                  qty: iterator.beli,
+                  status: 'order',
+                  PermintaanBarangBarangSplitHistory: {
+                    create: {
+                      formNo: permPem.no,
+                      formType: 'permintaan-pembelian',
+                      desc: 'Permintaan pembelian'
+                    }
+                  }
+                },
+                include: {
+                  PermintaanBarangBarangSplitHistory: true
+                }
+              })
+              await tx.pBSPBB.create({
+                data: {
+                  barangSplitId: splitResult.id,
+                  pembelianBarangId: ppb.id
+                }
+              })
+            }
+
+            await tx.permintaanBarangBarangGroup.update({
+              where: {
+                barangId: value.id,
+              },
+              data: {
+                ordered: { increment: value.permintaan },
+              }
+            })
+          }
+        })
+        return {
+          ok: true,
+          message: 'Berhasil membuat permintaan pembelian'
         }
-      })
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Kemunkingan terjadi kesalahan sistem, silahkan coba lagi",
+          cause: error,
+        });
+      }
     }),
   approve: protectedProcedure
     .input(z.object({ id: z.string() }))
