@@ -12,6 +12,7 @@ import { DataTable } from "@/components/data-table";
 import { columns } from "./columns-select-vendor";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CurrencyInput } from "@/components/currency-input";
 
 export default function DialogSelectVendor({
   data,
@@ -43,7 +44,7 @@ export default function DialogSelectVendor({
   const [harga, setHarga] = useState(data.hargaNego)
 
   const onChange = (e: any) => {
-    setHarga(e.target.value)
+    setHarga(e)
   }
 
   const onSubmit = () => {
@@ -53,7 +54,7 @@ export default function DialogSelectVendor({
         if (v.id === data.id) {
           return {
             ...v,
-            hargaNego: harga
+            hargaNego: Number(harga)
           }
 
         }
@@ -82,12 +83,10 @@ export default function DialogSelectVendor({
         <div className="flex justify-between">
           <div className="space-y-1">
             <Label className="font-semibold">Harga penawaran</Label>
-            <Input
-              type="number"
-              className="w-[300px]"
-              placeholder="Input Harga Satuan"
-              value={harga}
-              onChange={onChange}
+            <CurrencyInput
+              name="input-name"
+              placeholder="Rp ..."
+              onValueChange={onChange}
             />
           </div>
           <div className="space-y-1 text-right">

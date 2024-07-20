@@ -94,13 +94,19 @@ export const permintaanBarangRouter = createTRPCRouter({
               Uom: true,
               Barang: true,
               PermintaanBarangBarangKodeAnggaran: true,
-              PermintaanBarangBarangHistory: true,
+              PermintaanBarangBarangHistory: {
+                orderBy: { createdAt: 'asc' }
+              },
               PermintaanBarangBarangSplit: {
+                orderBy: { createdAt: 'asc' },
                 include: {
-                  PermintaanBarangBarangSplitHistory: true
+                  PermintaanBarangBarangSplitHistory: {
+                    orderBy: { createdAt: 'asc' }
+                  }
                 }
               }
-            }
+            },
+            orderBy: { createdAt: 'asc' }
           }
         }
       })
@@ -402,26 +408,24 @@ export const permintaanBarangRouter = createTRPCRouter({
                   }
                 })
               }
+            }
+            await tx.permintaanBarangBarangHistory.createMany({
+              data: untouchedBarangs.map((v) => {
+                const { monthName, day, hours, minutes } = formatDate(new Date())
+                return ({
+                  pbbId: v.id,
+                  desc: `
 
-              await tx.permintaanBarangBarangHistory.createMany({
-                data: untouchedBarangs.map((v) => {
-                  const { monthName, day, hours, minutes } = formatDate(v.createdAt)
-                  return ({
-                    pbbId: v.id,
-                    desc: `
-<div class="grid gap-2 text-sm relative">
-<div class="aspect-square w-3 bg-primary rounded-full absolute left-0 translate-x-[-29.5px] z-10 top-1" />
+<div class="aspect-square w-3 bg-primary rounded-full absolute left-0 translate-x-[-29.5px] z-10 top-1" /></div>
 <div class="font-medium">${day}, ${monthName} ${hours}:${minutes} WIB</div>
 <div class="">${user?.name} menyutujui permintaan barang</div>
 <div class="text-muted-foreground">
 Menyutujui permintaan barang
-</div>
 </div>`,
-                    status: STATUS.IM_APPROVE.id
-                  })
+                  status: STATUS.IM_APPROVE.id
                 })
               })
-            }
+            })
           }
 
           if (update) {
@@ -465,8 +469,8 @@ Menyutujui permintaan barang
                 return ({
                   pbbId: v.id,
                   desc: ` 
-<div class="grid gap-2 text-sm relative">
-<div class="aspect-square w-3 bg-primary rounded-full absolute left-0 translate-x-[-29.5px] z-10 top-1" />
+
+<div class="aspect-square w-3 bg-primary rounded-full absolute left-0 translate-x-[-29.5px] z-10 top-1"></div>
 <div class="font-medium">${day}, ${monthName} ${hours}:${minutes} WIB</div>
 <div class="">${user?.name} menyutuji dan melakukan perubahan</div>
 <div class="text-muted-foreground">
@@ -474,7 +478,6 @@ Menyutujui permintaan dan melakukan perubahan jumlah item menjadi ${v.qty}
 </div>
 <div class="text-muted-foreground">
 Catatan: ${v.catatan}
-</div>
 </div>`,
                   status: STATUS.IM_APPROVE.id
                 })
@@ -501,15 +504,12 @@ Catatan: ${v.catatan}
                   pbbId: v.id,
                   desc:
                     `
-<div class="grid gap-2 text-sm relative">
 <div class="aspect-square w-3 bg-primary rounded-full absolute left-0 translate-x-[-29.5px] z-10 top-1" />
 <div class="font-medium">${day}, ${monthName} ${hours}:${minutes} WIB</div>
 <div class="">${user?.name} menolak permintaan barang</div>
 <div class="text-muted-foreground">
 Catatan: ${v.catatan}
-</div>
-</div>
-`,
+</div>`,
                   status: STATUS.IM_REJECT.id
                 })
               })

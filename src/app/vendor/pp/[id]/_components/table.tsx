@@ -18,6 +18,9 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { LoaderCircle } from "lucide-react"
+import { CurrencyInput } from "@/components/currency-input"
+
+
 
 const Cell = ({
   barangAtom,
@@ -66,17 +69,23 @@ const Cell = ({
       <TableCell className="w-[200px]">
         {status ? <div className='flex space-x-4'>
           <span className={`max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem] `}>
-            {barang.harga}
+            Rp {barang.harga?.toLocaleString('id-ID')}
           </span>
-        </div> : <Input
-          className="w-[200px]"
-          placeholder="Input harga satuan"
-          value={barang.hargaString}
-          onChange={(e) => {
-            const harga = Number(e.target.value)
-            setBarang((v) => ({ ...v, hargaString: e.target.value, harga, totalHarga: harga * barang.qty }));
-          }}
-        />}
+        </div> :
+          <CurrencyInput
+            name="input-name"
+            placeholder="Rp ..."
+            onValueChange={(_value, _name, values) => {
+              setBarang((v) => ({
+                ...v,
+                hargaString: values!.value,
+                harga: values!.float,
+                totalHarga: values!.float! * barang.qty
+              }))
+            }
+            }
+          />
+        }
       </TableCell>
       <TableCell className="w-[300px] text-right">Rp {barang.totalHarga?.toLocaleString("id-Id")}</TableCell>
     </>

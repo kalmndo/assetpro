@@ -7,6 +7,7 @@ import { type SetStateAction } from "jotai"
 import SearchKodeAnggaran from "./search-kode-anggaran"
 import { Circle, Plus, X } from "lucide-react"
 import { useState } from "react"
+import { getInitials } from "@/lib/utils"
 
 export default function KodeAnggaranDialog({
   cart,
@@ -46,7 +47,6 @@ export default function KodeAnggaranDialog({
 
   const newData = kodeAnggarans.filter((item) => !cart.kodeAnggaran.includes(item.value));
 
-
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -72,8 +72,8 @@ export default function KodeAnggaranDialog({
           <div className="flex gap-4 items-center mb-4">
             <div>
               <Avatar className='h-12 w-12 rounded-sm'>
-                <AvatarImage src="https://github.com/shadcn.png" alt='@shadcn' />
-                <AvatarFallback>SN</AvatarFallback>
+                <AvatarImage src={cart.image} alt='@shadcn' />
+                <AvatarFallback>{getInitials(cart.name)}</AvatarFallback>
               </Avatar>
             </div>
             <div className="grow">

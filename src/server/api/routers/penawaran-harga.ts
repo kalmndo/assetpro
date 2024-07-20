@@ -137,7 +137,7 @@ export const penawaranHargaRouter = createTRPCRouter({
         deadline: z.date(),
         barang: z.array(z.object({
           id: z.string({ description: "Permintaan pembelian barang id" }),
-          hargaNego: z.string()
+          hargaNego: z.number()
         }))
       })
     )
@@ -184,7 +184,7 @@ export const penawaranHargaRouter = createTRPCRouter({
             await tx.penawaranHargaBarangNego.create({
               data: {
                 pembelianBarangId: id,
-                hargaNego: Number(hargaNego)
+                hargaNego
               }
             })
           }

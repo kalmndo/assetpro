@@ -88,7 +88,7 @@ export default function DialogDetail({
                 <div className="w-full max-w-4xl mx-auto ml-4">
                   <div className="relative pl-6 after:absolute after:inset-y-0 after:left-0 after:w-px after:bg-muted-foreground/20">
                     <div className="grid gap-8">
-                      {data.riwayat?.[0].histories?.map((v: any, i: number) => {
+                      {data.riwayat?.[0]?.histories?.map((v: any, i: number) => {
                         const { day, hours, minutes, monthName } = formatDate(v.createdAt)
                         return (
                           <div key={i} className="grid gap-2 text-sm relative">
