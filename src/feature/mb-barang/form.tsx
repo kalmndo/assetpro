@@ -43,6 +43,7 @@ interface Props {
     uoms: SelectProps[]
   },
   value?: any,
+  isUser?: boolean
 }
 
 export const Form = ({
@@ -50,7 +51,8 @@ export const Form = ({
   data,
   isEdit = false,
   onSubmit,
-  isPending
+  isPending,
+  isUser
 }: Props) => {
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -59,7 +61,7 @@ export const Form = ({
       image: isEdit ? value.image : '',
       name: isEdit ? value.name : '',
       deskripsi: isEdit ? value.deskripsi : '',
-      code: isEdit ? String(value.code) : '',
+      code: isUser ? '1' : isEdit ? String(value.code) : '',
       golonganId: isEdit ? value.golonganId : '',
       kategoriId: isEdit ? value.kategoriId : '',
       subKategoriId: isEdit ? value.subKategoriId : '',
@@ -133,7 +135,7 @@ export const Form = ({
                   </FormItem>
                 )}
               />
-              <FormField
+              {!isUser && <FormField
                 control={form.control}
                 name="code"
                 render={({ field }) => (
@@ -145,7 +147,7 @@ export const Form = ({
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              />}
               <FormField
                 control={form.control}
                 name="deskripsi"

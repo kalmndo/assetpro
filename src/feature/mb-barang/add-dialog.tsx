@@ -14,6 +14,8 @@ import { useState } from "react"
 import { Form } from "./form"
 import { toast } from "sonner"
 import { type SelectProps } from "@/lib/type"
+import { cartsAtom } from "@/data/cart"
+import { useSetAtom } from "jotai"
 
 interface Props {
   data: {
@@ -23,12 +25,14 @@ interface Props {
     subSubKategoris: SelectProps[],
     uoms: SelectProps[]
   },
+  isUser?: boolean
 }
 
-export const AddDialog = ({ data }: Props) => {
+export const AddDialog = ({ data, isUser = false }: Props) => {
   const router = useRouter()
   const { mutateAsync, isPending } = api.mbBarang.create.useMutation()
   const [open, setOpen] = useState(false)
+  const setCarts = useSetAtom(cartsAtom)
 
   async function onSubmit(values: any) {
 
@@ -40,9 +44,16 @@ export const AddDialog = ({ data }: Props) => {
 
       const classCode = `${golCode!.code}.${katCode!.code}.${subKatCode!.code}.${subSubKatCode!.code}`
 
-      const result = await mutateAsync({ ...values, classCode })
+      const result = await mutateAsync({ ...values, classCode, isUser })
       setOpen(false)
       toast.success(result.message)
+
+      // @ts-ignore
+      setCarts((prev: any) => [
+        ...prev,
+        result.data,
+      ])
+
       router.refresh()
     } catch (error: any) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
@@ -61,9 +72,10 @@ export const AddDialog = ({ data }: Props) => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-3xl overflow-y-scroll max-h-[550px]">
         <DialogHeader>
-          <DialogTitle>Tambah Barang</DialogTitle>
+          <DialogTitle>{isUser ? 'Tambah dan Simpan ke keranjang' : 'Tambah Barang'}</DialogTitle>
         </DialogHeader>
         <Form
+          isUser={isUser}
           data={data}
           isPending={isPending}
           onSubmit={onSubmit}

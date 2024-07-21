@@ -2,6 +2,7 @@
 import { api } from "@/trpc/server";
 import KategoriDialog from "./_components/kategori-dialog";
 import { Table } from "./_components/table";
+import { AddDialog } from "@/feature/mb-barang/add-dialog";
 
 export default async function Page({
   searchParams
@@ -11,6 +12,20 @@ export default async function Page({
 }) {
   const { data, filterName } = await api.cariBarang.getList({ kategori: searchParams?.kategori ?? '' })
   const { aset, persediaan } = await api.cariBarang.getAllKategori()
+
+  const golongans = await api.mbGolongan.getSelect()
+  const kategoris = await api.mbKategori.getSelect()
+  const subKategoris = await api.mbSubKategori.getSelect()
+  const subSubKategoris = await api.mbSubSubKategori.getSelect()
+  const uoms = await api.mUom.getSelect()
+
+  const modalData = {
+    golongans,
+    kategoris,
+    subKategoris,
+    subSubKategoris,
+    uoms
+  }
 
 
 
@@ -25,7 +40,8 @@ export default async function Page({
             Cari barang permintaanmu atau gunakan kategori.
           </p>
         </div>
-        <div className="">
+        <div className="flex space-x-4">
+          <AddDialog data={modalData} isUser />
           <KategoriDialog aset={aset[0]!.child} persediaan={persediaan[0]!.child} kategori={filterName} />
         </div>
       </div>

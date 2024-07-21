@@ -44,7 +44,8 @@ export const mbBarangRouter = createTRPCRouter({
       subSubKategoriId: z.string(),
       classCode: z.string(),
       uomId: z.string(),
-      deskripsi: z.string()
+      deskripsi: z.string(),
+      isUser: z.boolean()
     }))
     .mutation(async ({ ctx, input }) => {
       const {
@@ -54,44 +55,88 @@ export const mbBarangRouter = createTRPCRouter({
         subSubKategoriId,
         classCode,
         uomId,
-        deskripsi
+        deskripsi,
+        isUser
       } = input
 
       try {
-        await ctx.db.$transaction(async (tx) => {
-          const masterBarang = await tx.masterBarang.create({
+
+        const transaction = await ctx.db.$transaction(async (tx) => {
+          let theCode = Number(code)
+
+          if (isUser) {
+            const masterBarang = await tx.masterBarang.findMany({
+              where: {
+                classCode
+              }
+            })
+
+            const codes = masterBarang.map((v) => v.code)
+            // Sort the array to ensure the numbers are in ascending order
+            codes.sort((a, b) => a - b);
+
+            // Iterate through the array to find the first missing number
+            for (let i = 0; i < codes.length - 1; i++) {
+              if (codes[i + 1]! - codes[i]! > 1) {
+                theCode = codes[i]! + 1;
+              }
+            }
+
+            // If no missing number is found in the loop, return the next number after the maximum
+            theCode = codes[codes.length - 1]! + 1;
+          }
+
+          const result = await tx.masterBarang.create({
             data: {
               name,
               image,
-              code: Number(code),
+              code: theCode,
               subSubKategoriId,
               classCode,
-              fullCode: `${classCode}.${code}`,
+              fullCode: `${classCode}.${theCode}`,
               uomId,
               deskripsi
             },
+            include: {
+              Uom: true
+            }
           })
+
           if (Number(classCode.split('.')[0]) === 1) {
             await tx.daftarAsetGroup.create({
               data: {
                 booked: 0,
                 idle: 0,
                 used: 0,
-                id: masterBarang.id
+                id: result.id
               }
             })
           } else {
             await tx.kartuStok.create({
               data: {
                 qty: 0,
-                id: masterBarang.id
+                id: result.id
               }
             })
           }
+
+
+
+          return {
+            ...result,
+            kode: result.fullCode,
+            kodeAnggaran: [],
+            qty: '1',
+            uom: result.Uom.name,
+            golongan: classCode.split('.')[0] === '1' ? 1 : 2
+          }
+
         })
+
         return {
           ok: true,
-          message: 'Berhasil menambah barang'
+          message: 'Berhasil menambah barang',
+          data: transaction
         }
       } catch (error) {
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
