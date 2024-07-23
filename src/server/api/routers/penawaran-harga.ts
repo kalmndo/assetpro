@@ -108,8 +108,11 @@ export const penawaranHargaRouter = createTRPCRouter({
         vendor: v.PermintaanPenawaranBarangVendor.map((a) => ({
           name: a.Vendor.Vendor.name,
           harga: a.harga,
-          total: a.totalHarga
-        }))
+          total: a.totalHarga,
+          catatan: a.catatan,
+          garansi: a.garansi,
+          termin: a.termin
+        })),
       }))
 
       return {

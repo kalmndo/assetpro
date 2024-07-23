@@ -266,6 +266,8 @@ model PermintaanPenawaranBarangVendor {
     harga             Int?
     totalHarga        Int?
     catatan           String?
+    termin            String?
+    garansi           String?
 
     PembelianBarang PermintaanPembelianBarang @relation(fields: [pembelianBarangId], references: [id])
     Vendor          PermintaanPenawaranVendor @relation(fields: [vendorId], references: [id])

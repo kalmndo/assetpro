@@ -1,7 +1,6 @@
 'use client'
 import { api, type RouterOutputs } from "@/trpc/react"
 import { useEffect } from "react"
-import { Input } from "@/components/ui/input"
 import { type PrimitiveAtom, atom, useAtom, useAtomValue, useSetAtom } from "jotai"
 import { splitAtom } from "jotai/utils"
 import {
@@ -19,8 +18,6 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { LoaderCircle } from "lucide-react"
 import { CurrencyInput } from "@/components/currency-input"
-
-
 
 const Cell = ({
   barangAtom,
@@ -91,7 +88,6 @@ const Cell = ({
     </>
   )
 }
-
 
 const barangsAtom = atom([])
 

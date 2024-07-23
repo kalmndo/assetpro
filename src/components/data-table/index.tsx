@@ -43,6 +43,7 @@ interface DataTableProps<TData, TValue> {
   setRowSelection?: React.Dispatch<React.SetStateAction<RowSelectionState>>
   renderSubComponent?: (props: { row: Row<TData> }) => React.ReactElement
   getRowCanExpand?: (row: Row<TData>) => boolean
+  getIsRowExpanded?: ((row: Row<TData>) => boolean) | undefined
 }
 
 export function DataTable<TData, TValue>({
@@ -56,7 +57,8 @@ export function DataTable<TData, TValue>({
   rowSelection = {},
   setRowSelection,
   renderSubComponent,
-  getRowCanExpand
+  getRowCanExpand,
+  getIsRowExpanded,
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(columnVisibilityDefaultState)
@@ -84,6 +86,7 @@ export function DataTable<TData, TValue>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getRowCanExpand,
+    getIsRowExpanded,
     getExpandedRowModel: getExpandedRowModel()
   })
 

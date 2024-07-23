@@ -1,8 +1,9 @@
 "use server"
+
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/trpc/server";
 import { getStatus } from "@/lib/status";
-import Table from "./_components/table";
+import Content from "./_components/content";
 
 export default async function Page({ params: { id } }: { params: { id: string } }) {
   const data = await api.vendor.getPermintaanPenawaran({ id })
@@ -36,10 +37,9 @@ export default async function Page({ params: { id } }: { params: { id: string } 
               <p className="font-semibold">{data.tanggal}</p>
             </div>
           </div>
-
         </div>
         <div className="p-4">
-          <Table data={data} />
+          <Content data={data} />
         </div>
       </div>
     </div>

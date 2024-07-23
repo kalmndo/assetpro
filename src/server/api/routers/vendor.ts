@@ -49,7 +49,10 @@ export const vendorRouter = createTRPCRouter({
         uom: v.PembelianBarang.MasterBarang.Uom.name,
         harga: v.harga ?? 0,
         hargaString: String(v.harga ?? 0),
-        totalHarga: v.totalHarga
+        totalHarga: v.totalHarga,
+        catatan: v.catatan,
+        garansi: v.garansi,
+        termin: v.termin
       }))
 
       return {
@@ -66,7 +69,10 @@ export const vendorRouter = createTRPCRouter({
         barang: z.array(z.object({
           id: z.string(),
           harga: z.number(),
-          qty: z.number()
+          qty: z.number(),
+          garansi: z.string().nullable(),
+          termin: z.string().nullable(),
+          catatan: z.string().nullable()
         }))
       }))
     .mutation(async ({ ctx, input }) => {
@@ -93,7 +99,10 @@ export const vendorRouter = createTRPCRouter({
               },
               data: {
                 harga: iterator.harga,
-                totalHarga: iterator.harga * iterator.qty
+                totalHarga: iterator.harga * iterator.qty,
+                catatan: iterator.catatan,
+                garansi: iterator.garansi,
+                termin: iterator.termin
               }
             })
           }
