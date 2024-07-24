@@ -11,6 +11,27 @@ import { type Dispatch, type SetStateAction, useState, useEffect } from "react";
 import { DataTable } from "@/components/data-table";
 import { columns } from "./columns-select-vendor";
 import { Checkbox } from "@/components/ui/checkbox";
+import { type Row } from "@tanstack/react-table";
+import { type RouterOutputs } from "@/trpc/react";
+
+const renderSubComponent = ({ row }: { row: Row<RouterOutputs['penawaranHarga']['get']['barang'][0]['vendor'][0]> }) => {
+  return (
+    <div className="flex flex-col space-y-2">
+      <div >
+        <p className="font-semibold">Catatan</p>
+        <p className="text-sm">{row.original.catatan}</p>
+      </div>
+      <div >
+        <p className="font-semibold">Termin pembayaran & waktu pengiriman</p>
+        <p className="text-sm">{row.original.termin}</p>
+      </div>
+      <div >
+        <p className="font-semibold">Garansi</p>
+        <p className="text-sm">{row.original.garansi}</p>
+      </div>
+    </div>
+  )
+}
 
 export default function DialogSelectVendor({
   data,
@@ -107,6 +128,7 @@ export default function DialogSelectVendor({
           setRowSelection={setSelection}
           filter={{ column: 'name', placeholder: 'Nama ...' }}
           columnVisibilityDefaultState={{ kategori: false, subKategori: false, subSubKategori: false }}
+          renderSubComponent={renderSubComponent}
         />
 
         <DialogFooter>

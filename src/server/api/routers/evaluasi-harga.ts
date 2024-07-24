@@ -75,6 +75,15 @@ export const evaluasiHargaRouter = createTRPCRouter({
               },
               PembelianBarang: {
                 include: {
+                  PermintaanPembelian: {
+                    include: {
+                      PermintaanPembelianBarang: {
+                        include: {
+                          PermintaanPenawaranBarangVendor: true
+                        }
+                      }
+                    }
+                  },
                   PenawaranHargaBarangVendor: {
                     include: {
                       Vendor: {
@@ -138,7 +147,10 @@ export const evaluasiHargaRouter = createTRPCRouter({
             id: a.id,
             name: a.Vendor.Vendor.name,
             harga: a.harga,
-            total: a.totalHarga
+            total: a.totalHarga,
+            // catatan: v.PembelianBarang?.PermintaanPembelian.PermintaanPembelianBarang.find((v) => v.),
+            // garansi: a.,
+            // termin: a.
           })),
         })
       })

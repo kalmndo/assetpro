@@ -172,6 +172,9 @@ export const vendorRouter = createTRPCRouter({
         harga: v.harga ?? 0,
         hargaString: String(v.harga ?? 0),
         hargaPrev: v.PembelianBarang.PermintaanPenawaranBarangVendor.filter((a) => a.Vendor.Vendor.id === result.vendorId)[0]?.harga,
+        catatan: v.PembelianBarang.PermintaanPenawaranBarangVendor.find((v) => v.Vendor.Vendor.id === result.vendorId)?.catatan,
+        termin: v.PembelianBarang.PermintaanPenawaranBarangVendor.find((v) => v.Vendor.Vendor.id === result.vendorId)?.termin,
+        garansi: v.PembelianBarang.PermintaanPenawaranBarangVendor.find((v) => v.Vendor.Vendor.id === result.vendorId)?.garansi,
         hargaNego: v.PembelianBarang.PenawaranHargaBarangNego?.hargaNego,
         totalHarga: v.totalHarga
       }))
