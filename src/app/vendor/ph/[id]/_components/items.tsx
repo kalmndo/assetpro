@@ -1,5 +1,6 @@
 import { CurrencyInput } from "@/components/currency-input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { useAtom, type PrimitiveAtom } from "jotai";
 
 export default function Items({
@@ -26,6 +27,8 @@ export default function Items({
 }) {
   const [barang, setBarang] = useAtom(barangAtom)
 
+  const totalHargaPrev = barang.hargaPrev! * barang.qty
+  const totalHargaNego = barang.hargaNego! * barang.qty
   return (
     <div className="flex flex-col md:flex-row items-start gap-6 p-6 rounded-lg border mb-5">
       <div className="flex-shrink-0 rounded-lg overflow-hidden w-full md:w-[200px] aspect-square">
@@ -64,12 +67,23 @@ export default function Items({
           </div>
           <div className="flex justify-between">
             <div>
-              <Label htmlFor="prevHarga">Harga penawaran sebelumnya</Label>
+              <Label htmlFor="prevHarga">Harga sebelumnya</Label>
               <p className="text-sm font-semibold"> Rp {barang.hargaPrev?.toLocaleString("id-ID")}</p>
             </div>
             <div>
-              <Label htmlFor="prevHarga">Harga penawaran</Label>
-              <p className="font-bold text-green-800 "> Rp {barang.hargaNego?.toLocaleString("id-ID")}</p>
+              <Label htmlFor="prevHarga">Total Harga sebelumnya</Label>
+              <p className="font-bold text-green-800 "> Rp {totalHargaPrev.toLocaleString("id-ID")}</p>
+            </div>
+          </div>
+          <Separator className="space-y-2" />
+          <div className="flex justify-between">
+            <div>
+              <Label htmlFor="prevHarga">Harga nego</Label>
+              <p className="text-sm font-semibold"> Rp {barang.hargaNego?.toLocaleString("id-ID")}</p>
+            </div>
+            <div>
+              <Label htmlFor="prevHarga">Total Harga nego</Label>
+              <p className="font-bold text-green-800 "> Rp {totalHargaNego.toLocaleString("id-ID")}</p>
             </div>
           </div>
         </div>

@@ -42,7 +42,7 @@ export default async function Page({
         </div>
         <div className="flex space-x-4">
           <AddDialog data={modalData} isUser />
-          <KategoriDialog aset={aset[0]!.child} persediaan={persediaan[0]!.child} kategori={filterName} />
+          <KategoriDialog aset={aset[0]?.child} persediaan={persediaan[0]?.child} kategori={filterName} />
         </div>
       </div>
       <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>

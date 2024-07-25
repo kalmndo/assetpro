@@ -16,18 +16,25 @@ import { type RouterOutputs } from "@/trpc/react";
 
 const renderSubComponent = ({ row }: { row: Row<RouterOutputs['penawaranHarga']['get']['barang'][0]['vendor'][0]> }) => {
   return (
-    <div className="flex flex-col space-y-2">
-      <div >
-        <p className="font-semibold">Catatan</p>
-        <p className="text-sm">{row.original.catatan}</p>
+    <div className="grid grid-cols-2 gap-2">
+      <div className="flex flex-col space-y-2">
+        <div >
+          <p className="font-semibold">Catatan</p>
+          <p className="text-sm">{row.original.catatan}</p>
+        </div>
+        <div >
+          <p className="font-semibold">Termin pembayaran & waktu pengiriman</p>
+          <p className="text-sm">{row.original.termin}</p>
+        </div>
+        <div >
+          <p className="font-semibold">Garansi</p>
+          <p className="text-sm">{row.original.garansi}</p>
+        </div>
       </div>
-      <div >
-        <p className="font-semibold">Termin pembayaran & waktu pengiriman</p>
-        <p className="text-sm">{row.original.termin}</p>
-      </div>
-      <div >
-        <p className="font-semibold">Garansi</p>
-        <p className="text-sm">{row.original.garansi}</p>
+      <div>
+        <p className="font-semibold">Harga Sebelumnya</p>
+        {/* @ts-ignore */}
+        <p className="text-sm">Rp {row.original.prevHarga?.toLocaleString('id-ID')}</p>
       </div>
     </div>
   )
@@ -102,7 +109,6 @@ export default function DialogSelectVendor({
         </DialogHeader>
         <p>Pilih vendor untuk barang {data.name}</p>
         <DataTable
-
           data={data.vendor ?? []}
           columns={[
             {
@@ -122,12 +128,16 @@ export default function DialogSelectVendor({
               enableSorting: false,
               enableHiding: false,
             },
+            // @ts-ignore
             ...columns
           ]}
           rowSelection={selection}
           setRowSelection={setSelection}
           filter={{ column: 'name', placeholder: 'Nama ...' }}
           columnVisibilityDefaultState={{ kategori: false, subKategori: false, subSubKategori: false }}
+          getIsRowExpanded={() => true}
+          getRowCanExpand={() => true}
+          // @ts-ignore
           renderSubComponent={renderSubComponent}
         />
 

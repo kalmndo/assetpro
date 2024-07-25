@@ -56,7 +56,27 @@ export const evaluasiHargaRouter = createTRPCRouter({
           id
         },
         include: {
-          PenawaranHarga: true,
+          PenawaranHarga: {
+            include: {
+              PermintaanPenawaran: {
+                include: {
+                  PermintaanPenawaranVendor: {
+                    include: {
+                      PermintaanPenawaranBarangVendor: {
+                        include: {
+                          Vendor: {
+                            include: {
+                              Vendor: true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
           EvaluasiVendorTerpilihUser: {
             include: {
               EvaluasiVendorTerpilihVendor: true
@@ -75,15 +95,6 @@ export const evaluasiHargaRouter = createTRPCRouter({
               },
               PembelianBarang: {
                 include: {
-                  PermintaanPembelian: {
-                    include: {
-                      PermintaanPembelianBarang: {
-                        include: {
-                          PermintaanPenawaranBarangVendor: true
-                        }
-                      }
-                    }
-                  },
                   PenawaranHargaBarangVendor: {
                     include: {
                       Vendor: {
@@ -129,8 +140,9 @@ export const evaluasiHargaRouter = createTRPCRouter({
       if (result.status === STATUS.MENUNGGU.id) {
         getVendors = await ctx.db.vendor.findMany()
       }
-
+      const njim = result.PenawaranHarga.PermintaanPenawaran.PermintaanPenawaranVendor.flatMap((v) => v.PermintaanPenawaranBarangVendor.flatMap((v) => v))
       const barang = result.EvaluasiBarang.map((v) => {
+        772301023352532
 
         return ({
           id: v.id,
@@ -143,15 +155,19 @@ export const evaluasiHargaRouter = createTRPCRouter({
           vendorTerpilih: v.PenawaranHargaBarangVendor?.Vendor.Vendor.name,
           vendorTerpilihHarga: v.PenawaranHargaBarangVendor?.harga,
           vendorTerpilihTotal: v.PenawaranHargaBarangVendor?.totalHarga,
-          vendor: v.PembelianBarang?.PenawaranHargaBarangVendor.map((a) => ({
-            id: a.id,
-            name: a.Vendor.Vendor.name,
-            harga: a.harga,
-            total: a.totalHarga,
-            // catatan: v.PembelianBarang?.PermintaanPembelian.PermintaanPembelianBarang.find((v) => v.),
-            // garansi: a.,
-            // termin: a.
-          })),
+          vendor: v.PembelianBarang?.PenawaranHargaBarangVendor.map((a) => {
+            const lah = njim.find((v) => v.pembelianBarangId === a.pembelianBarangId && a.Vendor.Vendor.id === v.Vendor.Vendor.id)
+            return ({
+              id: a.id,
+              name: a.Vendor.Vendor.name,
+              harga: a.harga,
+              total: a.totalHarga,
+              catatan: lah?.catatan,
+              garansi: lah?.garansi,
+              termin: lah?.termin,
+              prevHarga: lah?.harga
+            })
+          }),
         })
       })
 
