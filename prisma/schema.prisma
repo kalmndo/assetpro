@@ -499,6 +499,7 @@ model FtkbItem {
     ftkbId   String
     barangId String
     qty      Int
+    status   Int    @default(0)
 
     Ftkb   Ftkb         @relation(fields: [ftkbId], references: [id])
     Barang MasterBarang @relation(fields: [barangId], references: [id])
@@ -513,6 +514,7 @@ model FtkbItemPemohon {
     imId       String
     ftkbItemId String
     qty        Int
+    status     Int    @default(0)
 
     FtkbItem FtkbItem         @relation(fields: [ftkbItemId], references: [id])
     IM       PermintaanBarang @relation(fields: [imId], references: [id])

@@ -61,7 +61,6 @@ export const columns: ColumnDef<User>[] = [
       <DataTableColumnHeader column={column} title='Nama' />
     ),
     cell: ({ row }) => {
-      console.log("row", row.original)
       return (
         <div className='flex space-x-2 items-center'>
           <Avatar>

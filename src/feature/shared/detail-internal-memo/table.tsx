@@ -14,6 +14,7 @@ import { type SelectProps } from "@/lib/type";
 import DialogApprove from "./dialog-approve";
 import { DialogReject } from "./dialog-reject";
 import DialogDetail from "./dialog-detail";
+import { DialogReceive } from "./dialog-receive";
 
 const DEFAULT_BARANG_VALUE = {
   id: "",
@@ -141,6 +142,17 @@ export function Table({
         columns={[
           ...columns,
           {
+            id: 'receive',
+            cell: ({ row }: { row: any }) => {
+              if (!row.original.isOut) {
+                return
+              }
+              return (
+                <Button onClick={() => setDialog({ open: 'receive', data: row.original })}>Terima</Button>
+              )
+            }
+          },
+          {
             id: 'actions',
             cell: ({ row }: { row: any }) => (
               <DataTableRowActions variant={'outline'}>
@@ -202,6 +214,12 @@ export function Table({
       <DialogReject
         id={data.id}
         open={dialog.open === 'reject'}
+        onOpenChange={handleDialogClose}
+      />
+      <DialogReceive
+        id={data.id}
+        barang={dialog.data}
+        open={dialog.open === 'receive'}
         onOpenChange={handleDialogClose}
       />
       <DialogDetail

@@ -241,7 +241,6 @@ export const barangMasukRouter = createTRPCRouter({
                 },
                 data: {
                   idle: { increment: qty },
-                  used: { decrement: qty }
                 }
               })
             } else {

@@ -8,7 +8,6 @@ import ApproveDialog from "./_components/approve-dialog";
 
 export default async function Page({ params: { id } }: { params: { id: string } }) {
   const data = await api.permintaanPembelian.get({ id })
-  console.log("data", data)
 
   const { name: status, color } = getStatus(data.status)
 

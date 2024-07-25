@@ -23,7 +23,6 @@ export default function DialogDetail({
   onOpenChange(): void
 }) {
   const { color, name: status } = getStatus(data.status)
-  console.log("data", data)
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>

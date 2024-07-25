@@ -132,15 +132,24 @@ export const barangKeluarRouter = createTRPCRouter({
 
           const permintaanBarangIds = tersedia.flatMap((v) => v.permintaanBarangId)
 
-          const barangSplit = await ctx.db.permintaanBarangBarangSplit.findMany({
+          const barangSplit = await tx.permintaanBarangBarangSplit.findMany({
             where: {
               pbbId: { in: permintaanBarangIds }
             }
           })
 
+          await tx.permintaanBarangBarangSplit.updateMany({
+            where: {
+              pbbId: { in: permintaanBarangIds }
+            },
+            data: {
+              status: 'out'
+            }
+          })
+
           const barangSplitIds = barangSplit.map((v) => v.id)
 
-          await ctx.db.permintaanBarangBarangSplitHistory.createMany({
+          await tx.permintaanBarangBarangSplitHistory.createMany({
             data: barangSplitIds.map((v) => ({
               barangSplitId: v,
               formType: 'barang-keluar',

@@ -19,7 +19,6 @@ export function AsetDialog({
   open: boolean,
   onOpenChange: Dispatch<SetStateAction<boolean>>
 }) {
-  console.log("data", data)
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">

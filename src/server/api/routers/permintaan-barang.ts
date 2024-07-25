@@ -137,28 +137,32 @@ export const permintaanBarangRouter = createTRPCRouter({
         PermintaanBarangBarang
       } = result
 
-      const barang = PermintaanBarangBarang.filter((v) => v.status !== STATUS.IM_REJECT.id).map((v) => ({
-        id: v.id,
-        name: v.Barang.name,
-        image: v.Barang.image ?? '',
-        deskripsi: v.Barang.deskripsi,
-        kode: v.Barang.fullCode,
-        jumlah: String(v.qty),
-        uom: {
-          id: v.Uom.id,
-          name: v.Uom.name
-        },
-        kodeAnggaran: v.PermintaanBarangBarangKodeAnggaran.map((v) => v.kodeAnggaranId),
-        status: v.status,
-        persetujuan: v.PermintaanBarangBarangHistory,
-        riwayat: v.PermintaanBarangBarangSplit.map((v) => ({
+      const barang = PermintaanBarangBarang.filter((v) => v.status !== STATUS.IM_REJECT.id).map((v) => {
+        const isOut = v.PermintaanBarangBarangSplit.map((a) => a.status).some((b) => b === 'out') && ctx.session.user.id === result.pemohondId
+        return ({
           id: v.id,
-          qty: v.qty,
+          barangId: v.Barang.id,
+          name: v.Barang.name,
+          image: v.Barang.image ?? '',
+          deskripsi: v.Barang.deskripsi,
+          kode: v.Barang.fullCode,
+          jumlah: String(v.qty),
+          uom: {
+            id: v.Uom.id,
+            name: v.Uom.name
+          },
+          kodeAnggaran: v.PermintaanBarangBarangKodeAnggaran.map((v) => v.kodeAnggaranId),
           status: v.status,
-          histories: v.PermintaanBarangBarangSplitHistory
-
-        }))
-      }))
+          persetujuan: v.PermintaanBarangBarangHistory,
+          isOut,
+          riwayat: v.PermintaanBarangBarangSplit.map((v) => ({
+            id: v.id,
+            qty: v.qty,
+            status: v.status,
+            histories: v.PermintaanBarangBarangSplitHistory
+          }))
+        })
+      })
 
       const isAtasan = userId === atasanId && status === getStatus(STATUS.PENGAJUAN.id).id
       const isImApprove = roles?.includes(ROLE.IM_APPROVE.id) && status === getStatus(STATUS.ATASAN_SETUJU.id).id
@@ -183,6 +187,149 @@ export const permintaanBarangRouter = createTRPCRouter({
         canUpdate,
         isImApprove
       }
+    }),
+  receive: protectedProcedure
+    .input(z.object({
+      permintaanBarangId: z.string(),
+      barangId: z.string(),
+      imId: z.string()
+    }))
+    .mutation(async ({ ctx, input }) => {
+
+
+
+      const { permintaanBarangId, imId, barangId } = input
+
+      try {
+
+        const result = await ctx.db.$transaction(async (tx) => {
+          const im = await tx.permintaanBarang.findUnique({
+            where: {
+              id: imId
+            },
+            include: {
+              PermintaanBarangBarang: {
+                include: {
+                  Barang: true,
+                  PermintaanBarangBarangSplit: {
+                    where: {
+                      status: "out"
+                    }
+                  }
+                }
+              },
+              FtkbItemPemohon: {
+                where: {
+                  status: 0,
+                  FtkbItem: {
+                    Barang: { id: barangId }
+                  }
+                },
+                include: {
+                  FtkbItemPemohonAset: true,
+                }
+              }
+            }
+          })
+
+          if (!im) {
+            throw new TRPCError({
+              code: 'BAD_GATEWAY',
+              message: "Tidak ada form ini"
+            })
+          }
+
+          const permintaanBarang = im.PermintaanBarangBarang.find((v) => v.id === permintaanBarangId)
+          const ftkbItemPemohon = im.FtkbItemPemohon[0]
+
+
+          const isAset = permintaanBarang?.Barang.fullCode.split(".")[0] === '1'
+          const split = permintaanBarang?.PermintaanBarangBarangSplit.find((v) => v.status === 'out')
+          if (isAset) {
+            for (const iterator of ftkbItemPemohon!.FtkbItemPemohonAset) {
+              await tx.daftarAset.update({
+                where: {
+                  id: iterator.daftarAsetId
+                },
+                data: {
+                  penggunaId: im.pemohondId
+                }
+              })
+            }
+            await tx.daftarAsetGroup.update({
+              where: {
+                id: barangId
+              },
+              data: {
+                booked: { decrement: ftkbItemPemohon?.qty },
+                used: { increment: ftkbItemPemohon?.qty },
+                idle: { decrement: ftkbItemPemohon?.qty }
+              }
+            })
+          } else {
+            await tx.kartuStok.update({
+              where: {
+                id: barangId
+              },
+              data: {
+                qty: { increment: ftkbItemPemohon?.qty }
+              }
+            })
+          }
+
+          await tx.permintaanBarangBarangSplitHistory.create({
+            data: {
+              barangSplitId: split!.id,
+              formType: 'received',
+              formNo: '',
+              desc: 'User telah terima barang'
+            }
+          })
+
+          await tx.permintaanBarangBarangSplit.update({
+            where: {
+              id: split!.id
+            },
+            data: {
+              status: "received"
+            }
+          })
+
+          await tx.permintaanBarangBarang.update({
+            where: {
+              id: permintaanBarangId
+            },
+            data: {
+              status: 'selesai'
+            }
+          })
+
+          const isAllReceived = im.PermintaanBarangBarang.filter((v) => v.id !== permintaanBarangId).map((v) => v.status).every((v) => v === 'selesai')
+
+          if (isAllReceived) {
+            await tx.permintaanBarang.update({
+              where: {
+                id: imId
+              },
+              data: {
+                status: 'selesai'
+              }
+            })
+          }
+        })
+        return {
+          ok: true,
+          message: ''
+        }
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Kemunkingan terjadi kesalahan sistem, silahkan coba lagi",
+          cause: error,
+        });
+      }
+
+
     }),
   create: protectedProcedure
     .input(z.object({
