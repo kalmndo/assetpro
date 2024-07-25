@@ -36,8 +36,14 @@ export const purchaseOrderRouter = createTRPCRouter({
             include: {
               Barang: {
                 include: {
+                  Vendor: true,
                   PembelianBarang: {
                     include: {
+                      PermintaanPenawaranBarangVendor: {
+                        include: {
+                          Vendor: true
+                        }
+                      },
                       MasterBarang: {
                         include: {
                           Uom: true
@@ -68,14 +74,21 @@ export const purchaseOrderRouter = createTRPCRouter({
         tanggal: result.createdAt.toLocaleDateString("id-ID"),
         noEvaluasi: result.Evaluasi.no,
         vendor,
-        barang: result.PoBarang.map((v) => ({
-          ...v.Barang.PembelianBarang.MasterBarang,
-          kode: v.Barang.PembelianBarang.MasterBarang.fullCode,
-          qty: v.Barang.PembelianBarang.qty,
-          uom: v.Barang.PembelianBarang.MasterBarang.Uom.name,
-          harga: v.Barang.harga?.toLocaleString("id-ID"),
-          totalHarga: v.Barang.totalHarga?.toLocaleString("id-ID")
-        }))
+        barang: result.PoBarang.map((v) => {
+          const lah = v.Barang.PembelianBarang.PermintaanPenawaranBarangVendor.find((p) => p.Vendor.vendorId === v.Barang.Vendor.vendorId)
+          return ({
+            ...v.Barang.PembelianBarang.MasterBarang,
+            kode: v.Barang.PembelianBarang.MasterBarang.fullCode,
+            qty: v.Barang.PembelianBarang.qty,
+            uom: v.Barang.PembelianBarang.MasterBarang.Uom.name,
+            harga: v.Barang.harga?.toLocaleString("id-ID"),
+            totalHarga: v.Barang.totalHarga?.toLocaleString("id-ID"),
+            catatan: lah?.catatan,
+            garansi: lah?.garansi,
+            termin: lah?.termin
+            //  asdf: v.Barang.PembelianBarang.PermintaanPenawaranBarangVendor.find((v) => v.) 
+          })
+        })
       }
     }),
   getSelect: protectedProcedure
