@@ -72,7 +72,7 @@ export default async function Page({ params: { id } }: { params: { id: string } 
           <PergerakanStokChart />
         </div>
         <div className="p-4">
-          <Table />
+          <Table data={data.riwayat} />
           {/* <Table data={data} modalData={modalData} /> */}
         </div>
       </div>

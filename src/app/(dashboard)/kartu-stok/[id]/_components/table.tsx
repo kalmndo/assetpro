@@ -1,25 +1,28 @@
 import { DataTable } from "@/components/data-table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { columnsMasuk } from "./columns-masuk";
+import { columnsKeluar } from "./columns-keluar";
+import { RouterOutputs } from "@/trpc/react";
 
-function TableMasuk() {
+function TableMasuk({ data }: { data: RouterOutputs['kartuStok']['get']['riwayat']['masuk'] }) {
   return (
     <DataTable
-      data={[]}
-      columns={[]}
+      data={data}
+      columns={columnsMasuk}
     />
   )
 }
 
-function TableKeluar() {
+function TableKeluar({ data }: { data: RouterOutputs['kartuStok']['get']['riwayat']['keluar'] }) {
   return (
     <DataTable
-      data={[]}
-      columns={[]}
+      data={data}
+      columns={columnsKeluar}
     />
   )
 }
 
-export default function Table() {
+export default function Table({ data }: { data: RouterOutputs['kartuStok']['get']['riwayat'] }) {
   return (
     <div>
       <Tabs defaultValue="masuk" className="w-full">
@@ -28,23 +31,12 @@ export default function Table() {
           <TabsTrigger value="keluar">Stok keluar</TabsTrigger>
         </TabsList>
         <TabsContent value="masuk">
-          <TableMasuk />
+          <TableMasuk data={data.masuk} />
         </TabsContent>
         <TabsContent value="keluar">
-          <TableKeluar />
+          <TableKeluar data={data.keluar} />
         </TabsContent>
       </Tabs>
     </div>
   )
 }
-// masuk
-// nama
-// jumlah
-// tanggal
-
-// keluar
-// vendor
-// jumlah
-// harga satuan
-// harga total
-// tanggal

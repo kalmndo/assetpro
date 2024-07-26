@@ -50,10 +50,21 @@ export const kartuStokRouter = createTRPCRouter({
             include: {
               Uom: true,
               FtkbItem: {
+                orderBy: {
+                  createdAt: 'desc'
+                },
                 include: {
+                  Ftkb: true,
                   FtkbItemPemohon: {
+                    orderBy: {
+                      createdAt: 'desc'
+                    },
                     include: {
-
+                      IM: {
+                        include: {
+                          Pemohon: true
+                        }
+                      }
                     }
                   }
                 }
@@ -61,8 +72,27 @@ export const kartuStokRouter = createTRPCRouter({
             },
           },
           FttbItemKartuStock: {
+            orderBy: { createdAt: 'desc' },
             include: {
-              FttbItem: true
+              FttbItem: {
+                include: {
+                  Fttb: true,
+                  PoBarang: {
+                    include: {
+                      PO: {
+                        include: {
+                          Vendor: true
+                        }
+                      },
+                      Barang: {
+                        include: {
+                          PembelianBarang: true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
           },
         }
@@ -76,8 +106,22 @@ export const kartuStokRouter = createTRPCRouter({
       }
 
       const barang = result.MasterBarang
-      const keluar = result.MasterBarang.FtkbItem
       const masuk = result.FttbItemKartuStock
+      let keluar: { id: string, no: string, pemohon: string, noIm: string, jumlah: number, tanggal: string }[] = []
+
+      for (const v of result.MasterBarang.FtkbItem) {
+        const no = v.Ftkb.no
+        for (const p of v.FtkbItemPemohon) {
+          keluar.push({
+            id: p.id,
+            no,
+            pemohon: p.IM.Pemohon.name,
+            noIm: p.IM.no,
+            jumlah: p.qty,
+            tanggal: p.createdAt.toLocaleDateString("id-ID")
+          })
+        }
+      }
 
       const res = {
         barang: {
@@ -90,28 +134,22 @@ export const kartuStokRouter = createTRPCRouter({
         },
         // pergerakanStok:
         riwayat: {
-          masuk,
+          masuk: masuk.map((v) => {
+            return {
+              id: v.id,
+              no: v.FttbItem.Fttb.no,
+              vendor: v.FttbItem.PoBarang.PO.Vendor.name,
+              jumlah: v.FttbItem.PoBarang.Barang.PembelianBarang.qty,
+              hargaSatuan: "Rp " + v.FttbItem.PoBarang.Barang.harga?.toLocaleString("id-ID"),
+              hargaTotal: "Rp " + v.FttbItem.PoBarang.Barang.totalHarga?.toLocaleString("id-ID"),
+              tanggal: v.FttbItem.createdAt.toLocaleDateString("id-ID")
+            }
+          }),
           keluar
         }
       }
-      console.log("res", JSON.stringify(res, null, 2))
 
-      return {
-        // barang : {
-        //    name:
-        //    image:
-        //    code:
-        //    jumlah:
-        //    uom:
-        //    deskripsi
-        // }
-        // pergerakanStok: [
-        // ]
-        // riwayat: {
-        //  masuk
-        //  keluar
-        // }
-      }
+      return res
     }),
   getSelect: protectedProcedure
     .query(async ({ ctx }) => {
