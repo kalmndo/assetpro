@@ -272,7 +272,7 @@ export const permintaanBarangRouter = createTRPCRouter({
                 id: barangId
               },
               data: {
-                qty: { increment: ftkbItemPemohon?.qty }
+                qty: { decrement: ftkbItemPemohon?.qty }
               }
             })
           }

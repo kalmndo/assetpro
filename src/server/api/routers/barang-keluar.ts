@@ -219,17 +219,7 @@ export const barangKeluarRouter = createTRPCRouter({
                   booked: { increment: value.tersedia },
                 }
               })
-            } else {
-              await tx.kartuStok.update({
-                where: {
-                  id: value.id
-                },
-                data: {
-                  qty: { decrement: value.tersedia }
-                }
-              })
             }
-
           }
 
         })
