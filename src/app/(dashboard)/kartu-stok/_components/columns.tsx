@@ -3,70 +3,86 @@ import { type ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/data-table/column-header'
 import { z } from 'zod'
 import Link from 'next/link'
-import { getStatus } from '@/lib/status'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { getInitials } from '@/lib/utils'
 
 export const schema = z.object({
   id: z.string(),
-  no: z.string(),
-  perihal: z.string(),
-  ruang: z.string(),
-  jumlah: z.number(),
-  tanggal: z.string(),
-  status: z.string(),
+  barang: z.object({
+    name: z.string(),
+    image: z.string().nullable()
+  }),
+  code: z.string(),
+  kategori: z.string(),
+  satuan: z.number(),
+  jumlah: z.string(),
+  harga: z.string(),
 })
-// barang
-// kodebarang
-// kategori
-// satuan
-// harga rerata
-// jumlah
-
 
 export type Schema = z.infer<typeof schema>
 
 export const columns: ColumnDef<Schema>[] = [
   {
-    accessorKey: 'no',
+    accessorKey: 'barang',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='No Internal Memo' />
+      <DataTableColumnHeader column={column} title='Barang' />
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`barang/${row.original.id}`} className='flex w-full'>
+        <div className='flex space-x-2 items-center'>
+          <Avatar className='rounded-sm w-12 h-12'>
+            <AvatarImage src={row.original.barang.image ?? ''} alt="@shadcn" />
+            <AvatarFallback>{getInitials(row.original.barang.name)}</AvatarFallback>
+          </Avatar>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('no')}
+            {row.original.barang.name}
           </span>
-        </Link>
+        </div>
       )
     },
     enableSorting: false,
     enableHiding: false,
   },
   {
-    accessorKey: 'perihal',
+    accessorKey: 'code',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Perihal & Tujuan' />
+      <DataTableColumnHeader column={column} title='Kode Barang' />
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`barang/${row.original.id}`} className='flex w-full'>
+        <Link href={`kartu-stok/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('perihal')}
+            {row.getValue('code')}
           </span>
         </Link>
       )
     },
   },
   {
-    accessorKey: 'ruang',
+    accessorKey: 'kategori',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Ruang' />
+      <DataTableColumnHeader column={column} title='Kategori' />
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`barang/${row.original.id}`} className='flex w-full'>
+        <Link href={`kartu-stok/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('ruang')}
+            {row.getValue('kategori')}
+          </span>
+        </Link>
+      )
+    },
+  },
+  {
+    accessorKey: 'satuan',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Satuan' />
+    ),
+    cell: ({ row }) => {
+      return (
+        <Link href={`kartu-stok/${row.original.id}`} className='flex w-full'>
+          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
+            {row.getValue('satuan')}
           </span>
         </Link>
       )
@@ -79,7 +95,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`barang/${row.original.id}`} className='flex w-full'>
+        <Link href={`kartu-stok/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('jumlah')}
           </span>
@@ -88,31 +104,15 @@ export const columns: ColumnDef<Schema>[] = [
     },
   },
   {
-    accessorKey: 'tanggal',
+    accessorKey: 'harga',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Tanggal' />
+      <DataTableColumnHeader column={column} title='Harga Rerata' />
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`barang/${row.original.id}`} className='flex w-full'>
+        <Link href={`kartu-stok/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('tanggal')}
-          </span>
-        </Link>
-      )
-    },
-  },
-  {
-    accessorKey: 'status',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Status' />
-    ),
-    cell: ({ row }) => {
-      const { color, name } = getStatus(row.getValue('status'))
-      return (
-        <Link href={`barang/${row.original.id}`} className='flex w-full'>
-          <span style={{ color }} className='max-w-32 truncate font-semibold sm:max-w-72 md:max-w-[31rem]'>
-            {name}
+            {row.getValue('harga')}
           </span>
         </Link>
       )

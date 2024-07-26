@@ -2,7 +2,7 @@ import { api } from "@/trpc/server";
 import { Table } from "./_components/table";
 
 export default async function Page() {
-  const data = await api.permintaanBarang.getAll({ isUser: true })
+  const data = await api.kartuStok.getAll()
 
   return (
     <div>
