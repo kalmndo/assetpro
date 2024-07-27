@@ -834,5 +834,20 @@ model KartuStok {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    FttbItemKartuStock FttbItemKartuStock[]
+    FttbItemKartuStock  FttbItemKartuStock[]
+    KartuStokPergerakan KartuStokPergerakan[]
+}
+
+model KartuStokPergerakan {
+    id          String @id @default(cuid())
+    year        Int
+    month       Int
+    out         Int    @default(0)
+    in          Int    @default(0)
+    kartuStokId String
+
+    KartuStok KartuStok @relation(fields: [kartuStokId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }

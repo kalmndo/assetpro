@@ -267,14 +267,7 @@ export const permintaanBarangRouter = createTRPCRouter({
               }
             })
           } else {
-            await tx.kartuStok.update({
-              where: {
-                id: barangId
-              },
-              data: {
-                qty: { decrement: ftkbItemPemohon?.qty }
-              }
-            })
+
           }
 
           await tx.permintaanBarangBarangSplitHistory.create({

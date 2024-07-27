@@ -274,6 +274,33 @@ export const barangMasukRouter = createTRPCRouter({
                 }
               })
 
+              const ksp = await tx.kartuStokPergerakan.findFirst({
+                where: {
+                  year: new Date().getFullYear(),
+                  month: new Date().getMonth() + 1,
+                  kartuStokId: masterBarangId
+                }
+              })
+
+              if (ksp) {
+                await tx.kartuStokPergerakan.update({
+                  where: {
+                    id: ksp.id
+                  },
+                  data: {
+                    out: { increment: qty }
+                  }
+
+                })
+              } else {
+                await tx.kartuStokPergerakan.create({
+                  data: {
+                    year: new Date().getFullYear(),
+                    month: new Date().getMonth() + 1,
+                    kartuStokId: masterBarangId
+                  }
+                })
+              }
               await tx.poBarang.update({
                 where: {
                   id: value.id

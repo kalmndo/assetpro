@@ -219,9 +219,45 @@ export const barangKeluarRouter = createTRPCRouter({
                   booked: { increment: value.tersedia },
                 }
               })
+            } else {
+              await tx.kartuStok.update({
+                where: {
+                  id: value.id
+                },
+                data: {
+                  qty: { decrement: value.tersedia }
+                }
+              })
+
+              const ksp = await tx.kartuStokPergerakan.findFirst({
+                where: {
+                  year: new Date().getFullYear(),
+                  month: new Date().getMonth() + 1,
+                  kartuStokId: value.id
+                }
+              })
+
+              if (ksp) {
+                await tx.kartuStokPergerakan.update({
+                  where: {
+                    id: ksp.id
+                  },
+                  data: {
+                    out: { increment: value.tersedia }
+                  }
+
+                })
+              } else {
+                await tx.kartuStokPergerakan.create({
+                  data: {
+                    year: new Date().getFullYear(),
+                    month: new Date().getMonth() + 1,
+                    kartuStokId: value.id
+                  }
+                })
+              }
             }
           }
-
         })
         return {
           ok: true,

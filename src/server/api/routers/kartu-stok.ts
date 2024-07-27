@@ -2,6 +2,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@/server/api/trpc";
+import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -46,6 +47,7 @@ export const kartuStokRouter = createTRPCRouter({
           id
         },
         include: {
+          KartuStokPergerakan: true,
           MasterBarang: {
             include: {
               Uom: true,
@@ -106,7 +108,16 @@ export const kartuStokRouter = createTRPCRouter({
       }
 
       const barang = result.MasterBarang
-      const masuk = result.FttbItemKartuStock
+      const masuk = result.FttbItemKartuStock.map((v) => ({
+        id: v.id,
+        no: v.FttbItem.Fttb.no,
+        vendor: v.FttbItem.PoBarang.PO.Vendor.name,
+        jumlah: v.FttbItem.PoBarang.Barang.PembelianBarang.qty,
+        hargaSatuan: "Rp " + v.FttbItem.PoBarang.Barang.harga?.toLocaleString("id-ID"),
+        hargaTotal: "Rp " + v.FttbItem.PoBarang.Barang.totalHarga?.toLocaleString("id-ID"),
+        tanggal: v.FttbItem.createdAt.toLocaleDateString("id-ID")
+      }))
+
       let keluar: { id: string, no: string, pemohon: string, noIm: string, jumlah: number, tanggal: string }[] = []
 
       for (const v of result.MasterBarang.FtkbItem) {
@@ -123,6 +134,8 @@ export const kartuStokRouter = createTRPCRouter({
         }
       }
 
+      const pergerakanStok = createKartuStokPergerakan(result.KartuStokPergerakan)
+
       const res = {
         barang: {
           name: barang.name,
@@ -132,19 +145,15 @@ export const kartuStokRouter = createTRPCRouter({
           uom: barang.Uom.name,
           deskripsi: barang.deskripsi
         },
-        // pergerakanStok:
+        card: {
+          stok: result.qty,
+          masuk: masuk.map((v) => v.jumlah).reduce((acc, num) => acc + num, 0),
+          keluar: keluar.map((v) => v.jumlah).reduce((acc, num) => acc + num, 0),
+          harga: 'Rp 0'
+        },
+        pergerakanStok,
         riwayat: {
-          masuk: masuk.map((v) => {
-            return {
-              id: v.id,
-              no: v.FttbItem.Fttb.no,
-              vendor: v.FttbItem.PoBarang.PO.Vendor.name,
-              jumlah: v.FttbItem.PoBarang.Barang.PembelianBarang.qty,
-              hargaSatuan: "Rp " + v.FttbItem.PoBarang.Barang.harga?.toLocaleString("id-ID"),
-              hargaTotal: "Rp " + v.FttbItem.PoBarang.Barang.totalHarga?.toLocaleString("id-ID"),
-              tanggal: v.FttbItem.createdAt.toLocaleDateString("id-ID")
-            }
-          }),
+          masuk,
           keluar
         }
       }
@@ -259,3 +268,60 @@ export const kartuStokRouter = createTRPCRouter({
     }),
 
 });
+
+type Data = {
+  id: string;
+  year: number;
+  month: any;
+  out: number;
+  in: number;
+  kartuStokId: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+function createKartuStokPergerakan(data: Data[]) {
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  // Initialize a map to track existing months
+  const monthMap = new Map<number, Data>();
+
+  let year: number = 0
+
+  for (const entry of data) {
+    monthMap.set(entry.month, entry);
+    year = entry.year
+
+  }
+
+  // Initialize the result array
+  const result: Data[] = [];
+
+  // Fill in missing months from January to December
+  for (let month = 1; month <= 12; month++) {
+    if (monthMap.has(month)) {
+      const existingEntry = monthMap.get(month)!;
+
+      result.push({
+        ...existingEntry,
+        month: monthNames[month - 1]
+      });
+    } else {
+      result.push({
+        id: "", // Generate or provide an appropriate id
+        year,
+        month: monthNames[month - 1],
+        out: 0,
+        in: 0,
+        kartuStokId: "", // Provide appropriate kartuStokId
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+    }
+  }
+
+  return result
+}

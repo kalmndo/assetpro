@@ -7,37 +7,23 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-
-const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-  { month: "July", desktop: 186, mobile: 80 },
-  { month: "Augustus", desktop: 305, mobile: 200 },
-  { month: "September", desktop: 237, mobile: 120 },
-  { month: "Oktober", desktop: 73, mobile: 190 },
-  { month: "November", desktop: 209, mobile: 130 },
-  { month: "Desember", desktop: 214, mobile: 140 },
-]
+import { RouterOutputs } from "@/trpc/react"
 
 const chartConfig = {
-  desktop: {
-    label: "Desktop",
+  in: {
+    label: "In",
     color: "hsl(var(--chart-1))",
   },
-  mobile: {
-    label: "Mobile",
+  out: {
+    label: "Out",
     color: "hsl(var(--chart-2))",
   },
 } satisfies ChartConfig
 
-export function PergerakanStokChart() {
+export function PergerakanStokChart({ data }: { data: RouterOutputs['kartuStok']['get']['pergerakanStok'] }) {
   return (
     <ChartContainer config={chartConfig} className="h-[400px] w-full">
-      <BarChart accessibilityLayer data={chartData}>
+      <BarChart accessibilityLayer data={data}>
         <CartesianGrid vertical={false} />
         <XAxis
           dataKey="month"
@@ -50,8 +36,8 @@ export function PergerakanStokChart() {
           cursor={false}
           content={<ChartTooltipContent indicator="dashed" />}
         />
-        <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4} />
-        <Bar dataKey="mobile" fill="var(--color-mobile)" radius={4} />
+        <Bar dataKey="in" fill="var(--color-in)" radius={4} />
+        <Bar dataKey="out" fill="var(--color-out)" radius={4} />
       </BarChart>
     </ChartContainer>
   )
