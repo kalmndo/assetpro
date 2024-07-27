@@ -2,14 +2,13 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@/server/api/trpc";
-import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-export const kartuStokRouter = createTRPCRouter({
+export const daftarAsetRouter = createTRPCRouter({
   getAll: protectedProcedure
     .query(async ({ ctx }) => {
-      const result = await ctx.db.kartuStok.findMany({
+      const result = await ctx.db.daftarAsetGroup.findMany({
         orderBy: {
           createdAt: "desc"
         },
@@ -32,7 +31,7 @@ export const kartuStokRouter = createTRPCRouter({
         code: v.MasterBarang.fullCode,
         kategori: v.MasterBarang.SubSubKategori.name,
         satuan: v.MasterBarang.Uom.name,
-        jumlah: v.qty,
+        jumlah: v.used + v.booked + v.idle,
         harga: ''
       }))
     }),

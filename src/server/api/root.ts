@@ -25,6 +25,7 @@ import { barangKeluarRouter } from "./routers/barang-keluar";
 import { perbaikanRouter } from "./routers/perbaikan";
 import { notificationRouter } from "./routers/notification";
 import { kartuStokRouter } from "./routers/kartu-stok";
+import { daftarAsetRouter } from "./routers/daftar-aset";
 
 /**
  * This is the primary router for your server.
@@ -57,7 +58,8 @@ export const appRouter = createTRPCRouter({
   barangKeluar: barangKeluarRouter,
   perbaikan: perbaikanRouter,
   vendor: vendorRouter,
-  kartuStok: kartuStokRouter
+  kartuStok: kartuStokRouter,
+  daftarAset: daftarAsetRouter
 });
 
 // export type definition of API
