@@ -329,6 +329,7 @@ export const permintaanBarangRouter = createTRPCRouter({
       no: z.string(),
       perihal: z.string(),
       ruangId: z.string(),
+      peruntukan: z.string(),
       barang: z.array(z.object({
         id: z.string(),
         qty: z.string(),
@@ -342,6 +343,7 @@ export const permintaanBarangRouter = createTRPCRouter({
         no,
         perihal,
         ruangId,
+        peruntukan,
         barang
       } = input
       const pemohondId = ctx.session.user.id
@@ -354,6 +356,10 @@ export const permintaanBarangRouter = createTRPCRouter({
             where: {
               id: userId
             },
+            include: {
+              UserRole: true
+
+            }
           })
 
           const atasanId = user?.atasanId
@@ -364,7 +370,8 @@ export const permintaanBarangRouter = createTRPCRouter({
               perihal,
               ruangId,
               status: STATUS.PENGAJUAN.id,
-              pemohondId
+              pemohondId,
+              ...(user?.UserRole.length !== 0 && { peruntukan: Number(peruntukan) })
             }
           })
 

@@ -185,6 +185,8 @@ export const barangMasukRouter = createTRPCRouter({
             }
           })
 
+          let imIds: string[] = []
+
           for (const value of poBarangs) {
             const type = Number(value.Barang.PembelianBarang.MasterBarang.fullCode.split('.')[0])
             const masterBarangId = value.Barang.PembelianBarang.MasterBarang.id
@@ -193,10 +195,15 @@ export const barangMasukRouter = createTRPCRouter({
             const pBSPBB = await tx.pBSPBB.findMany({
               where: {
                 pembelianBarangId: value.Barang.pembelianBarangId
+              },
+              include: {
+                BarangSplit: {
+                  include: { Barang: { include: { Permintaan: true } } }
+                }
               }
             })
 
-            for (const { barangSplitId } of pBSPBB) {
+            for (const { barangSplitId, BarangSplit: { pbbId, Barang: { Permintaan: { peruntukan, id } } } } of pBSPBB) {
               await tx.permintaanBarangBarangSplitHistory.create({
                 data: {
                   formType: "barang-masuk",
@@ -205,6 +212,20 @@ export const barangMasukRouter = createTRPCRouter({
                   desc: "Barang telah diterima di gudang"
                 }
               })
+
+              if (peruntukan) {
+                await tx.permintaanBarangBarang.update({
+                  where: {
+                    id: pbbId
+                  },
+                  data: {
+                    status: 'selesai'
+                  }
+                })
+              }
+              if (!imIds.includes(id)) {
+                imIds.push(id)
+              }
             }
             // aset
 
@@ -342,6 +363,32 @@ export const barangMasukRouter = createTRPCRouter({
             })
           }
 
+          const im = await tx.permintaanBarang.findMany({
+            where: {
+              id: { in: imIds }
+            },
+            include: {
+              PermintaanBarangBarang: true
+            }
+          })
+
+          const forStock = im.filter((v) => v.peruntukan === 1)
+
+          for (const value of forStock) {
+            const isAllDone = value.PermintaanBarangBarang.map((v) => v.status).every((v) => v === 'selesai')
+
+            if (isAllDone) {
+              await tx.permintaanBarang.update({
+                where: {
+                  id: value.id
+                },
+                data: {
+                  status: 'selesai'
+                }
+              })
+
+            }
+          }
         })
         return {
           ok: true,

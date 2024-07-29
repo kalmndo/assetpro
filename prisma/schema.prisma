@@ -71,6 +71,7 @@ model PermintaanBarang {
     perihal    String
     ruangId    String
     pemohondId String
+    peruntukan Int    @default(0)
 
     Pemohon                User                     @relation(fields: [pemohondId], references: [id])
     Ruang                  MasterRuang              @relation(fields: [ruangId], references: [id])

@@ -30,11 +30,14 @@ import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { RESET } from "jotai/utils";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { getSession } from "next-auth/react";
 
 const formSchema = z.object({
   "no": z.string().min(1).max(255),
   "perihal": z.string().min(1).max(9999),
   "ruangId": z.string().min(1).max(255),
+  "peruntukan": z.string().min(1).max(255),
 })
 
 export default function Content({
@@ -48,6 +51,17 @@ export default function Content({
   const [barang, setBarang] = useAtom(cartsAtom)
   const { mutateAsync, isPending } = api.permintaanBarang.create.useMutation()
   const router = useRouter()
+  const [isUser, setIsUser] = useState(true)
+
+  useEffect(() => {
+    getSession().then((v) => {
+      if (v?.user.role.length === 0) {
+        setIsUser(true)
+      } else {
+        setIsUser(false)
+      }
+    })
+  }, [])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -55,6 +69,7 @@ export default function Content({
       no: '',
       perihal: '',
       ruangId: '',
+      peruntukan: '0'
     },
   })
 
@@ -107,6 +122,17 @@ export default function Content({
                 placeholder="Pilih Ruang "
               />
             </div>
+            {!isUser &&
+              <div className="w-60">
+                <SearchSelect
+                  data={[{ value: '0', label: 'Personal' }, { value: '1', label: "Stock" }]}
+                  form={form}
+                  label="Peruntukan"
+                  name="peruntukan"
+                  placeholder="Pilih Peruntukan"
+                />
+              </div>
+            }
           </div>
 
           <FormField
