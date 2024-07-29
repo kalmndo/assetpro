@@ -17,6 +17,7 @@ export default function Items({
     harga: number | null;
     hargaString: string
     totalHarga: number | null;
+    delivery: string | null;
     garansi: string;
     termin: string;
     catatan: string;
@@ -44,9 +45,7 @@ export default function Items({
         </div>
         <p className="font-semibold">{barang.qty} {barang.uom}</p>
         <p className="text-muted-foreground text-sm leading-relaxed">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl nec ultricies ultricies, nunc
-          nisl ultricies nunc, nec ultricies nunc nisl nec nunc. Nullam auctor, nisl nec ultricies ultricies, nunc nisl
-          ultricies nunc, nec ultricies nunc nisl nec nunc.
+          {/* {barang.} */}
         </p>
         <div className="flex flex-col gap-2">
           <div>
@@ -57,7 +56,7 @@ export default function Items({
               <Input
                 name="catatan"
                 placeholder="Catatan"
-                value={barang.catatan}
+                value={barang.catatan ?? ''}
                 onChange={(v) => {
                   setBarang((prev) => ({
                     ...prev,
@@ -68,18 +67,36 @@ export default function Items({
             }
           </div>
           <div>
-            <Label htmlFor="termin">Termin pembayaran & waktu pengiriman</Label>
+            <Label htmlFor="termin">Termin pembayaran</Label>
             {status ?
               <p className="text-sm">{barang.termin}</p>
               :
               <Input
                 name="termin"
-                placeholder="Termin pembayaran & waktu pengiriman"
-                value={barang.termin}
+                placeholder="Termin pembayaran"
+                value={barang.termin ?? ''}
                 onChange={(v) => {
                   setBarang((prev) => ({
                     ...prev,
                     termin: v.target.value
+                  }))
+                }}
+              />
+            }
+          </div>
+          <div>
+            <Label htmlFor="delivery">Waktu pengiriman</Label>
+            {status ?
+              <p className="text-sm">{barang.delivery}</p>
+              :
+              <Input
+                name="termin"
+                placeholder="Waktu pengiriman"
+                value={barang.delivery ?? ''}
+                onChange={(v) => {
+                  setBarang((prev) => ({
+                    ...prev,
+                    delivery: v.target.value
                   }))
                 }}
               />
@@ -93,7 +110,7 @@ export default function Items({
               <Input
                 name="garansi"
                 placeholder="Garansi"
-                value={barang.garansi}
+                value={barang.garansi ?? ''}
                 onChange={(v) => {
                   setBarang((prev) => ({
                     ...prev,

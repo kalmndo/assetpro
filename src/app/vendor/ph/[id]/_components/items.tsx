@@ -1,4 +1,5 @@
 import { CurrencyInput } from "@/components/currency-input";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useAtom, type PrimitiveAtom } from "jotai";
@@ -19,6 +20,7 @@ export default function Items({
     hargaPrev: number | null | undefined
     hargaNego: number | undefined
     totalHarga: number | null;
+    delivery: string | null;
     garansi: string;
     termin: string;
     catatan: string;
@@ -55,25 +57,75 @@ export default function Items({
         <div className="flex flex-col gap-2">
           <div>
             <Label htmlFor="catatan">Catatan</Label>
-            <p className="text-sm">{barang.catatan}</p>
+            {status ?
+              <p className="text-sm">{barang.catatan}</p>
+              :
+              <Input
+                name="catatan"
+                placeholder="Catatan"
+                value={barang.catatan ?? ''}
+                onChange={(v) => {
+                  setBarang((prev) => ({
+                    ...prev,
+                    catatan: v.target.value
+                  }))
+                }}
+              />
+            }
           </div>
           <div>
-            <Label htmlFor="termin">Termin pembayaran & waktu pengiriman</Label>
-            <p className="text-sm">{barang.termin}</p>
+            <Label htmlFor="termin">Termin pembayaran</Label>
+            {status ?
+              <p className="text-sm">{barang.termin}</p>
+              :
+              <Input
+                name="termin"
+                placeholder="Termin pembayaran"
+                value={barang.termin ?? ''}
+                onChange={(v) => {
+                  setBarang((prev) => ({
+                    ...prev,
+                    termin: v.target.value
+                  }))
+                }}
+              />
+            }
+          </div>
+          <div>
+            <Label htmlFor="delivery">Waktu pengiriman</Label>
+            {status ?
+              <p className="text-sm">{barang.delivery}</p>
+              :
+              <Input
+                name="termin"
+                placeholder="Waktu pengiriman"
+                value={barang.delivery ?? ''}
+                onChange={(v) => {
+                  setBarang((prev) => ({
+                    ...prev,
+                    delivery: v.target.value
+                  }))
+                }}
+              />
+            }
           </div>
           <div>
             <Label htmlFor="garansi">Garansi</Label>
-            <p className="text-sm">{barang.garansi}</p>
-          </div>
-          <div className="flex justify-between">
-            <div>
-              <Label htmlFor="prevHarga">Harga sebelumnya</Label>
-              <p className="text-sm font-semibold"> Rp {barang.hargaPrev?.toLocaleString("id-ID")}</p>
-            </div>
-            <div>
-              <Label htmlFor="prevHarga">Total Harga sebelumnya</Label>
-              <p className="font-bold text-green-800 "> Rp {totalHargaPrev.toLocaleString("id-ID")}</p>
-            </div>
+            {status ?
+              <p className="text-sm">{barang.garansi}</p>
+              :
+              <Input
+                name="garansi"
+                placeholder="Garansi"
+                value={barang.garansi ?? ''}
+                onChange={(v) => {
+                  setBarang((prev) => ({
+                    ...prev,
+                    garansi: v.target.value
+                  }))
+                }}
+              />
+            }
           </div>
           <Separator className="space-y-2" />
           <div className="flex justify-between">
@@ -100,6 +152,7 @@ export default function Items({
               <CurrencyInput
                 name="harga"
                 placeholder="Rp ..."
+                value={barang.harga ?? barang.hargaPrev!}
                 onValueChange={(_value, _name, values) => {
                   setBarang((v) => ({
                     ...v,
@@ -112,8 +165,14 @@ export default function Items({
               />
             </div>
           }
-
-          <div className="text-lg font-semibold">Rp {barang.totalHarga?.toLocaleString("id-Id")}</div>
+          {/* <div className="flex">
+            <Label htmlFor="total">Total Harga</Label>
+            <div className="text-lg font-semibold">Rp {barang.totalHarga ? barang.totalHarga?.toLocaleString("id-Id") : totalHargaPrev?.toLocaleString("id-ID")}</div>
+          </div> */}
+          <div>
+            <Label htmlFor="prevHarga">Total Harga</Label>
+            <p className="font-bold text-green-800 "> Rp {barang.totalHarga ? barang.totalHarga?.toLocaleString("id-Id") : totalHargaPrev?.toLocaleString("id-ID")}</p>
+          </div>
         </div>
       </div>
     </div>

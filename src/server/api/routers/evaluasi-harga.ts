@@ -140,9 +140,7 @@ export const evaluasiHargaRouter = createTRPCRouter({
       if (result.status === STATUS.MENUNGGU.id) {
         getVendors = await ctx.db.vendor.findMany()
       }
-      const njim = result.PenawaranHarga.PermintaanPenawaran.PermintaanPenawaranVendor.flatMap((v) => v.PermintaanPenawaranBarangVendor.flatMap((v) => v))
       const barang = result.EvaluasiBarang.map((v) => {
-        772301023352532
 
         return ({
           id: v.id,
@@ -156,16 +154,15 @@ export const evaluasiHargaRouter = createTRPCRouter({
           vendorTerpilihHarga: v.PenawaranHargaBarangVendor?.harga,
           vendorTerpilihTotal: v.PenawaranHargaBarangVendor?.totalHarga,
           vendor: v.PembelianBarang?.PenawaranHargaBarangVendor.map((a) => {
-            const lah = njim.find((v) => v.pembelianBarangId === a.pembelianBarangId && a.Vendor.Vendor.id === v.Vendor.Vendor.id)
             return ({
               id: a.id,
               name: a.Vendor.Vendor.name,
               harga: a.harga,
               total: a.totalHarga,
-              catatan: lah?.catatan,
-              garansi: lah?.garansi,
-              termin: lah?.termin,
-              prevHarga: lah?.harga
+              catatan: a.catatan,
+              garansi: a.garansi,
+              termin: a.termin,
+              prevHarga: a.harga
             })
           }),
         })

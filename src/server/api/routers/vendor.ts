@@ -47,12 +47,14 @@ export const vendorRouter = createTRPCRouter({
         kode: v.PembelianBarang.MasterBarang.fullCode,
         qty: v.PembelianBarang.qty,
         uom: v.PembelianBarang.MasterBarang.Uom.name,
+        deskripsi: v.PembelianBarang.MasterBarang.deskripsi,
         harga: v.harga ?? 0,
         hargaString: String(v.harga ?? 0),
         totalHarga: v.totalHarga,
         catatan: v.catatan,
         garansi: v.garansi,
-        termin: v.termin
+        termin: v.termin,
+        delivery: v.delivery
       }))
 
       return {
@@ -71,6 +73,7 @@ export const vendorRouter = createTRPCRouter({
           harga: z.number(),
           qty: z.number(),
           garansi: z.string().nullable(),
+          delivery: z.string().nullable(),
           termin: z.string().nullable(),
           catatan: z.string().nullable()
         }))
@@ -102,7 +105,8 @@ export const vendorRouter = createTRPCRouter({
                 totalHarga: iterator.harga * iterator.qty,
                 catatan: iterator.catatan,
                 garansi: iterator.garansi,
-                termin: iterator.termin
+                termin: iterator.termin,
+                delivery: iterator.delivery
               }
             })
           }
@@ -175,6 +179,7 @@ export const vendorRouter = createTRPCRouter({
         catatan: v.PembelianBarang.PermintaanPenawaranBarangVendor.find((v) => v.Vendor.Vendor.id === result.vendorId)?.catatan,
         termin: v.PembelianBarang.PermintaanPenawaranBarangVendor.find((v) => v.Vendor.Vendor.id === result.vendorId)?.termin,
         garansi: v.PembelianBarang.PermintaanPenawaranBarangVendor.find((v) => v.Vendor.Vendor.id === result.vendorId)?.garansi,
+        delivery: v.PembelianBarang.PermintaanPenawaranBarangVendor.find((v) => v.Vendor.Vendor.id === result.vendorId)?.delivery,
         hargaNego: v.PembelianBarang.PenawaranHargaBarangNego?.hargaNego,
         totalHarga: v.totalHarga
       }))
@@ -193,6 +198,10 @@ export const vendorRouter = createTRPCRouter({
         barang: z.array(z.object({
           id: z.string(),
           harga: z.number(),
+          catatan: z.string().nullable(),
+          termin: z.string().nullable(),
+          delivery: z.string().nullable(),
+          garansi: z.string().nullable(),
           qty: z.number()
         }))
       }))
@@ -220,7 +229,11 @@ export const vendorRouter = createTRPCRouter({
               },
               data: {
                 harga: iterator.harga,
-                totalHarga: iterator.harga * iterator.qty
+                totalHarga: iterator.harga * iterator.qty,
+                catatan: iterator.catatan,
+                termin: iterator.termin,
+                delivery: iterator.delivery,
+                garansi: iterator.garansi,
               }
             })
           }
