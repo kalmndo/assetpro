@@ -35,6 +35,26 @@ export const daftarAsetRouter = createTRPCRouter({
         harga: ''
       }))
     }),
+  getSelectUser: protectedProcedure
+    .query(async ({ ctx }) => {
+      const penggunaId = ctx.session.user.id
+      const result = await ctx.db.daftarAset.findMany({
+        where: {
+          penggunaId
+        },
+        orderBy: {
+          createdAt: "desc"
+        },
+        include: {
+          MasterBarang: true,
+        }
+      })
+
+      return result.map((v) => ({
+        label: `${v.id} | ${v.MasterBarang.name}`,
+        value: v.id,
+      }))
+    }),
   get: protectedProcedure
     .input(z.object({
       id: z.string()

@@ -4,6 +4,7 @@ import { AddDialog } from "./_components/add-dialog";
 
 export default async function Page() {
   const data = await api.perbaikan.getAll({ isUser: true })
+  const daftarAsets = await api.daftarAset.getSelectUser()
 
   return (
     <div>
@@ -17,7 +18,7 @@ export default async function Page() {
           </p>
         </div>
         <div className="">
-          <AddDialog />
+          <AddDialog asets={daftarAsets} />
         </div>
       </div>
       <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>

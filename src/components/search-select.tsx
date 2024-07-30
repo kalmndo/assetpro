@@ -6,6 +6,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command"
 import {
   FormControl,
@@ -76,29 +77,31 @@ const SearchSelect = (props: TextInputProps) => {
             <PopoverContent className=" p-0">
               <Command>
                 <CommandInput placeholder={props.placeholder} />
-                <CommandEmpty>No data.</CommandEmpty>
-                <CommandGroup>
-                  {props.data?.map((data) => (
-                    <CommandItem
-                      value={data.label}
-                      key={data.value}
-                      onSelect={() => {
-                        props.form.setValue(props.name, data.value)
-                        setOpen(false)
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          data.value === field.value
-                            ? "opacity-100"
-                            : "opacity-0"
-                        )}
-                      />
-                      {data.label}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+                <CommandList>
+                  <CommandEmpty>No data.</CommandEmpty>
+                  <CommandGroup>
+                    {props.data?.map((data) => (
+                      <CommandItem
+                        value={data.label}
+                        key={data.value}
+                        onSelect={() => {
+                          props.form.setValue(props.name, data.value)
+                          setOpen(false)
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            data.value === field.value
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                        {data.label}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
               </Command>
             </PopoverContent>
           </Popover>

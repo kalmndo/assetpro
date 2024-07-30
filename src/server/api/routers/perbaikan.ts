@@ -1,3 +1,4 @@
+import { STATUS } from "@/lib/status";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -56,37 +57,49 @@ export const perbaikanRouter = createTRPCRouter({
 
       return result
     }),
-  getSelect: protectedProcedure
-    .query(async ({ ctx }) => {
-      const result = await ctx.db.organisasi.findMany({
-        orderBy: {
-          createdAt: "desc"
-        },
-      })
-
-      return result.map((v) => ({
-        label: v.name,
-        value: v.id,
-      }))
-    }),
   create: protectedProcedure
     .input(z.object({
-      name: z.string(),
+      asetId: z.string(),
+      keluhan: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
       const {
-        name,
+        asetId,
+        keluhan
       } = input
+      const userId = ctx.session.user.id
 
       try {
-        await ctx.db.organisasi.create({
-          data: {
-            name,
-          },
+        await ctx.db.$transaction(async (tx) => {
+          const user = await tx.user.findFirst({
+            where: { id: userId }
+          })
+
+          const perbaikan = await tx.perbaikan.create({
+            data: {
+              no: Math.random().toString(),
+              userId,
+              keluhan,
+              asetId,
+              status: STATUS.PENGAJUAN.id
+            },
+          })
+
+          const desc = `<p class="text-sm font-semibold">${user?.name}<span class="font-normal ml-[5px]">Meminta persetujuan permintaan perbaikan ${perbaikan.no}</span></p>`
+          await tx.notification.create({
+            data: {
+              fromId: userId,
+              // TODO: Benerin ini kalau gak ada atasan
+              toId: user?.atasanId ?? userId,
+              link: `/permintaan/perbaikan/${perbaikan.id}`,
+              desc,
+              isRead: false,
+            }
+          })
         })
         return {
           ok: true,
-          message: 'Berhasil menambah organisasi'
+          message: 'Berhasil meminta permohonan perbaikan'
         }
       } catch (error) {
         throw new TRPCError({

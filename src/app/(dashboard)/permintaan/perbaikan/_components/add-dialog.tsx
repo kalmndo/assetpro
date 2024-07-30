@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { api } from "@/trpc/react"
+import { api, RouterOutputs } from "@/trpc/react"
 import { Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -15,14 +15,17 @@ import { Form } from "./form"
 import { toast } from "sonner"
 
 
-export const AddDialog = () => {
-  const { data } = api.barangMasuk.findByPo.useQuery()
+export const AddDialog = ({
+  asets
+}: {
+  asets: RouterOutputs['daftarAset']['getSelectUser']
+}) => {
   const router = useRouter()
-  const { mutateAsync, isPending } = api.barangMasuk.create.useMutation()
+  const { mutateAsync, isPending } = api.perbaikan.create.useMutation()
   const [open, setOpen] = useState(false)
 
   async function onSubmit(values: any) {
-
+    console.log("values", values)
     try {
       const result = await mutateAsync(values)
       setOpen(false)
@@ -47,9 +50,9 @@ export const AddDialog = () => {
           <DialogTitle>Buat Permintaan Perbaikan</DialogTitle>
         </DialogHeader>
         <Form
-          data={data}
           isPending={isPending}
           onSubmit={onSubmit}
+          asets={asets}
         />
       </DialogContent>
     </Dialog>

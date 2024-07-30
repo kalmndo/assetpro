@@ -545,9 +545,10 @@ model FtkbItemPemohonAset {
 
 model Perbaikan {
     id             String  @id @default(cuid())
+    no             String
     userId         String
     teknisiId      String?
-    deskripsi      String
+    keluhan        String
     asetId         String
     status         String
     catatanTeknisi String?
