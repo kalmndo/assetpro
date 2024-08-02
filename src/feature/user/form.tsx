@@ -62,6 +62,13 @@ const items: Items[] = [
     separator: true
   },
   {
+    id: ROLE.SELECT_TEKNISI.id,
+    label: ROLE.SELECT_TEKNISI.name,
+  },
+  {
+    separator: true
+  },
+  {
     id: ROLE.EVALUASI_HARGA_READ.id,
     label: ROLE.EVALUASI_HARGA_READ.name,
   },

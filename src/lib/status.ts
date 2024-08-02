@@ -44,7 +44,17 @@ export const STATUS = {
     id: 'in',
     name: 'Barang di terima di gudang',
     color: '#15803c'
-  }
+  },
+  TEKNISI_DISPOSITION: {
+    id: 'diserahkan-teknisi',
+    name: 'Diserahkan Ke Teknisi',
+    color: '#15803c'
+  },
+  TEKNISI_FIXING: {
+    id: 'teknisi-fixing',
+    name: 'Teknisi sedang memperbaiki',
+    color: '#15803c'
+  },
 }
 
 export const getStatus = (id: string) => {

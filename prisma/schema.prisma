@@ -50,6 +50,7 @@ model User {
     EvaluasiVendorTerpilihUser EvaluasiVendorTerpilihUser[]
     DaftarAset                 DaftarAset[]
     Perbaikan                  Perbaikan[]
+    Teknisi                    Teknisi?
 }
 
 model UserRole {
@@ -553,12 +554,43 @@ model Perbaikan {
     status         String
     catatanTeknisi String?
 
-    User User       @relation(fields: [userId], references: [id])
-    Aset DaftarAset @relation(fields: [asetId], references: [id])
+    User    User       @relation(fields: [userId], references: [id])
+    Aset    DaftarAset @relation(fields: [asetId], references: [id])
+    Teknisi Teknisi?   @relation(fields: [teknisiId], references: [id])
 
     createdAt         DateTime            @default(now())
     updatedAt         DateTime            @updatedAt
     PerbaikanExternal PerbaikanExternal[]
+    PerbaikanHistory  PerbaikanHistory[]
+    PerbaikanKomponen PerbaikanKomponen[]
+}
+
+model PerbaikanKomponen {
+    id          String  @id @default(cuid())
+    perbaikanId String
+    type        Int
+    name        String?
+    barangId    String?
+    biaya       Int
+    jumlah      Int
+
+    Perbaikan Perbaikan     @relation(fields: [perbaikanId], references: [id])
+    Barang    MasterBarang? @relation(fields: [barangId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model PerbaikanHistory {
+    id          String  @id @default(cuid())
+    perbaikanId String
+    desc        String
+    catatan     String?
+
+    Perbaikan Perbaikan @relation(fields: [perbaikanId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model PerbaikanExternal {
@@ -622,6 +654,15 @@ model Vendor {
     PenawaranHargaVendor      PenawaranHargaVendor[]
     PO                        PO[]
     PerbaikanExternal         PerbaikanExternal[]
+}
+
+model Teknisi {
+    id   String @unique // userId
+    User User   @relation(fields: [id], references: [id])
+
+    createdAt DateTime    @default(now())
+    updatedAt DateTime    @updatedAt
+    Perbaikan Perbaikan[]
 }
 
 model DepartmentUnit {
@@ -725,6 +766,7 @@ model MasterBarang {
     KartuStok                 KartuStok[]
     PermintaanPembelianBarang PermintaanPembelianBarang[]
     FtkbItem                  FtkbItem[]
+    PerbaikanKomponen         PerbaikanKomponen[]
 }
 
 model MasterBarangUnit {

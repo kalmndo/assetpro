@@ -24,6 +24,10 @@ export const ROLE = {
     id: 'pembelian-select-approve',
     name: 'Permintaan Pembelian (select vendor)',
   },
+  SELECT_TEKNISI: {
+    id: 'perbaikan-select-approve',
+    name: 'Perbaikan (select teknisi)',
+  },
   EVALUASI_HARGA_READ: {
     id: 'evaluasi-read',
     name: 'Evaluasi Harga (view)',
