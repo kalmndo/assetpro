@@ -21,18 +21,24 @@ import {
 } from "@/components/ui/form"
 import { z } from "zod";
 import { useEffect, useState } from "react";
-import { api } from "@/trpc/react";
+import { api, RouterOutputs } from "@/trpc/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CurrencyInput } from "@/components/currency-input";
 import SearchSelect from "@/components/search-select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getInitials } from "@/lib/utils";
 
 const formSchema = z.object({
   "type": z.string().min(1).max(255),
   "name": z.string().min(1).max(255),
-  "barangId": z.string().min(1).max(255),
+  "imId": z.string().min(1).max(255),
+  "items": z.array(z.string()).refine((value) => value.some((item) => item), {
+    message: "Wajib pilih minimal 1 barang.",
+  }),
   "biaya": z.string().min(1).max(255),
   "jumlah": z.string().min(1).max(255),
 })
@@ -46,16 +52,19 @@ const formSchema = z.object({
 const TheForm = ({
   isPending,
   onSubmit,
+  imComponents
 }: {
   isPending: boolean,
   onSubmit(value: any): void,
+  imComponents: RouterOutputs['perbaikan']['getImConponents']
 }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       type: '0',
       name: '',
-      barangId: '',
+      imId: '',
+      items: [],
       biaya: '',
       jumlah: ''
     },
@@ -66,12 +75,14 @@ const TheForm = ({
 
   useEffect(() => {
     if (formType === '0') {
-      setValue("barangId", '')
+      setValue("imId", '')
+      setValue("items", [])
       setValue("name", '1')
       setValue("biaya", '1')
       setValue("jumlah", '1')
     } else if (formType === '1') {
-      setValue("barangId", '1')
+      setValue("imId", '1')
+      setValue("items", ['1'])
       setValue("name", '')
       setValue("biaya", '')
       setValue("jumlah", '')
@@ -104,13 +115,87 @@ const TheForm = ({
             )}
           />
           {form.watch("type") === '0' ?
-            <SearchSelect
-              name="barangId"
-              form={form}
-              label="Pilih barang"
-              placeholder="Pilih barang"
-              data={[{ value: '1', label: '1' }]}
-            />
+            <>
+              <SearchSelect
+                name="imId"
+                form={form}
+                label="Pilih Internal Memo"
+                placeholder="Pilih Internal Memo"
+                data={imComponents?.map((v) => ({ label: v.no, value: v.imId }))}
+              />
+              {
+                form.watch("imId") ?
+                  imComponents.find((v) => v.imId === form.watch("imId"))?.barang.length! > 0 ?
+                    <FormField
+                      control={form.control}
+                      name="items"
+                      render={() => (
+                        <FormItem>
+                          {imComponents.find((v) => v.imId === form.watch('imId'))?.barang.map((item) => (
+                            <FormField
+                              key={item.id}
+                              control={form.control}
+                              name="items"
+                              render={({ field }) => {
+                                return (
+                                  <FormItem
+                                    key={item.id}
+                                    className="flex flex-row items-center justify-between space-x-3 space-y-0 mt-4"
+                                  >
+                                    <div
+                                      className="flex flex-row items-center space-x-3 space-y-0"
+                                    >
+                                      <FormControl>
+                                        <Checkbox
+                                          checked={field.value?.includes(item.id)}
+                                          onCheckedChange={(checked) => {
+                                            return checked
+                                              ? field.onChange([...field.value, item.id])
+                                              : field.onChange(
+                                                field.value?.filter(
+                                                  (value) => value !== item.id
+                                                )
+                                              )
+                                          }}
+                                        />
+                                      </FormControl>
+                                      <div className='flex space-x-2 items-center'>
+                                        <Avatar className='rounded-sm w-12 h-12'>
+                                          {/* @ts-ignore */}
+                                          <AvatarImage src={item.image} alt="@shadcn" />
+                                          <AvatarFallback>{getInitials(item.name)}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex flex-col">
+                                          <span className='truncate font-medium text-sm'>
+                                            {item.name}
+                                          </span>
+                                          <span className='truncate text-sm'>
+                                            {item.code}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="flex ">
+                                      <p className="text-sm font-medium">
+                                        {item.qty} {item.uom}
+                                      </p>
+                                    </div>
+                                  </FormItem>
+                                )
+                              }}
+                            />
+                          ))
+                          }
+                        </FormItem>
+                      )}
+                    />
+                    :
+                    <div className="flex justify-center">
+                      <p className="my-4">Tidak ada barang</p>
+                    </div>
+                  : <div></div>
+              }
+            </>
             :
             <>
               <FormField
@@ -176,8 +261,10 @@ const TheForm = ({
 
 export default function TambahKomponenDialog({
   id,
+  imComponents
 }: {
   id: string,
+  imComponents: RouterOutputs['perbaikan']['getImConponents']
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -185,7 +272,6 @@ export default function TambahKomponenDialog({
 
   const onSubmit = async (v: z.infer<typeof formSchema>) => {
     try {
-      console.log("v", v)
       const result = await mutateAsync({ perbaikanId: id, ...v })
       toast.success(result.message)
       router.refresh()
@@ -207,7 +293,7 @@ export default function TambahKomponenDialog({
         <DialogHeader>
           <DialogTitle>Tambah komponen</DialogTitle>
         </DialogHeader>
-        <TheForm onSubmit={onSubmit} isPending={isPending} />
+        <TheForm onSubmit={onSubmit} isPending={isPending} imComponents={imComponents} />
       </DialogContent>
     </Dialog>
   )

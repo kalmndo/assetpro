@@ -43,7 +43,7 @@ export const perbaikanRouter = createTRPCRouter({
           },
           PerbaikanKomponen: {
             orderBy: { createdAt: 'desc' },
-            include: { Barang: true }
+            include: { Barang: { include: { Barang: true, Permintaan: true } } }
           }
         }
       })
@@ -65,14 +65,31 @@ export const perbaikanRouter = createTRPCRouter({
       const p = result.User
       const b = result.Aset.MasterBarang
 
-      const comps = result.PerbaikanKomponen.map((v) => ({
-        id: v.id,
-        type: v.type,
-        name: v.name,
-        jumlah: v.jumlah,
-        biaya: `Rp ${v.biaya.toLocaleString("id-ID")}`,
-        b: v.biaya
-      }))
+      const comps = result.PerbaikanKomponen.map((v) => {
+        if (v.type === 0) {
+          return {
+            id: v.id,
+            type: v.type,
+            name: v.Barang?.Barang.name,
+            code: v.Barang?.Barang.fullCode,
+            // noInv: v.Barang?.Barang.
+            noIm: v.Barang?.Permintaan.no,
+            imId: v.Barang?.Permintaan.id,
+            jumlah: v.jumlah,
+            biaya: `Rp ${v.biaya.toLocaleString("id-ID")}`,
+            b: v.biaya
+          }
+        }
+        return {
+          id: v.id,
+          type: v.type,
+          name: v.name,
+          jumlah: v.jumlah,
+          biaya: `Rp ${v.biaya.toLocaleString("id-ID")}`,
+          b: v.biaya
+        }
+      })
+
 
       const totalComps = comps.map((v) => v.b).reduce((a, b) => a + b, 0)
 
@@ -105,12 +122,73 @@ export const perbaikanRouter = createTRPCRouter({
         components: comps.length === 0 ? [] : [...comps, { id: "total", type: "", biaya: `Rp ${totalComps.toLocaleString("id-ID")}`, jumlah: '', name: "" }]
       }
     }),
+  getImConponents: protectedProcedure
+    .input(z.object({
+      id: z.string()
+    }))
+    .query(async ({ ctx, input }) => {
+      const { id } = input
+
+      const relatedBarangIds = await ctx.db.perbaikanKomponen.findMany({
+        where: {
+          barangId: {
+            not: null
+          }
+        },
+        select: {
+          barangId: true
+        }
+      });
+
+      const relatedIds = relatedBarangIds.map(item => item.barangId!);
+
+      const result = await ctx.db.imPerbaikan.findMany({
+        where: {
+          perbaikanId: id
+        },
+        include: {
+          IM: {
+            include: {
+              PermintaanBarangBarang: {
+                where: {
+                  id: {
+                    notIn: relatedIds
+                  },
+                  status: STATUS.SELESAI.id,
+                },
+                include: {
+                  PerbaikanKomponen: true,
+                  Barang: {
+                    include: { Uom: true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      })
+
+      return result.map((v) => ({
+        id: v.id,
+        imId: v.imId,
+        no: v.IM.no,
+        barang: v.IM.PermintaanBarangBarang.map((v) => ({
+          id: v.id,
+          barangId: v.barangId,
+          image: v.Barang.image,
+          name: v.Barang.name,
+          code: v.Barang.fullCode,
+          qty: v.qty,
+          uom: v.Barang.Uom.name
+        }))
+      }))
+    }),
   addComponent: protectedProcedure
     .input(z.object({
       perbaikanId: z.string(),
       type: z.string(),
       name: z.string(),
-      barangId: z.string(),
+      items: z.array(z.string()),
       biaya: z.string(),
       jumlah: z.string()
     }))
@@ -119,7 +197,7 @@ export const perbaikanRouter = createTRPCRouter({
         perbaikanId,
         type,
         name,
-        barangId,
+        items,
         biaya,
         jumlah
       } = input
@@ -127,13 +205,33 @@ export const perbaikanRouter = createTRPCRouter({
         await ctx.db.$transaction(async (tx) => {
 
           if (type === '0') {
-            // await tx.perbaikanKomponen.create({
-            //   data: {
-            //     type
+            const barang = await tx.permintaanBarangBarang.findMany({
+              where: {
+                id: {
+                  in: items
+                }
+              },
+              include: {
+                PermintaanBarangBarangSplit: { include: { PBSPBB: { include: { PembelianBarang: { include: { PenawaranHargaBarangVendor: { select: { totalHarga: true } } } } } } } },
+                Barang: true
+              }
+            })
 
-            //   }
+            const newBarang = barang.map((v) => {
+              const biaya = v.PermintaanBarangBarangSplit.flatMap((v) => v.PBSPBB.flatMap((v) => v.PembelianBarang.PenawaranHargaBarangVendor.flatMap((v) => v.totalHarga!))).reduce((a, b) => a + b, 0)
 
-            // })
+              return {
+                perbaikanId,
+                barangId: v.id,
+                type: Number(type),
+                biaya,
+                jumlah: Number(v.qty)
+              }
+            })
+
+            await tx.perbaikanKomponen.createMany({
+              data: newBarang
+            })
           } else {
             await tx.perbaikanKomponen.create({
               data: {

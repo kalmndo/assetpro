@@ -72,7 +72,7 @@ model PermintaanBarang {
     perihal    String
     ruangId    String
     pemohondId String
-    peruntukan Int    @default(0)
+    peruntukan Int    @default(0) // 0 personal 1 stock 2 perbaikan
 
     Pemohon                User                     @relation(fields: [pemohondId], references: [id])
     Ruang                  MasterRuang              @relation(fields: [ruangId], references: [id])
@@ -82,6 +82,7 @@ model PermintaanBarang {
     updatedAt       DateTime          @updatedAt
     PBPP            PBPP[]
     FtkbItemPemohon FtkbItemPemohon[]
+    ImPerbaikan     ImPerbaikan[]
 }
 
 model PermintaanBarangBarang {
@@ -101,8 +102,9 @@ model PermintaanBarangBarang {
     PermintaanBarangBarangHistory      PermintaanBarangBarangHistory[]
     PermintaanBarangBarangKodeAnggaran PermintaanBarangBarangKodeAnggaran[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt         DateTime            @default(now())
+    updatedAt         DateTime            @updatedAt
+    PerbaikanKomponen PerbaikanKomponen[]
 }
 
 // Persetujuan History
@@ -563,6 +565,20 @@ model Perbaikan {
     PerbaikanExternal PerbaikanExternal[]
     PerbaikanHistory  PerbaikanHistory[]
     PerbaikanKomponen PerbaikanKomponen[]
+    ImPerbaikan       ImPerbaikan[]
+}
+
+model ImPerbaikan {
+    id String @id @default(cuid())
+
+    perbaikanId String
+    imId        String
+
+    Perbaikan Perbaikan        @relation(fields: [perbaikanId], references: [id])
+    IM        PermintaanBarang @relation(fields: [imId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model PerbaikanKomponen {
@@ -571,11 +587,12 @@ model PerbaikanKomponen {
     type        Int
     name        String?
     barangId    String?
+    noInv       String?
     biaya       Int
     jumlah      Int
 
-    Perbaikan Perbaikan     @relation(fields: [perbaikanId], references: [id])
-    Barang    MasterBarang? @relation(fields: [barangId], references: [id])
+    Perbaikan Perbaikan               @relation(fields: [perbaikanId], references: [id])
+    Barang    PermintaanBarangBarang? @relation(fields: [barangId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -766,7 +783,6 @@ model MasterBarang {
     KartuStok                 KartuStok[]
     PermintaanPembelianBarang PermintaanPembelianBarang[]
     FtkbItem                  FtkbItem[]
-    PerbaikanKomponen         PerbaikanKomponen[]
 }
 
 model MasterBarangUnit {

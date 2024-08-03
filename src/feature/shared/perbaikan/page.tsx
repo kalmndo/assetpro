@@ -19,11 +19,13 @@ import TableKomponen from "./table-komponen";
 export default function Page({
   data,
   teknisi,
+  imComponents,
   vendors
 }: {
   data: RouterOutputs['perbaikan']['get'],
   teknisi: SelectProps[],
-  vendors: SelectProps[]
+  vendors: SelectProps[],
+  imComponents: RouterOutputs['perbaikan']['getImConponents']
 }) {
   const { color, name: status } = getStatus(data.status)
 
@@ -121,7 +123,7 @@ export default function Page({
             <div className="flex justify-between my-2 items-center">
               <p className="font-semibold text-lg">Komponen perbaikan</p>
               {data.isTeknisiCanDone &&
-                <TambahKomponenDialog id={data.id} />
+                <TambahKomponenDialog id={data.id} imComponents={imComponents} />
               }
             </div>
             <TableKomponen data={data.components} />

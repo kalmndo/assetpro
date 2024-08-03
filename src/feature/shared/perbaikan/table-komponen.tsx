@@ -4,11 +4,14 @@ import { type ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/data-table/column-header'
 import { z } from 'zod'
 import { RouterOutputs } from "@/trpc/react";
+import Link from "next/link";
 
 const schema = z.object({
   id: z.string(),
   type: z.number(),
   name: z.string().nullable(),
+  noIm: z.string().nullable(),
+  imId: z.string().nullable(),
   jumlah: z.number(),
   biaya: z.string(),
 })
@@ -37,10 +40,21 @@ const columns: ColumnDef<Schema>[] = [
       <DataTableColumnHeader column={column} title='Nama' />
     ),
     cell: ({ row }) => {
+      const isUser = window.location.pathname.split("/")[1] === 'permintaan' ? true : false
       return (
-        <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-          {row.getValue('name')}
-        </span>
+        <div className="space-y-2">
+          <p>{row.getValue('name')}</p>
+          {
+
+            row.original.noIm &&
+            <div className="flex space-x-3">
+              <p className="font-semibold">No IM: </p>
+              <Link href={`${isUser ? '/permintaan/barang/' : '/permintaan-barang/'}${row.original.imId}`}>
+                <p className="text-blue-600 font-semibold">{row.original.noIm}</p>
+              </Link>
+            </div>
+          }
+        </div>
       )
     },
     enableSorting: false,
@@ -84,6 +98,7 @@ const columns: ColumnDef<Schema>[] = [
 export default function TableKomponen({ data }: { data: RouterOutputs['perbaikan']['get']['components'] }) {
   return (
     <DataTable
+      // @ts-ignore
       data={data}
       // @ts-ignore
       columns={columns}

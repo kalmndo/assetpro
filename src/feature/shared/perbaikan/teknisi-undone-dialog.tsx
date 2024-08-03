@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/form"
 import { z } from "zod";
 import { useEffect, useState } from "react";
-import { api } from "@/trpc/react";
+import { api, RouterOutputs } from "@/trpc/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -44,6 +44,7 @@ const TheForm = ({
   isPending: boolean,
   onSubmit(value: any): void,
   vendors: SelectProps[]
+
 }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -98,10 +99,9 @@ const TheForm = ({
               form={form}
               label="Pilih vendor"
               placeholder="Pilih vendor"
-              data={vendors}
+              data={[]}
             />
           }
-
           <FormField
             control={form.control}
             name="catatan"
