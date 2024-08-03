@@ -1,4 +1,5 @@
 "use client"
+
 import {
   Dialog,
   DialogContent,
@@ -21,33 +22,86 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { z } from "zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import SearchSelect from "@/components/search-select";
+import { SelectProps } from "@/lib/type";
 
 const formSchema = z.object({
+  "type": z.string().min(1).max(255),
   "catatan": z.string().min(1).max(255),
+  "vendorId": z.string().min(1).max(255),
 })
 
 const TheForm = ({
   isPending,
   onSubmit,
+  vendors
 }: {
   isPending: boolean,
   onSubmit(value: any): void,
+  vendors: SelectProps[]
 }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      catatan: ''
+      type: '0',
+      catatan: '',
+      vendorId: ''
     },
   })
+
+  const formType = form.watch("type")
+  const setValue = form.setValue
+
+  useEffect(() => {
+    if (formType === "0") {
+      setValue("catatan", '')
+      setValue('vendorId', '')
+    } else {
+      setValue("catatan", '')
+      setValue('vendorId', '')
+    }
+  }, [formType, setValue])
 
   return (
     <Form {...form}>
       <form noValidate onSubmit={form.handleSubmit(onSubmit)} >
         <div className="space-y-2">
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Type</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pilih tipe" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="0">Tidak selesai</SelectItem>
+                    <SelectItem value="1">Tidak selesai dan kirim ke external</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {formType === '1' &&
+            <SearchSelect
+              name="vendorId"
+              form={form}
+              label="Pilih vendor"
+              placeholder="Pilih vendor"
+              data={vendors}
+            />
+          }
+
           <FormField
             control={form.control}
             name="catatan"
@@ -77,8 +131,10 @@ const TheForm = ({
 
 export default function TeknisiUndoneDialog({
   id,
+  vendors
 }: {
   id: string,
+  vendors: SelectProps[]
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -107,7 +163,7 @@ export default function TeknisiUndoneDialog({
             Apakah kamu yakin untuk menolak permintaan ini?
           </DialogDescription>
         </DialogHeader>
-        <TheForm onSubmit={onSubmit} isPending={isPending} />
+        <TheForm onSubmit={onSubmit} isPending={isPending} vendors={vendors} />
       </DialogContent>
     </Dialog>
   )

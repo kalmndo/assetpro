@@ -4,19 +4,27 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
-import { RouterOutputs } from "@/trpc/react";
+import { type RouterOutputs } from "@/trpc/react";
 import { getStatus } from "@/lib/status";
 import RejectDialog from "./reject-dialog";
 import ApproveDialog from "./approve-dialog";
 import SelectTeknisiDialog from "./select-teknisi-dialog";
-import { SelectProps } from "@/lib/type";
+import { type SelectProps } from "@/lib/type";
 import TeknisiTerimaDialog from "./teknisi-terima-dialog";
 import TeknisiDoneDialog from "./teknisi-done-dialog";
 import TeknisiUndoneDialog from "./teknisi-undone-dialog";
 import TambahKomponenDialog from "./tambah-komponen-dialog";
 import TableKomponen from "./table-komponen";
 
-export default function Page({ data, teknisi }: { data: RouterOutputs['perbaikan']['get'], teknisi: SelectProps[] }) {
+export default function Page({
+  data,
+  teknisi,
+  vendors
+}: {
+  data: RouterOutputs['perbaikan']['get'],
+  teknisi: SelectProps[],
+  vendors: SelectProps[]
+}) {
   const { color, name: status } = getStatus(data.status)
 
   return (
@@ -101,13 +109,14 @@ export default function Page({ data, teknisi }: { data: RouterOutputs['perbaikan
               </p>
             </div>
           </div>
-          <div className="flex justify-between">
-            <div className="space-y-2">
-              <p className="text-sm">Teknisi</p>
-              <p className="font-semibold">{data.teknisi}</p>
+          {data.teknisi &&
+            <div className="flex justify-between">
+              <div className="space-y-2">
+                <p className="text-sm">Teknisi</p>
+                <p className="font-semibold">{data.teknisi}</p>
+              </div>
             </div>
-
-          </div>
+          }
           <div className="my-4">
             <div className="flex justify-between my-2 items-center">
               <p className="font-semibold text-lg">Komponen perbaikan</p>
@@ -135,7 +144,7 @@ export default function Page({ data, teknisi }: { data: RouterOutputs['perbaikan
           }
           {data.isTeknisiCanDone &&
             <div className="flex justify-end space-x-4">
-              <TeknisiUndoneDialog id={data.id} />
+              <TeknisiUndoneDialog id={data.id} vendors={vendors} />
               <TeknisiDoneDialog id={data.id} />
             </div>
           }

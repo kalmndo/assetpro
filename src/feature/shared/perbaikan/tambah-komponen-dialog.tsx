@@ -2,7 +2,6 @@
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -67,15 +66,15 @@ const TheForm = ({
 
   useEffect(() => {
     if (formType === '0') {
-      form.setValue("barangId", '')
-      form.setValue("name", '1')
-      form.setValue("biaya", '1')
-      form.setValue("jumlah", '1')
+      setValue("barangId", '')
+      setValue("name", '1')
+      setValue("biaya", '1')
+      setValue("jumlah", '1')
     } else if (formType === '1') {
-      form.setValue("barangId", '1')
-      form.setValue("name", '')
-      form.setValue("biaya", '')
-      form.setValue("jumlah", '')
+      setValue("barangId", '1')
+      setValue("name", '')
+      setValue("biaya", '')
+      setValue("jumlah", '')
     }
   }, [formType, setValue])
 
