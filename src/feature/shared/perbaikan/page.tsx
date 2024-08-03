@@ -15,6 +15,7 @@ import TeknisiDoneDialog from "./teknisi-done-dialog";
 import TeknisiUndoneDialog from "./teknisi-undone-dialog";
 import TambahKomponenDialog from "./tambah-komponen-dialog";
 import TableKomponen from "./table-komponen";
+import UserTerimaDialog from "./user-terima-dialog";
 
 export default function Page({
   data,
@@ -142,6 +143,11 @@ export default function Page({
           {data.isTeknisiCanAccept &&
             <div className="flex justify-end space-x-4">
               <TeknisiTerimaDialog id={data.id} />
+            </div>
+          }
+          {data.isUserCanAccept &&
+            <div className="flex justify-end space-x-4">
+              <UserTerimaDialog id={data.id} />
             </div>
           }
           {data.isTeknisiCanDone &&

@@ -59,6 +59,7 @@ export const perbaikanRouter = createTRPCRouter({
       const isAtasanCanApprove = result.User.atasanId === userId && result.status === STATUS.PENGAJUAN.id
       const isTeknisiCanAccept = userId === result.teknisiId && result.status === STATUS.TEKNISI_DISPOSITION.id
       const isTeknisiCanDone = userId === result.teknisiId && result.status === STATUS.TEKNISI_FIXING.id
+      const isUserCanAccept = userId === result.userId && result.status === STATUS.TEKNISI_DONE.id
       // teknisi mengeksekusi
       // teknisi selesai
 
@@ -119,6 +120,7 @@ export const perbaikanRouter = createTRPCRouter({
         isCanSelectTeknisi,
         isTeknisiCanAccept,
         isTeknisiCanDone,
+        isUserCanAccept,
         components: comps.length === 0 ? [] : [...comps, { id: "total", type: "", biaya: `Rp ${totalComps.toLocaleString("id-ID")}`, jumlah: '', name: "" }]
       }
     }),
