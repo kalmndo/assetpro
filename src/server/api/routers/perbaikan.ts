@@ -44,7 +44,8 @@ export const perbaikanRouter = createTRPCRouter({
           PerbaikanKomponen: {
             orderBy: { createdAt: 'desc' },
             include: { Barang: { include: { Barang: true, Permintaan: true } } }
-          }
+          },
+          PerbaikanHistory: true
         }
       })
 
@@ -109,6 +110,7 @@ export const perbaikanRouter = createTRPCRouter({
           departmentUnit: p.DepartmentUnit?.name
         },
         teknisi: result.Teknisi?.User.name,
+        catatanTeknisi: result.catatanTeknisi,
         barang: {
           id: b.id,
           name: b.name,
@@ -121,7 +123,8 @@ export const perbaikanRouter = createTRPCRouter({
         isTeknisiCanAccept,
         isTeknisiCanDone,
         isUserCanAccept,
-        components: comps.length === 0 ? [] : [...comps, { id: "total", type: "", biaya: `Rp ${totalComps.toLocaleString("id-ID")}`, jumlah: '', name: "" }]
+        components: comps.length === 0 ? [] : [...comps, { id: "total", type: "", biaya: `Rp ${totalComps.toLocaleString("id-ID")}`, jumlah: '', name: "" }],
+        riwayat: result.PerbaikanHistory
       }
     }),
   getImConponents: protectedProcedure
@@ -347,6 +350,12 @@ export const perbaikanRouter = createTRPCRouter({
               link: `/permintaan/perbaikan/${perbaikan.id}`,
               desc,
               isRead: false,
+            }
+          })
+          await tx.perbaikanHistory.create({
+            data: {
+              perbaikanId: perbaikan.id,
+              desc: 'Meminta permohonan perbaikan'
             }
           })
         })

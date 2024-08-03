@@ -16,6 +16,8 @@ import TeknisiUndoneDialog from "./teknisi-undone-dialog";
 import TambahKomponenDialog from "./tambah-komponen-dialog";
 import TableKomponen from "./table-komponen";
 import UserTerimaDialog from "./user-terima-dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import formatDate from "@/lib/formatDate";
 
 export default function Page({
   data,
@@ -113,12 +115,20 @@ export default function Page({
             </div>
           </div>
           {data.teknisi &&
-            <div className="flex justify-between">
-              <div className="space-y-2">
-                <p className="text-sm">Teknisi</p>
-                <p className="font-semibold">{data.teknisi}</p>
+            <>
+              <div className="flex justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm">Teknisi</p>
+                  <p className="font-semibold">{data.teknisi}</p>
+                </div>
               </div>
-            </div>
+              <div className="flex justify-between my-4">
+                <div className="space-y-2">
+                  <p className="text-sm">Catatan Teknisi</p>
+                  <p className="text-sm">{data.catatanTeknisi}</p>
+                </div>
+              </div>
+            </>
           }
           <div className="my-4">
             <div className="flex justify-between my-2 items-center">
@@ -156,6 +166,30 @@ export default function Page({
               <TeknisiDoneDialog id={data.id} />
             </div>
           }
+        </div>
+        <div className="p-4">
+          <p className="font-semibold text-lg">Riwayat</p>
+          <div className="border rounded-lg p-4">
+            <ScrollArea className="h-[400px]">
+              <div className="w-full max-w-4xl mx-auto ml-4">
+                <div className="relative pl-6 after:absolute after:inset-y-0 after:left-0 after:w-px after:bg-muted-foreground/20">
+                  <div className="grid gap-8">
+                    {data.riwayat.map((v: any, i: number) => {
+                      const { day, hours, minutes, monthName } = formatDate(v.createdAt)
+                      return (
+                        <div key={i} className="grid gap-2 text-sm relative">
+                          <div className="aspect-square w-3 bg-primary rounded-full absolute left-0 translate-x-[-29.5px] z-10 top-1"></div>
+                          <div className="font-medium">{day}, {monthName} {hours}:{minutes} WIB</div>
+                          <div className="font-semibold">{v.desc}</div>
+                          <div className="text-sm text-blue-700">{v.formNo}</div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            </ScrollArea>
+          </div>
         </div>
       </div>
     </div>
