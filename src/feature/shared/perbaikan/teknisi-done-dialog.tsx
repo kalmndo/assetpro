@@ -82,11 +82,11 @@ export default function TeknisiDoneDialog({
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const { mutateAsync, isPending } = api.perbaikan.approve.useMutation()
+  const { mutateAsync, isPending } = api.perbaikan.teknisiDone.useMutation()
 
-  const onSubmit = async () => {
+  const onSubmit = async (v: z.infer<typeof formSchema>) => {
     try {
-      const result = await mutateAsync({ id })
+      const result = await mutateAsync({ id, catatan: v.catatan })
       toast.success(result.message)
       router.refresh()
       setOpen(false)

@@ -55,6 +55,11 @@ export const STATUS = {
     name: 'Teknisi sedang memperbaiki',
     color: '#15803c'
   },
+  TEKNISI_DONE: {
+    id: 'teknisi-done',
+    name: 'Teknisi selesai memperbaiki',
+    color: '#15803c'
+  },
 }
 
 export const getStatus = (id: string) => {

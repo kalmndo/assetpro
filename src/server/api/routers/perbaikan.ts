@@ -530,33 +530,38 @@ export const perbaikanRouter = createTRPCRouter({
           cause: error,
         });
       }
-
     }),
-  update: protectedProcedure
+  teknisiDone: protectedProcedure
     .input(z.object({
       id: z.string(),
-      name: z.string(),
+      catatan: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
-      const {
-        id,
-        name,
-      } = input
-
+      const { id, catatan } = input
       try {
+        await ctx.db.$transaction(async (tx) => {
+          await tx.perbaikan.update({
+            where: {
+              id
+            },
+            data: {
+              catatanTeknisi: catatan,
+              status: STATUS.TEKNISI_DONE.id
+            }
+          })
 
-        await ctx.db.department.update({
-          where: {
-            id
-          },
-          data: {
-            name
-          },
+          await tx.perbaikanHistory.create({
+            data: {
+              perbaikanId: id,
+              desc: `Teknisi selesai memperbaiki dan mengirim barang ke user`,
+            }
+          })
         })
         return {
           ok: true,
-          message: 'Berhasil mengubah organisasi'
+          message: 'Berhasil menyelesaikan perbaikan'
         }
+
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -565,23 +570,44 @@ export const perbaikanRouter = createTRPCRouter({
         });
       }
     }),
-  remove: protectedProcedure
+  userTerima: protectedProcedure
     .input(z.object({
-      id: z.string(),
+      id: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
-      const {
-        id,
-      } = input
-
+      const { id } = input
       try {
-        await ctx.db.department.delete({
-          where: { id },
+        await ctx.db.$transaction(async (tx) => {
+          const res = await tx.perbaikan.update({
+            where: {
+              id
+            },
+            data: {
+              status: STATUS.SELESAI.id
+            },
+            include: {
+              Aset: true
+            }
+          })
+          // TODO: Update status jadi used
+          // await tx.daftarAset.update({
+          //   where: {
+          //     id: res.Aset.id
+          //   },
+          // })
+
+          await tx.perbaikanHistory.create({
+            data: {
+              perbaikanId: id,
+              desc: "Telah di terima oleh user"
+            }
+          })
         })
         return {
           ok: true,
-          message: 'Berhasil menghapus organisasi'
+          message: 'Berhasil menyelesaikan perbaikan'
         }
+
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -590,5 +616,4 @@ export const perbaikanRouter = createTRPCRouter({
         });
       }
     }),
-
 });
