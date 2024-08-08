@@ -1,9 +1,7 @@
 "use client"
-
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -26,47 +24,35 @@ import { useEffect, useState } from "react";
 import { api, RouterOutputs } from "@/trpc/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CurrencyInput } from "@/components/currency-input";
 import SearchSelect from "@/components/search-select";
-import { SelectProps } from "@/lib/type";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getInitials } from "@/lib/utils";
 
 const formSchema = z.object({
-  "type": z.string().min(1).max(255),
-  "catatan": z.string().min(1).max(255),
-  "vendorId": z.string().min(1).max(255),
+  "name": z.string().min(1).max(255),
+  "biaya": z.string().min(1).max(255),
+  "jumlah": z.string().min(1).max(255),
 })
 
 const TheForm = ({
   isPending,
   onSubmit,
-  vendors
 }: {
   isPending: boolean,
   onSubmit(value: any): void,
-  vendors: SelectProps[]
-
 }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: '0',
-      catatan: '',
-      vendorId: ''
+      name: '',
+      biaya: '',
+      jumlah: ''
     },
   })
-
-  const formType = form.watch("type")
-  const setValue = form.setValue
-
-  useEffect(() => {
-    if (formType === "0") {
-      setValue("catatan", '')
-      setValue('vendorId', '')
-    } else {
-      setValue("catatan", '')
-      setValue('vendorId', '')
-    }
-  }, [formType, setValue])
 
   return (
     <Form {...form}>
@@ -74,42 +60,44 @@ const TheForm = ({
         <div className="space-y-2">
           <FormField
             control={form.control}
-            name="type"
+            name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih tipe" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="0">Tidak selesai</SelectItem>
-                    <SelectItem value="1">Tidak selesai dan kirim ke external</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormLabel>Nama</FormLabel>
+                <FormControl>
+                  <Input placeholder="Nama" {...field} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          {formType === '1' &&
-            <SearchSelect
-              name="vendorId"
-              form={form}
-              label="Pilih vendor"
-              placeholder="Pilih vendor"
-              data={vendors}
-            />
-          }
           <FormField
             control={form.control}
-            name="catatan"
+            name="jumlah"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Catatan</FormLabel>
+                <FormLabel>Jumlah</FormLabel>
                 <FormControl>
-                  <Input placeholder="Catatan" {...field} />
+                  <Input type="number" placeholder="Jumlah" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="biaya"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Biaya</FormLabel>
+                <FormControl>
+                  <CurrencyInput
+                    // {...field}
+                    placeholder="Rp ..."
+                    onValueChange={(_v, _n, value) => {
+                      form.setValue("biaya", value!.value)
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -119,9 +107,9 @@ const TheForm = ({
         <DialogFooter className="mt-4">
           <Button
             type="submit"
-            disabled={!form.formState.isDirty || !form.formState.isValid || isPending}
+            disabled={isPending}
           >
-            Submit
+            Tambah
           </Button>
         </DialogFooter>
       </form>
@@ -129,20 +117,18 @@ const TheForm = ({
   )
 }
 
-export default function TeknisiUndoneDialog({
+export default function TambahKomponenDialog({
   id,
-  vendors
 }: {
   id: string,
-  vendors: SelectProps[]
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const { mutateAsync, isPending } = api.perbaikan.teknisiUndoneExternal.useMutation()
+  const { mutateAsync, isPending } = api.perbaikanEksternal.addComponent.useMutation()
 
   const onSubmit = async (v: z.infer<typeof formSchema>) => {
     try {
-      const result = await mutateAsync({ id, ...v })
+      const result = await mutateAsync({ id: id, ...v })
       toast.success(result.message)
       router.refresh()
       setOpen(false)
@@ -154,16 +140,16 @@ export default function TeknisiUndoneDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="lg" variant={'outline'}>Tidak Selesai</Button>
+        <Button size="sm" variant={'secondary'}>
+          <Plus size={14} className="mr-2" />
+          Tambah komponen
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Tidak selesai</DialogTitle>
-          <DialogDescription>
-            Apakah kamu yakin untuk menolak permintaan ini?
-          </DialogDescription>
+          <DialogTitle>Tambah komponen</DialogTitle>
         </DialogHeader>
-        <TheForm onSubmit={onSubmit} isPending={isPending} vendors={vendors} />
+        <TheForm onSubmit={onSubmit} isPending={isPending} />
       </DialogContent>
     </Dialog>
   )

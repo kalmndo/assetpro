@@ -36,6 +36,26 @@ export const ROLE = {
     id: 'evaluasi-approve',
     name: 'Evaluasi Harga (approve)',
   },
+  PERBAIKAN_EKSTERNAL_APPROVE: {
+    id: 'perbaikan-eksternal-approve',
+    name: 'Perbaikan Eksternal (approve)',
+  },
+  PERBAIKAN_EKSTERNAL_ADD_COMPONENT: {
+    id: 'perbaikan-eksternal-komponen',
+    name: 'Perbaikan Eksternal (add components)',
+  },
+  PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_VENDOR: {
+    id: 'perbaikan-eksternal-diserahkan-ke-vendor',
+    name: 'Perbaikan Eksternal (send to vendor)',
+  },
+  PERBAIKAN_EKSTERNAL_TERIMA: {
+    id: 'perbaikan-eksternal-terima',
+    name: 'Perbaikan Eksternal (receive from vendor)',
+  },
+  PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_USER: {
+    id: 'perbaikan-eksternal-diserahkan-ke-user',
+    name: 'Perbaikan Eksternal (send to user)',
+  }
 }
 
 export const getStatus = (id: string) => {

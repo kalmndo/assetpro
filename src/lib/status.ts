@@ -40,6 +40,11 @@ export const STATUS = {
     name: 'Selesai',
     color: '#15803c'
   },
+  TIDAK_SELESAI: {
+    id: 'tidak-selesai',
+    name: 'Tidak selesai',
+    color: '#15803c'
+  },
   BARANG: {
     id: 'in',
     name: 'Barang di terima di gudang',
@@ -58,6 +63,41 @@ export const STATUS = {
   TEKNISI_DONE: {
     id: 'teknisi-done',
     name: 'Teknisi selesai memperbaiki',
+    color: '#15803c'
+  },
+  PERBAIKAN_EKSTERNAL_SELESAI: {
+    id: 'perbaikan-eksternal-selesai',
+    name: 'Perbaikan eksternal selesai',
+    color: '#15803c'
+  },
+  PERBAIKAN_EKSTERNAL_TIDAK_SELESAI: {
+    id: 'perbaikan-eksternal-tidak-selesai',
+    name: 'Perbaikan eksternal tidak selesai',
+    color: '#15803c'
+  },
+  TEKNISI_UNDONE: {
+    id: 'teknisi-undone',
+    name: 'Tidak Selesai',
+    color: '#15803c'
+  },
+  TEKNISI_UNDONE_EXTERNAL: {
+    id: 'perbaikan-eksternal',
+    name: 'Perbaikan eksternal',
+    color: '#15803c'
+  },
+  PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_VENDOR: {
+    id: 'perbaikan-eksternal-diserahkan-ke-vendor',
+    name: 'Diserahkan ke vendor',
+    color: '#15803c'
+  },
+  PERBAIKAN_EKSTERNAL_TERIMA: {
+    id: 'perbaikan-eksternal-terima',
+    name: 'Diterima oleh gudang',
+    color: '#15803c'
+  },
+  PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_USER: {
+    id: 'perbaikan-eksternal-diserahkan-ke-user',
+    name: 'Diserahkan ke user',
     color: '#15803c'
   },
 }

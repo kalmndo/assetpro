@@ -6,6 +6,7 @@ import { RouterOutputs } from "@/trpc/react";
 export default async function Page({ params: { id } }: { params: { id: string } }) {
   const data = await api.perbaikan.get({ id })
   let teknisi: SelectProps[] = []
+  let vendors: SelectProps[] = []
   let imComponents: RouterOutputs['perbaikan']['getImConponents'] = []
 
   if (data.isCanSelectTeknisi) {
@@ -14,11 +15,13 @@ export default async function Page({ params: { id } }: { params: { id: string } 
   }
 
   if (data.isTeknisiCanDone) {
+    const ven = await api.vendor.getSelect()
     const res = await api.perbaikan.getImConponents({ id })
     imComponents = res
+    vendors = ven
   }
 
   return (
-    <Content data={data} teknisi={[]} vendors={[]} imComponents={imComponents} />
+    <Content data={data} teknisi={[]} vendors={vendors} imComponents={imComponents} />
   )
 }

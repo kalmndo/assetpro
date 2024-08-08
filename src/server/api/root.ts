@@ -27,6 +27,7 @@ import { notificationRouter } from "./routers/notification";
 import { kartuStokRouter } from "./routers/kartu-stok";
 import { daftarAsetRouter } from "./routers/daftar-aset";
 import { teknisiRouter } from "./routers/teknisi";
+import { perbaikanEksternalRouter } from "./routers/perbaikan-eksternal";
 
 /**
  * This is the primary router for your server.
@@ -58,6 +59,7 @@ export const appRouter = createTRPCRouter({
   barangMasuk: barangMasukRouter,
   barangKeluar: barangKeluarRouter,
   perbaikan: perbaikanRouter,
+  perbaikanEksternal: perbaikanEksternalRouter,
   vendor: vendorRouter,
   kartuStok: kartuStokRouter,
   daftarAset: daftarAsetRouter,

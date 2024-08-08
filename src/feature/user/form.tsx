@@ -62,6 +62,17 @@ const items: Items[] = [
     separator: true
   },
   {
+    id: ROLE.EVALUASI_HARGA_READ.id,
+    label: ROLE.EVALUASI_HARGA_READ.name,
+  },
+  {
+    id: ROLE.EVALUASI_HARGA_APPROVE.id,
+    label: ROLE.EVALUASI_HARGA_APPROVE.name,
+  },
+  {
+    separator: true
+  },
+  {
     id: ROLE.SELECT_TEKNISI.id,
     label: ROLE.SELECT_TEKNISI.name,
   },
@@ -69,12 +80,31 @@ const items: Items[] = [
     separator: true
   },
   {
-    id: ROLE.EVALUASI_HARGA_READ.id,
-    label: ROLE.EVALUASI_HARGA_READ.name,
+    id: ROLE.PERBAIKAN_EKSTERNAL_APPROVE.id,
+    label: ROLE.PERBAIKAN_EKSTERNAL_APPROVE.name,
   },
   {
-    id: ROLE.EVALUASI_HARGA_APPROVE.id,
-    label: ROLE.EVALUASI_HARGA_APPROVE.name,
+    id: ROLE.PERBAIKAN_EKSTERNAL_APPROVE.id,
+    label: ROLE.PERBAIKAN_EKSTERNAL_APPROVE.name,
+  },
+  {
+    id: ROLE.PERBAIKAN_EKSTERNAL_ADD_COMPONENT.id,
+    label: ROLE.PERBAIKAN_EKSTERNAL_ADD_COMPONENT.name,
+  },
+  {
+    id: ROLE.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_VENDOR.id,
+    label: ROLE.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_VENDOR.name,
+  },
+  {
+    id: ROLE.PERBAIKAN_EKSTERNAL_TERIMA.id,
+    label: ROLE.PERBAIKAN_EKSTERNAL_TERIMA.name,
+  },
+  {
+    id: ROLE.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_USER.id,
+    label: ROLE.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_USER.name,
+  },
+  {
+    separator: true
   },
 ] as const
 

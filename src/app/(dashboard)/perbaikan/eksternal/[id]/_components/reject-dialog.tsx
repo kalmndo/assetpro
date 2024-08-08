@@ -1,5 +1,4 @@
 "use client"
-
 import {
   Dialog,
   DialogContent,
@@ -22,86 +21,33 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { z } from "zod";
-import { useEffect, useState } from "react";
-import { api, RouterOutputs } from "@/trpc/react";
+import { useState } from "react";
+import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import SearchSelect from "@/components/search-select";
-import { SelectProps } from "@/lib/type";
 
 const formSchema = z.object({
-  "type": z.string().min(1).max(255),
   "catatan": z.string().min(1).max(255),
-  "vendorId": z.string().min(1).max(255),
 })
 
 const TheForm = ({
   isPending,
   onSubmit,
-  vendors
 }: {
   isPending: boolean,
   onSubmit(value: any): void,
-  vendors: SelectProps[]
-
 }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: '0',
-      catatan: '',
-      vendorId: ''
+      catatan: ''
     },
   })
-
-  const formType = form.watch("type")
-  const setValue = form.setValue
-
-  useEffect(() => {
-    if (formType === "0") {
-      setValue("catatan", '')
-      setValue('vendorId', '')
-    } else {
-      setValue("catatan", '')
-      setValue('vendorId', '')
-    }
-  }, [formType, setValue])
 
   return (
     <Form {...form}>
       <form noValidate onSubmit={form.handleSubmit(onSubmit)} >
         <div className="space-y-2">
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih tipe" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="0">Tidak selesai</SelectItem>
-                    <SelectItem value="1">Tidak selesai dan kirim ke external</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {formType === '1' &&
-            <SearchSelect
-              name="vendorId"
-              form={form}
-              label="Pilih vendor"
-              placeholder="Pilih vendor"
-              data={vendors}
-            />
-          }
           <FormField
             control={form.control}
             name="catatan"
@@ -119,9 +65,10 @@ const TheForm = ({
         <DialogFooter className="mt-4">
           <Button
             type="submit"
+            variant="destructive"
             disabled={!form.formState.isDirty || !form.formState.isValid || isPending}
           >
-            Submit
+            Tolak
           </Button>
         </DialogFooter>
       </form>
@@ -129,20 +76,18 @@ const TheForm = ({
   )
 }
 
-export default function TeknisiUndoneDialog({
+export default function RejectDialog({
   id,
-  vendors
 }: {
   id: string,
-  vendors: SelectProps[]
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const { mutateAsync, isPending } = api.perbaikan.teknisiUndoneExternal.useMutation()
+  const { mutateAsync, isPending } = api.perbaikanEksternal.reject.useMutation()
 
   const onSubmit = async (v: z.infer<typeof formSchema>) => {
     try {
-      const result = await mutateAsync({ id, ...v })
+      const result = await mutateAsync({ id, catatan: v.catatan })
       toast.success(result.message)
       router.refresh()
       setOpen(false)
@@ -154,16 +99,18 @@ export default function TeknisiUndoneDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="lg" variant={'outline'}>Tidak Selesai</Button>
+        <Button size="lg" variant={'destructive'}>Tolak</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Tidak selesai</DialogTitle>
+          <DialogTitle>Tolak permintaan</DialogTitle>
           <DialogDescription>
             Apakah kamu yakin untuk menolak permintaan ini?
+            <br />
+            Wajib isi catatan untuk menolak barang permintaan
           </DialogDescription>
         </DialogHeader>
-        <TheForm onSubmit={onSubmit} isPending={isPending} vendors={vendors} />
+        <TheForm onSubmit={onSubmit} isPending={isPending} />
       </DialogContent>
     </Dialog>
   )

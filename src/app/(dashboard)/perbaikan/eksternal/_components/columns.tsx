@@ -9,7 +9,7 @@ export const schema = z.object({
   id: z.string(),
   no: z.string(),
   barang: z.string(),
-  keluhan: z.number(),
+  pemohon: z.number(),
   tanggal: z.string(),
   status: z.string(),
 })
@@ -24,7 +24,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`perbaikan/${row.original.id}`} className='flex w-full'>
+        <Link href={`eksternal/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('no')}
           </span>
@@ -41,7 +41,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`perbaikan/${row.original.id}`} className='flex w-full'>
+        <Link href={`eksternal/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('barang')}
           </span>
@@ -50,15 +50,15 @@ export const columns: ColumnDef<Schema>[] = [
     },
   },
   {
-    accessorKey: 'keluhan',
+    accessorKey: 'pemohon',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Keluhan' />
+      <DataTableColumnHeader column={column} title='pemohon' />
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`perbaikan/${row.original.id}`} className='flex w-full'>
+        <Link href={`eksternal/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('keluhan')}
+            {row.getValue('pemohon')}
           </span>
         </Link>
       )
@@ -71,7 +71,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`perbaikan/${row.original.id}`} className='flex w-full'>
+        <Link href={`eksternal/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('tanggal')}
           </span>
@@ -87,7 +87,7 @@ export const columns: ColumnDef<Schema>[] = [
     cell: ({ row }) => {
       const { color, name } = getStatus(row.getValue('status'))
       return (
-        <Link href={`perbaikan/${row.original.id}`} className='flex w-full'>
+        <Link href={`eksternal/${row.original.id}`} className='flex w-full'>
           <span style={{ color }} className='max-w-32 truncate font-semibold sm:max-w-72 md:max-w-[31rem]'>
             {name}
           </span>

@@ -1,12 +1,21 @@
 // import { STATUS } from "@/lib/status";
 import {
   createTRPCRouter,
+  protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 export const vendorRouter = createTRPCRouter({
+  getSelect: protectedProcedure
+    .query(async ({ ctx }) => {
+      const res = await ctx.db.vendor.findMany()
+      return res.map((v) => ({
+        label: v.name,
+        value: v.id
+      }))
+    }),
   getPermintaanPenawaran: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {

@@ -1,4 +1,3 @@
-"use client"
 import { Separator } from "@/components/ui/separator";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import Link from "next/link";
@@ -6,30 +5,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
 import { type RouterOutputs } from "@/trpc/react";
 import { getStatus } from "@/lib/status";
-import RejectDialog from "./reject-dialog";
-import ApproveDialog from "./approve-dialog";
-import SelectTeknisiDialog from "./select-teknisi-dialog";
 import { type SelectProps } from "@/lib/type";
-import TeknisiTerimaDialog from "./teknisi-terima-dialog";
-import TeknisiDoneDialog from "./teknisi-done-dialog";
-import TeknisiUndoneDialog from "./teknisi-undone-dialog";
-import TambahKomponenDialog from "./tambah-komponen-dialog";
-import TableKomponen from "./table-komponen";
-import UserTerimaDialog from "./user-terima-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import formatDate from "@/lib/formatDate";
+import { api } from "@/trpc/server";
+import TambahKomponenDialog from "./_components/tambah-komponen-dialog";
+import TableKomponen from "./_components/table-komponen";
+import RejectDialog from "./_components/reject-dialog";
+import ApproveDialog from "./_components/approve-dialog";
+import SendToVendorDialog from "./_components/send-to-vendor-dialog";
+import ReceiveDialog from "./_components/receive-dialog";
+import SendToUserDialog from "./_components/send-to-user-dialog";
 
-export default function Page({
-  data,
-  teknisi,
-  imComponents,
-  vendors
-}: {
-  data: RouterOutputs['perbaikan']['get'],
-  teknisi: SelectProps[],
-  vendors: SelectProps[],
-  imComponents: RouterOutputs['perbaikan']['getImConponents']
-}) {
+export default async function Page({ params: { id } }: { params: { id: string } }) {
+  const data = await api.perbaikanEksternal.getById({ id })
   const { color, name: status } = getStatus(data.status)
 
   return (
@@ -38,19 +27,19 @@ export default function Page({
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/perbaikan">Permintaan Perbaikan</Link>
+              <Link href="/perbaikan"> Perbaikan eksternal</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Detail permintaan perbaikan</BreadcrumbPage>
+            <BreadcrumbPage>Detail perbaikan eksternal</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
       <div className="my-4 flex justify-between">
         <div className="">
           <h1 className='text-2xl font-bold tracking-tight'>
-            Permintaan perbaikan
+            Perbaikan eksternal
           </h1>
         </div>
         <div className="">
@@ -74,21 +63,21 @@ export default function Page({
               <p className="font-semibold">{data.tanggal}</p>
             </div>
             <div className="space-y-2">
-              <p className="text-sm">Keluhan</p>
-              <p className="text-sm">{data.keluhan}</p>
+              <p className="text-sm">No Perbaikan</p>
+              <p className="text-sm">{data.noPerbaikan}</p>
             </div>
 
           </div>
           <div className="space-y-4">
-            <p className="text-sm">Pemohon</p>
+            <p className="text-sm">Vendor</p>
             <Avatar className='w-14 h-14'>
-              <AvatarImage src={data.pemohon.image ?? ''} alt="@shadcn" />
-              <AvatarFallback>{getInitials(data.pemohon.name)}</AvatarFallback>
+              <AvatarImage src={data.vendor.name ?? ''} alt="@shadcn" />
+              <AvatarFallback>{getInitials(data.vendor.name)}</AvatarFallback>
             </Avatar>
-            <p className="font-semibold">{data.pemohon.name}</p>
+            <p className="font-semibold">{data.vendor.name}</p>
             <div className="text-sm">
-              <p>{data.pemohon.title}</p>
-              <p>{data.pemohon.department} - {data.pemohon.departmentUnit}</p>
+              <p>{data.vendor.alamat}</p>
+              <p>{data.vendor.email} - {data.vendor.nohp} - {data.vendor.whatsapp}</p>
             </div>
           </div>
         </div>
@@ -133,8 +122,8 @@ export default function Page({
           <div className="my-4">
             <div className="flex justify-between my-2 items-center">
               <p className="font-semibold text-lg">Komponen perbaikan</p>
-              {data.isTeknisiCanDone &&
-                <TambahKomponenDialog id={data.id} imComponents={imComponents} />
+              {data.canAddComponents &&
+                <TambahKomponenDialog id={data.id} />
               }
             </div>
             <TableKomponen data={data.components} />
@@ -145,31 +134,19 @@ export default function Page({
               <ApproveDialog id={data.id} />
             </div>
           }
-          {data.isCanSelectTeknisi &&
+          {data.canSendToVendor &&
             <div className="flex justify-end space-x-4">
-              <SelectTeknisiDialog id={data.id} teknisis={teknisi} />
+              <SendToVendorDialog id={data.id} />
             </div>
           }
-          {data.isTeknisiCanAccept &&
+          {data.canReceiveFromVendor &&
             <div className="flex justify-end space-x-4">
-              <TeknisiTerimaDialog id={data.id} />
+              <ReceiveDialog id={data.id} />
             </div>
           }
-          {data.isUserCanAccept &&
+          {data.canSendToUser &&
             <div className="flex justify-end space-x-4">
-              <UserTerimaDialog id={data.id} />
-            </div>
-          }
-          {data.isTeknisiCanDone &&
-            <div className="flex justify-end space-x-4">
-              <TeknisiUndoneDialog id={data.id} vendors={vendors} />
-              <TeknisiDoneDialog id={data.id} />
-            </div>
-          }
-          {
-            data.isTeknisiCanDoneFromEks &&
-            <div className="flex justify-end space-x-4">
-              <TeknisiDoneDialog id={data.id} />
+              <SendToUserDialog id={data.id} />
             </div>
           }
         </div>

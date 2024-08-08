@@ -168,9 +168,9 @@ export const sidelinks: SideLink[] = [
         icon: <LayoutDashboard size={18} />,
       },
       {
-        title: 'Keluar',
+        title: 'Eksternal',
         label: '',
-        href: '/perbaikan/keluar',
+        href: '/perbaikan/eksternal',
         icon: <LayoutDashboard size={18} />,
       },
     ]

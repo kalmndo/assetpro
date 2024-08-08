@@ -61,8 +61,7 @@ export const perbaikanRouter = createTRPCRouter({
       const isTeknisiCanAccept = userId === result.teknisiId && result.status === STATUS.TEKNISI_DISPOSITION.id
       const isTeknisiCanDone = userId === result.teknisiId && result.status === STATUS.TEKNISI_FIXING.id
       const isUserCanAccept = userId === result.userId && result.status === STATUS.TEKNISI_DONE.id
-      // teknisi mengeksekusi
-      // teknisi selesai
+      const isTeknisiCanDoneFromEks = userId === result.teknisiId && result.status === STATUS.PERBAIKAN_EKSTERNAL_SELESAI.id
 
       const p = result.User
       const b = result.Aset.MasterBarang
@@ -123,6 +122,7 @@ export const perbaikanRouter = createTRPCRouter({
         isTeknisiCanAccept,
         isTeknisiCanDone,
         isUserCanAccept,
+        isTeknisiCanDoneFromEks,
         components: comps.length === 0 ? [] : [...comps, { id: "total", type: "", biaya: `Rp ${totalComps.toLocaleString("id-ID")}`, jumlah: '', name: "" }],
         riwayat: result.PerbaikanHistory
       }
@@ -311,7 +311,14 @@ export const perbaikanRouter = createTRPCRouter({
       // @ts-ignore
       const result = await ctx.db.perbaikan.findMany(findMany)
 
-      return result
+      return result.map((v) => ({
+        id: v.id,
+        no: v.no,
+        barang: v.Aset.MasterBarang.name,
+        keluhan: v.keluhan,
+        tanggal: v.createdAt.toLocaleDateString(),
+        status: v.status
+      }))
     }),
   create: protectedProcedure
     .input(z.object({
@@ -572,7 +579,64 @@ export const perbaikanRouter = createTRPCRouter({
           ok: true,
           message: 'Berhasil menyelesaikan perbaikan'
         }
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Kemunkingan terjadi kesalahan sistem, silahkan coba lagi",
+          cause: error,
+        });
+      }
+    }),
 
+  // EKSTERNAL
+  teknisiUndoneExternal: protectedProcedure
+    .input(z.object({
+      id: z.string(),
+      vendorId: z.string(),
+      catatan: z.string()
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { id, catatan, vendorId } = input
+      try {
+        await ctx.db.$transaction(async (tx) => {
+          await tx.perbaikan.update({
+            where: {
+              id
+            },
+            data: {
+              catatanTeknisi: catatan,
+              status: STATUS.TEKNISI_UNDONE_EXTERNAL.id
+            }
+          })
+
+          await tx.perbaikanHistory.create({
+            data: {
+              perbaikanId: id,
+              desc: `Barang dikirim ke eksternal untuk perbaikan lebih lanjut`,
+            }
+          })
+
+          const per = await tx.perbaikanExternal.create({
+            data: {
+              status: STATUS.PENGAJUAN.id,
+              no: Math.random().toString(),
+              perbaikanId: id,
+              vendorId
+            }
+          })
+
+          await tx.perbaikanExternalHistory.create({
+            data: {
+              perbaikanExternalId: per.id,
+              desc: `Permohonan perbaikan eksternal`
+            }
+          })
+        })
+
+        return {
+          ok: true,
+          message: 'Berhasil '
+        }
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -600,6 +664,8 @@ export const perbaikanRouter = createTRPCRouter({
               Aset: true
             }
           })
+
+
           // TODO: Update status jadi used
           // await tx.daftarAset.update({
           //   where: {

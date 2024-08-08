@@ -610,14 +610,44 @@ model PerbaikanHistory {
     updatedAt DateTime @updatedAt
 }
 
+// --------------------------- PERBAIKAN EKSTERNAL --------------------------------
+
 model PerbaikanExternal {
     id          String @id @default(cuid())
+    no          String
     perbaikanId String
     vendorId    String
-    status      String
+    status      String // permohanan, setujui, diserahkan ke vendor, diterima, di terima user
 
     Perbaikan Perbaikan @relation(fields: [perbaikanId], references: [id])
     Vendor    Vendor    @relation(fields: [vendorId], references: [id])
+
+    createdAt                  DateTime                     @default(now())
+    updatedAt                  DateTime                     @updatedAt
+    PerbaikanExternalHistory   PerbaikanExternalHistory[]
+    PerbaikanEksternalKomponen PerbaikanEksternalKomponen[]
+}
+
+model PerbaikanEksternalKomponen {
+    id                  String @id @default(cuid())
+    perbaikanExternalId String
+    name                String
+    biaya               Int
+    jumlah              Int
+
+    PerbaikanEksternal PerbaikanExternal @relation(fields: [perbaikanExternalId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model PerbaikanExternalHistory {
+    id                  String  @id @default(cuid())
+    perbaikanExternalId String
+    desc                String
+    catatan             String?
+
+    PerbaikanExternal PerbaikanExternal @relation(fields: [perbaikanExternalId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
