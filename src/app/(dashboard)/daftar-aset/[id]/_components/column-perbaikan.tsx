@@ -2,25 +2,25 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/data-table/column-header'
 import { z } from 'zod'
-import Link from 'next/link'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { getInitials } from '@/lib/utils'
-
+// id: string; no: string; teknisi: string | undefined; keluhan: string; catatan: string | null; tanggal: string; status: string; biaya: string;
 export const schema = z.object({
+  id: z.string(),
   no: z.string(),
-  pemohon: z.string(),
-  noIm: z.string(),
-  jumlah: z.number(),
-  tanggal: z.string()
+  teknisi: z.string().optional(),
+  keluhan: z.string(),
+  catatan: z.string().nullable(),
+  tanggal: z.string(),
+  status: z.string(),
+  biaya: z.string(),
 })
 
 export type Schema = z.infer<typeof schema>
 
-export const columnsKeluar: ColumnDef<Schema>[] = [
+export const columnPerbaikan: ColumnDef<Schema>[] = [
   {
     accessorKey: 'no',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='No Ftkb' />
+      <DataTableColumnHeader column={column} title='Nomor' />
     ),
     cell: ({ row }) => {
       return (
@@ -35,45 +35,75 @@ export const columnsKeluar: ColumnDef<Schema>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: 'pemohon',
+    accessorKey: 'teknisi',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Pemohon' />
+      <DataTableColumnHeader column={column} title='Teknisi' />
     ),
     cell: ({ row }) => {
       return (
         <div className='flex space-x-2 items-center'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue("pemohon")}
+            {row.getValue("teknisi")}
           </span>
         </div>
       )
     },
   },
   {
-    accessorKey: 'noIm',
+    accessorKey: 'keluhan',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='No Internal Memo' />
+      <DataTableColumnHeader column={column} title='Keluhan' />
     ),
     cell: ({ row }) => {
       return (
         <div className='flex space-x-2 items-center'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue("noIm")}
+            {row.getValue("keluhan")}
           </span>
         </div>
       )
     },
   },
   {
-    accessorKey: 'jumlah',
+    accessorKey: 'catatan',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Jumlah' />
+      <DataTableColumnHeader column={column} title='Catatan Teknisi' />
     ),
     cell: ({ row }) => {
       return (
         <div className='flex space-x-2 items-center'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue("jumlah")}
+            {row.getValue("catatan")}
+          </span>
+        </div>
+      )
+    },
+  },
+  {
+    accessorKey: 'biaya',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Biaya' />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className='flex space-x-2 items-center'>
+          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
+            {row.getValue("biaya")}
+          </span>
+        </div>
+      )
+    },
+  },
+  {
+    accessorKey: 'status',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Status' />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className='flex space-x-2 items-center'>
+          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
+            {row.getValue("status")}
           </span>
         </div>
       )
@@ -95,3 +125,4 @@ export const columnsKeluar: ColumnDef<Schema>[] = [
     },
   },
 ]
+

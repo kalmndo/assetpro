@@ -8,6 +8,7 @@ import { getInitials } from '@/lib/utils'
 
 export const schema = z.object({
   id: z.string(),
+  no: z.string(),
   barang: z.object({
     name: z.string(),
     image: z.string().nullable()
@@ -15,13 +16,27 @@ export const schema = z.object({
   code: z.string(),
   kategori: z.string(),
   satuan: z.number(),
-  jumlah: z.string(),
-  harga: z.string(),
+  pengguna: z.string(),
 })
 
 export type Schema = z.infer<typeof schema>
 
 export const columns: ColumnDef<Schema>[] = [
+  {
+    accessorKey: 'no',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='No Inventaris' />
+    ),
+    cell: ({ row }) => {
+      return (
+        <Link href={`daftar-aset/${row.original.id}`} className='flex w-full'>
+          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
+            {row.getValue('no')}
+          </span>
+        </Link>
+      )
+    },
+  },
   {
     accessorKey: 'barang',
     header: ({ column }) => (
@@ -29,15 +44,17 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <div className='flex space-x-2 items-center'>
-          <Avatar className='rounded-sm w-12 h-12'>
-            <AvatarImage src={row.original.barang.image ?? ''} alt="@shadcn" />
-            <AvatarFallback>{getInitials(row.original.barang.name)}</AvatarFallback>
-          </Avatar>
-          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.original.barang.name}
-          </span>
-        </div>
+        <Link href={`daftar-aset/${row.original.id}`} className='flex w-full'>
+          <div className='flex space-x-2 items-center'>
+            <Avatar className='rounded-sm w-12 h-12'>
+              <AvatarImage src={row.original.barang.image ?? ''} alt="@shadcn" />
+              <AvatarFallback>{getInitials(row.original.barang.name)}</AvatarFallback>
+            </Avatar>
+            <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
+              {row.original.barang.name}
+            </span>
+          </div>
+        </Link>
       )
     },
     enableSorting: false,
@@ -50,7 +67,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`kartu-stok/${row.original.id}`} className='flex w-full'>
+        <Link href={`daftar-aset/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('code')}
           </span>
@@ -65,7 +82,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`kartu-stok/${row.original.id}`} className='flex w-full'>
+        <Link href={`daftar-aset/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('kategori')}
           </span>
@@ -80,7 +97,7 @@ export const columns: ColumnDef<Schema>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`kartu-stok/${row.original.id}`} className='flex w-full'>
+        <Link href={`daftar-aset/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('satuan')}
           </span>
@@ -89,30 +106,15 @@ export const columns: ColumnDef<Schema>[] = [
     },
   },
   {
-    accessorKey: 'jumlah',
+    accessorKey: 'pengguna',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Jumlah' />
+      <DataTableColumnHeader column={column} title='pengguna' />
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`kartu-stok/${row.original.id}`} className='flex w-full'>
+        <Link href={`daftar-aset/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('jumlah')}
-          </span>
-        </Link>
-      )
-    },
-  },
-  {
-    accessorKey: 'harga',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Harga Rerata' />
-    ),
-    cell: ({ row }) => {
-      return (
-        <Link href={`kartu-stok/${row.original.id}`} className='flex w-full'>
-          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('harga')}
+            {row.getValue('pengguna')}
           </span>
         </Link>
       )

@@ -6,20 +6,18 @@ import { z } from 'zod'
 export const schema = z.object({
   id: z.string(),
   no: z.string(),
-  vendor: z.string(),
-  jumlah: z.number(),
-  hargaSatuan: z.string(),
-  hargaTotal: z.string(),
+  pemohon: z.string(),
+  noIm: z.string(),
   tanggal: z.string(),
 })
 
 export type Schema = z.infer<typeof schema>
 
-export const columnsMasuk: ColumnDef<Schema>[] = [
+export const columnsKeluar: ColumnDef<Schema>[] = [
   {
     accessorKey: 'no',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='No Fttb' />
+      <DataTableColumnHeader column={column} title='No' />
     ),
     cell: ({ row }) => {
       return (
@@ -34,60 +32,30 @@ export const columnsMasuk: ColumnDef<Schema>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: 'vendor',
+    accessorKey: 'pemohon',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Vendor' />
+      <DataTableColumnHeader column={column} title='Pemohon' />
     ),
     cell: ({ row }) => {
       return (
         <div className='flex space-x-2 items-center'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue("vendor")}
+            {row.getValue("pemohon")}
           </span>
         </div>
       )
     },
   },
   {
-    accessorKey: 'jumlah',
+    accessorKey: 'noIm',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Jumlah' />
+      <DataTableColumnHeader column={column} title='No IM' />
     ),
     cell: ({ row }) => {
       return (
         <div className='flex space-x-2 items-center'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue("jumlah")}
-          </span>
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: 'hargaSatuan',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Harga satuan' />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className='flex space-x-2 items-center'>
-          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue("hargaSatuan")}
-          </span>
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: 'hargaTotal',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Harga total' />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className='flex space-x-2 items-center'>
-          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue("hargaTotal")}
+            {row.getValue("noIm")}
           </span>
         </div>
       )
@@ -109,3 +77,4 @@ export const columnsMasuk: ColumnDef<Schema>[] = [
     },
   },
 ]
+
