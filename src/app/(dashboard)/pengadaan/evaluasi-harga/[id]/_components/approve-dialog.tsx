@@ -11,6 +11,7 @@ import { api, type RouterOutputs } from "@/trpc/react";
 import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const defaultData = {
   isCreatePo: false,
@@ -18,7 +19,9 @@ const defaultData = {
   nilai: 0,
   title: '',
   total: 0,
-  button: ''
+  button: '',
+  currentUser: '',
+  nextUser: ''
 }
 
 export default function ApproveDialog({
@@ -28,7 +31,7 @@ export default function ApproveDialog({
   id: string,
   barang: RouterOutputs['evaluasiHarga']['get']['barang']
 }) {
-  const [date, setDate] = useState<Date>()
+  const router = useRouter()
   const [dialog, setDialog] = useState({ open: false, data: defaultData as RouterOutputs['evaluasiHarga']['checkEvaluasi'] })
   const { mutateAsync: check, isPending: checkPending } = api.evaluasiHarga.checkEvaluasi.useMutation()
   const { mutateAsync: send, isPending: sendPending } = api.evaluasiHarga.send.useMutation()
@@ -49,7 +52,7 @@ export default function ApproveDialog({
       }
 
       toast.success(result.message)
-
+      router.refresh()
     } catch (error: any) {
       toast.error(error.message)
     }
