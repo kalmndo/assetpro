@@ -660,6 +660,60 @@ model PerbaikanChat {
     updatedAt DateTime @updatedAt
 }
 
+// --------------------------- PEMINJAMAN --------------------------------
+
+// user mohon Peminjaman
+// disetujui atasan
+// tanggal
+// barang diserahkan
+// user terima barang
+// tanggal pengembalian nya nih, kirim notif
+// user kembalikan barang
+// mal terima barang
+model Peminjaman {
+    id         String   @id @default(cuid())
+    no         String
+    type       Int
+    asetId     String?
+    ruangId    String?
+    peminjamId String
+    peruntukan String
+    tglPinjam  DateTime
+    tglKembali DateTime
+    status     String
+    jumlah     Int
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model PeminjamanHistory {
+    id      String  @id @default(cuid())
+    desc    String
+    catatan String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model PeminjamanExternal {
+    id         String   @id @default(cuid())
+    no         String
+    type       String
+    peminjam   String
+    asetId     String?
+    ruangId    String?
+    peruntukan String
+    tglPinjam  DateTime
+    tglKembali DateTime
+    status     String
+    jumlah     Int
+    biaya      Int
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
 // --------------------------- MASTER --------------------------------
 
 model Organisasi {
