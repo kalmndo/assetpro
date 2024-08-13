@@ -116,7 +116,7 @@ function FormDialog({
                           <TableCell className="text-xs text-right text-green-600 font-semibold">{item.toTransfer} {v.uom}</TableCell>
                         </TableRow>
                         {
-                          item.noInventaris.length > 0 &&
+                          item.noInventaris?.length > 0 &&
                           <TableRow>
                             <TableCell colSpan={5} className="p-4">
                               <div className="grid gap-2">

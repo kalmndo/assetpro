@@ -5,219 +5,263 @@ type BarangGroupResultType = {
   golongan: number;
   createdAt: Date;
   updatedAt: Date;
-}[]
+}[];
 
 type CheckKetersediaanByBarangResult = {
-  id: string,
-  image: string,
-  name: string,
-  kode: string
-  permintaan: number,
-  uom: string,
-  tersedia: number,
-  golongan: string,
-  permintaanBarang: PermintaanBarangResult[]
-  imQty: string,
-  qty: '15 Pcs'
-}
+  id: string;
+  image: string;
+  name: string;
+  kode: string;
+  permintaan: number;
+  uom: string;
+  tersedia: number;
+  golongan: string;
+  permintaanBarang: PermintaanBarangResult[];
+  imQty: string;
+  qty: string;
+};
 
 type PermintaanBarangResult = {
-  id: string
-  name: string
-  im: string
-  href: string
-  qty: string
-  permintaan: number
-  qtyOrder: string
-  beli: number,
-  status: string
-}
+  id: string;
+  name: string;
+  im: string;
+  href: string;
+  qty: string;
+  permintaan: number;
+  qtyOrder: string;
+  beli: number;
+  status: string;
+};
+
 
 export default async function checkKetersediaanByBarang(ctx: any, barangGroupResult: BarangGroupResultType) {
   const barangIds = barangGroupResult.map((v) => v.barangId)
   const permintaanBarangIds = barangGroupResult.flatMap((v) => v.permintaanBarang)
 
-  const permintaanBarangResult = await ctx.permintaanBarangBarang.findMany({
-    where: {
-      id: { in: permintaanBarangIds }
-    },
-    include: {
-      Permintaan: {
-        include: {
-          Pemohon: true
-        }
-      }
-    },
-    orderBy: {
-      createdAt: 'desc'
-    }
-  })
+  const permintaanBarangResult = await fetchPermintaanBarang(ctx, permintaanBarangIds);
+
 
   const mergeBarangGroupResult = barangGroupResult.map((v) => {
     // && a.status === STATUS.IM_APPROVE.name
     // TODO: intinya filter status by approve or progress entah lah
-    const permintaanBarang = permintaanBarangResult.filter((a: any) => a.barangId === v.barangId)
     return {
       ...v,
-      permintaanBarang
+      permintaanBarang: permintaanBarangResult.filter((a: any) => a.barangId === v.barangId)
     }
   })
 
-  const filterGolongan = (golongan: number) => mergeBarangGroupResult.filter((v) => v.golongan === golongan);
-
-  const [groupGolonganAset, groupGolonganPersediaan] = [filterGolongan(1), filterGolongan(2)];
-
-  const fetchKetersediaan = async (model: 'daftarAsetGroup' | 'kartuStok', ids: string[]) => {
-    // @ts-ignore
-    const result = await ctx[model].findMany({
-      where: { id: { in: ids } },
-      include: {
-        MasterBarang: {
-          include: {
-            Uom: true,
-            DaftarAset: true
-          }
-        }
-      }
-    })
-    return result
-  }
+  const [groupGolonganAset, groupGolonganPersediaan] = partitionByGolongan(
+    mergeBarangGroupResult
+  );
 
   const [daftarAsetGroup, kartuStok] = await Promise.all([
-    fetchKetersediaan('daftarAsetGroup', barangIds),
-    fetchKetersediaan('kartuStok', barangIds)
+    fetchKetersediaan(ctx, 'daftarAsetGroup', barangIds),
+    fetchKetersediaan(ctx, 'kartuStok', barangIds)
   ]);
 
-  const mapBarang = (barang: any, golonganData: any, qtyField: string) => {
-    return barang.map((v: any) => {
-      const permintaan = golonganData.find((a: any) => a.barangId === v.id);
+  const tersedia = [
+    // @ts-ignore
+    ...mapBarangTersedia(daftarAsetGroup, groupGolonganAset, "idle"),
+    // @ts-ignore
+    ...mapBarangTersedia(kartuStok, groupGolonganPersediaan, "qty"),
+  ];
 
-      const permintaanBarang = permintaan.permintaanBarang.map((item: any) => {
-        // const qty = item.qty - item.qtyOrdered - item.qtyOut
-        return ({
-          id: item.id,
-          pemohonId: item.Permintaan.Pemohon.id,
-          name: item.Permintaan.Pemohon.name,
-          im: item.Permintaan.no,
-          href: item.Permintaan.id,
-          barangId: v.MasterBarang.id,
-          qty: `${item.qty} ${v.MasterBarang.Uom.name}`,
-          permintaan: item.qty,
-          qtyOrdered: item.qtyOrdered,
-          qtyOut: item.qtyOut,
-          imStatus: item.Permintaan.status,
-          status: item.status,
-          createdAt: item.createdAt,
-        })
-      }) as CheckKetersediaanByBarangResult[]
+  const takTersedia = [
+    // @ts-ignore
+    ...mapBarangTakTersedia(daftarAsetGroup, groupGolonganAset, "idle"),
+    // @ts-ignore
+    ...mapBarangTakTersedia(kartuStok, groupGolonganPersediaan, "qty"),
+  ];
 
-      const permintaanBarangId = permintaanBarang.map((v) => v.id)
+  return {
+    tersedia,
+    takTersedia,
+  };
+}
 
+function fetchPermintaanBarang(ctx: any, permintaanBarangIds: string[]) {
+  return ctx.permintaanBarangBarang.findMany({
+    where: {
+      id: { in: permintaanBarangIds },
+    },
+    include: {
+      Permintaan: {
+        include: {
+          Pemohon: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+}
 
-      return {
-        id: permintaan.barangId,
-        image: v.MasterBarang.image,
-        name: v.MasterBarang.name,
-        kode: v.MasterBarang.fullCode,
-        permintaan: permintaan.qty,
-        uom: v.MasterBarang.Uom.name,
-        tersedia: qtyField === 'idle' ? v[qtyField] - v.booked : v[qtyField],
-        ordered: permintaan.ordered,
-        golongan: permintaan.golongan === 1 ? "Aset" : "Persediaan",
-        permintaanBarang,
-        permintaanBarangId,
-        imQty: permintaan.permintaanBarang.length,
-        noInventaris: v.MasterBarang?.DaftarAset.map((v: any) => v.id)
-      };
-    });
-  }
+function partitionByGolongan(mergeBarangGroupResult: BarangGroupResultType) {
+  const filterGolongan = (golongan: number) =>
+    mergeBarangGroupResult.filter((v) => v.golongan === golongan);
 
-  const mapBarangTersedia = (barang: any, golonganData: any, qtyField: string) => {
-    return mapBarang(barang, golonganData, qtyField).map((v: any) => {
-      let quota = v.tersedia
+  return [filterGolongan(1), filterGolongan(2)];
+}
+
+function fetchKetersediaan(ctx: any, model: string, ids: string[]) {
+  // @ts-ignore
+  return ctx[model].findMany({
+    where: { id: { in: ids } },
+    include: {
+      MasterBarang: {
+        include: {
+          Uom: true,
+          DaftarAset: true,
+        },
+      },
+    },
+  });
+}
+
+function mapBarang(
+  barang: any[],
+  golonganData: any[],
+  qtyField: string
+): any[] {
+  return barang.map((v) => {
+    const permintaan = golonganData.find((a) => a.barangId === v.id);
+    const permintaanBarang = permintaan.permintaanBarang.map((item: any) =>
+      mapPermintaanBarang(item, v.MasterBarang)
+    );
+
+    return {
+      id: permintaan.barangId,
+      image: v.MasterBarang.image,
+      name: v.MasterBarang.name,
+      kode: v.MasterBarang.fullCode,
+      permintaan: permintaan.qty,
+      uom: v.MasterBarang.Uom.name,
+      tersedia: calculateTersedia(v, qtyField),
+      ordered: permintaan.ordered,
+      golongan: getGolonganLabel(permintaan.golongan),
+      permintaanBarang,
+      permintaanBarangId: permintaanBarang.map((v: any) => v.id),
+      imQty: permintaan.permintaanBarang.length,
+      noInventaris: v.MasterBarang?.DaftarAset.map((v: any) => v.id),
+    };
+  });
+}
+
+function mapPermintaanBarang(item: any, masterBarang: any) {
+  return {
+    id: item.id,
+    pemohonId: item.Permintaan.Pemohon.id,
+    name: item.Permintaan.Pemohon.name,
+    im: item.Permintaan.no,
+    href: item.Permintaan.id,
+    barangId: masterBarang.id,
+    qty: `${item.qty} ${masterBarang.Uom.name}`,
+    permintaan: item.qty,
+    qtyOrdered: item.qtyOrdered,
+    qtyOut: item.qtyOut,
+    imStatus: item.Permintaan.status,
+    status: item.status,
+    createdAt: item.createdAt,
+  };
+}
+
+function calculateTersedia(v: any, qtyField: string) {
+  return qtyField === "idle" ? v[qtyField] - v.booked : v[qtyField];
+}
+
+function getGolonganLabel(golongan: number) {
+  return golongan === 1 ? "Aset" : "Persediaan";
+}
+
+function mapBarangTersedia(
+  barang: any[],
+  golonganData: any[],
+  qtyField: string
+): CheckKetersediaanByBarangResult[] {
+  return mapBarang(barang, golonganData, qtyField).map((v) => {
+    let quota = v.tersedia;
+    const noInventarisArr = v.noInventaris;
+
+    const permintaanBarang = v.permintaanBarang
       // @ts-ignore
-      v.permintaanBarang.sort((a: any, b: any) => new Date(a.createdAt) - new Date(b.createdAt))
-      const noInventarisArr = v.noInventaris
-
-      const permintaanBarang = v.permintaanBarang.map((item: any) => {
-        let toTransfer = 0
-        let noInventaris
-        quota = quota - toTransfer
-
-        if (quota > 0) {
-          if (quota >= item.permintaan) {
-            toTransfer = item.permintaan;
-            noInventaris = noInventarisArr.splice(0, item.permintaan)
-
-            quota -= item.permintaan;
-          } else {
-            toTransfer = quota;
-            quota = 0;
-          }
-        }
+      .sort((a: any, b: any) => new Date(a.createdAt) - new Date(b.createdAt))
+      .map((item: any) => {
+        const { toTransfer, updatedNoInventaris } = calculateToTransfer(
+          item.permintaan,
+          quota,
+          noInventarisArr
+        );
+        quota -= toTransfer;
 
         return {
           ...item,
           toTransfer,
-          noInventaris
-        }
-      }).filter((v: any) => v.toTransfer > 0)
-
-      return ({
-        ...v,
-        permintaanBarang,
-        imQty: permintaanBarang.length
+          noInventaris: updatedNoInventaris,
+        };
       })
-    })
+      .filter((item: any) => item.toTransfer > 0);
+
+    return {
+      ...v,
+      permintaanBarang,
+      imQty: permintaanBarang.length,
+    };
+  });
+}
+
+
+function calculateToTransfer(permintaan: number, quota: number, noInventarisArr: string[]) {
+  let toTransfer = 0;
+  let updatedNoInventaris;
+
+  if (quota > 0) {
+    if (quota >= permintaan) {
+      toTransfer = permintaan;
+      updatedNoInventaris = noInventarisArr.splice(0, permintaan);
+    } else {
+      toTransfer = quota;
+    }
   }
 
-  const mapBarangTakTersedia = (barang: any, golonganData: any, qtyField: string) => {
-    return mapBarang(barang, golonganData, qtyField).map((v: any) => {
-      const permintaan = v.permintaan - v.ordered
-      let quota = permintaan
+  return { toTransfer, updatedNoInventaris };
+}
 
-      const permintaanBarang = v.permintaanBarang.map((item: any) => {
-        let beli = 0
-        quota = quota - beli
+function mapBarangTakTersedia(
+  barang: any[],
+  golonganData: any[],
+  qtyField: string
+): CheckKetersediaanByBarangResult[] {
+  return mapBarang(barang, golonganData, qtyField)
+    .map((v) => {
+      const remainingPermintaan = v.permintaan - v.ordered;
+      let quota = remainingPermintaan;
 
-        if (quota > 0) {
-          if (quota >= item.permintaan) {
-            beli = item.permintaan;
-            quota -= item.permintaan;
-          } else {
-            beli = quota;
-            quota = 0;
-          }
-        }
+      const permintaanBarang = v.permintaanBarang
+        .map((item: any) => {
+          const beli = calculateBeli(item.permintaan, quota);
+          quota -= beli;
 
-
-        return ({
-          ...item,
-          qtyOrder: `${beli} ${v.uom}`,
-          beli,
-          permintaan: item.permintaan - item.qtyOrdered
+          return {
+            ...item,
+            qtyOrder: `${beli} ${v.uom}`,
+            beli,
+            permintaan: item.permintaan - item.qtyOrdered,
+          };
         })
-      }).filter((v: any) => v.permintaan > 0)
+        .filter((item: any) => item.permintaan > 0);
 
-      return ({
+      return {
         ...v,
-        permintaan,
-        qty: `${permintaan} Pcs`,
+        permintaan: remainingPermintaan,
+        qty: `${remainingPermintaan} Pcs`,
         permintaanBarang,
-        imQty: permintaanBarang.length
-      })
-    }).filter((a: any) => a.permintaan > 0)
-  }
-  const asetTersedia = mapBarangTersedia(daftarAsetGroup, groupGolonganAset, 'idle');
-  const persediaanTersedia = mapBarangTersedia(kartuStok, groupGolonganPersediaan, 'qty');
-  const asetTakTersedia = mapBarangTakTersedia(daftarAsetGroup, groupGolonganAset, 'idle');
-  const persediaanTakTersedia = mapBarangTakTersedia(kartuStok, groupGolonganPersediaan, 'qty');
+        imQty: permintaanBarang.length,
+      };
+    })
+    .filter((item) => item.permintaan > 0);
+}
 
-  const tersedia = [...asetTersedia, ...persediaanTersedia]
-  const takTersedia = [...asetTakTersedia, ...persediaanTakTersedia] as CheckKetersediaanByBarangResult[]
-
-  return {
-    tersedia,
-    takTersedia
-  }
+function calculateBeli(permintaan: number, quota: number) {
+  return quota > 0 ? Math.min(permintaan, quota) : 0;
 }
