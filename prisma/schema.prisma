@@ -836,6 +836,7 @@ model MasterBarangSubSubKategori {
     classCode     String
     fullCode      String @unique
     subKategoriId String
+    umur          Int?
 
     SubKategori MasterBarangSubKategori @relation(fields: [subKategoriId], references: [id])
 

@@ -9,7 +9,7 @@ import Aset from "./_components/aset";
 
 export default async function Page({ params: { id } }: { params: { id: string } }) {
   const data = await api.barangMasuk.get({ id })
-  const { color, name: status } = getStatus(STATUS.MENUNGGU.id)
+  const { color, name: status } = getStatus(STATUS.SELESAI.id)
 
   return (
     <div>

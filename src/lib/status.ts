@@ -100,6 +100,11 @@ export const STATUS = {
     name: 'Diserahkan ke user',
     color: '#15803c'
   },
+  ASET_IDLE: {
+    id: 'aset-idle',
+    name: 'Idle',
+    color: '#15803c'
+  }
 }
 
 export const getStatus = (id: string) => {

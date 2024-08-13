@@ -188,6 +188,7 @@ export const barangMasukRouter = createTRPCRouter({
           let imIds: string[] = []
 
           for (const value of poBarangs) {
+            const code = value.Barang.PembelianBarang.MasterBarang.fullCode
             const type = Number(value.Barang.PembelianBarang.MasterBarang.fullCode.split('.')[0])
             const masterBarangId = value.Barang.PembelianBarang.MasterBarang.id
             const qty = value.Barang.PembelianBarang.qty
@@ -237,12 +238,22 @@ export const barangMasukRouter = createTRPCRouter({
                 }
               })
 
+
+
+              const subKat = await tx.masterBarangSubSubKategori.findFirst({
+                where: {
+                  fullCode: code.split('.').slice(0, 4).join('.')
+                }
+              })
+
               for (let i = 0; i < qty; i++) {
                 await tx.daftarAset.create({
                   data: {
                     id: Math.random().toString(),
                     barangId: masterBarangId,
-                    fttbItemId: fttbItem.id
+                    fttbItemId: fttbItem.id,
+                    status: STATUS.ASET_IDLE.id,
+                    umur: subKat?.umur!
                   }
                 })
               }
