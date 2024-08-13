@@ -12,6 +12,7 @@ export default function Items({
     name: string;
     image: string | null;
     kode: string;
+    desc: string;
     qty: number;
     uom: string;
     harga: number | null;
@@ -45,7 +46,7 @@ export default function Items({
         </div>
         <p className="font-semibold">{barang.qty} {barang.uom}</p>
         <p className="text-muted-foreground text-sm leading-relaxed">
-          {/* {barang.} */}
+          {barang.desc}
         </p>
         <div className="flex flex-col gap-2">
           <div>

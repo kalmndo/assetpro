@@ -13,6 +13,7 @@ export default function Items({
     name: string;
     image: string | null;
     kode: string;
+    desc: string;
     qty: number;
     uom: string;
     harga: number | null;
@@ -50,9 +51,7 @@ export default function Items({
         </div>
         <p className="font-semibold">{barang.qty} {barang.uom}</p>
         <p className="text-muted-foreground text-sm leading-relaxed">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl nec ultricies ultricies, nunc
-          nisl ultricies nunc, nec ultricies nunc nisl nec nunc. Nullam auctor, nisl nec ultricies ultricies, nunc nisl
-          ultricies nunc, nec ultricies nunc nisl nec nunc.
+          {barang.desc}
         </p>
         <div className="flex flex-col gap-2">
           <div>
@@ -152,7 +151,7 @@ export default function Items({
               <CurrencyInput
                 name="harga"
                 placeholder="Rp ..."
-                value={barang.harga ?? barang.hargaPrev!}
+                value={!barang.harga ? barang.hargaPrev! : barang.harga}
                 onValueChange={(_value, _name, values) => {
                   setBarang((v) => ({
                     ...v,
