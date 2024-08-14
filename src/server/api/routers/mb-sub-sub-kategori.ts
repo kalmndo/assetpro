@@ -50,14 +50,18 @@ export const mbSubSubKategoriRouter = createTRPCRouter({
       name: z.string(),
       code: z.string(),
       subKategoriId: z.string(),
-      classCode: z.string()
+      classCode: z.string(),
+      umur: z.string(),
+      minimum: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
       const {
         name,
         code,
         subKategoriId,
-        classCode
+        classCode,
+        umur,
+        minimum
       } = input
 
       try {
@@ -67,7 +71,8 @@ export const mbSubSubKategoriRouter = createTRPCRouter({
             code: Number(code),
             subKategoriId,
             classCode,
-            fullCode: `${classCode}.${code}`
+            fullCode: `${classCode}.${code}`,
+            ...(classCode.split(".")[0] === '1' ? { umur: Number(umur) } : { minimum: Number(minimum) }),
           },
         })
         return {
@@ -98,7 +103,9 @@ export const mbSubSubKategoriRouter = createTRPCRouter({
       name: z.string(),
       code: z.string(),
       subKategoriId: z.string(),
-      classCode: z.string()
+      classCode: z.string(),
+      umur: z.string(),
+      minimum: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
       const {
@@ -106,22 +113,24 @@ export const mbSubSubKategoriRouter = createTRPCRouter({
         name,
         code,
         subKategoriId,
-        classCode
+        classCode,
+        umur,
+        minimum
       } = input
-
       try {
-
+        const data = {
+          name,
+          code: Number(code),
+          subKategoriId,
+          classCode,
+          fullCode: `${classCode}.${code}`,
+          ...(classCode.split(".")[0] === '1' ? { umur: Number(umur) } : { minimum: Number(minimum) }),
+        }
         await ctx.db.masterBarangSubSubKategori.update({
           where: {
             id
           },
-          data: {
-            name,
-            code: Number(code),
-            subKategoriId,
-            classCode,
-            fullCode: `${classCode}.${code}`
-          },
+          data
         })
         return {
           ok: true,

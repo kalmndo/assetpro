@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input"
 import { type SelectProps, } from "@/lib/type"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { LoaderCircle } from "lucide-react"
-import { useEffect, useRef } from "react"
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -23,6 +23,8 @@ const formSchema = z.object({
   "golonganId": z.string().min(1).max(255),
   "kategoriId": z.string().min(1).max(255),
   "subKategoriId": z.string().min(1).max(255),
+  "umur": z.string().min(1).max(255),
+  "minimum": z.string().min(1).max(255),
 })
 
 interface Props {
@@ -53,36 +55,37 @@ export const Form = ({
       golonganId: isEdit ? value.golonganId : '',
       kategoriId: isEdit ? value.kategoriId : '',
       subKategoriId: isEdit ? value.subKategoriId : '',
+      umur: isEdit ? value.umur : '',
+      minimum: isEdit ? value.minimum : '',
     },
   })
+
   const { golonganId, kategoriId } = form.watch()
   const { setValue } = form
 
-  const initialRender = useRef(true);
-
   useEffect(() => {
-    if (!initialRender.current) {
-      if (golonganId) {
-        setValue('kategoriId', '')
-      }
-
-    } else {
-      initialRender.current = false;
-    }
-  }, [golonganId, setValue])
-
-  useEffect(() => {
-    if (!initialRender.current) {
-      if (kategoriId) {
-        setValue('subKategoriId', '')
+    if (golonganId === '1') {
+      if (isEdit) {
+        setValue("umur", value.umur)
+        setValue("minimum", 'kosong')
+      } else {
+        setValue("umur", '')
+        setValue("minimum", 'kosong')
       }
     } else {
-      initialRender.current = false;
+      if (isEdit) {
+        setValue("umur", 'kosong')
+        setValue("minimum", value.minimum)
+      } else {
+        setValue("umur", 'kosong')
+        setValue("minimum", '')
+      }
     }
-  }, [kategoriId, setValue])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [golonganId, setValue, isEdit])
 
-  const kategoris = data.kategoris.filter((v) => v.golonganId === form.watch('golonganId'))
-  const subKategoris = data.subKategoris.filter((v) => v.kategoriId === form.watch('kategoriId'))
+  const kategoris = data.kategoris.filter((v) => v.golonganId === golonganId)
+  const subKategoris = data.subKategoris.filter((v) => v.kategoriId === kategoriId)
 
   return (
     <div className="relative">
@@ -143,6 +146,35 @@ export const Form = ({
               </FormItem>
             )}
           />
+          {golonganId === '1' ?
+            <FormField
+              control={form.control}
+              name="umur"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Umur Aset</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="Umur Aset" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            :
+            <FormField
+              control={form.control}
+              name="minimum"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Minimum Stok</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="Minimum Stok" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          }
           <DialogFooter>
             <Button disabled={isPending} type="submit">
               {isPending ?
