@@ -779,8 +779,7 @@ model DepartmentUnit {
 }
 
 model Role {
-    id   String @id
-    name String
+    id String @id
 
     UserRole UserRole[]
 

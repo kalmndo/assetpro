@@ -23,89 +23,86 @@ import { z } from "zod"
 
 type Items = {
   id?: string,
-  label?: string,
+  name?: string,
   separator?: boolean
 }
 
 const items: Items[] = [
   {
     id: "admin",
-    label: "Admin",
+    name: "Admin",
   },
   {
     separator: true
   },
-  {
-    id: ROLE.IM_READ.id,
-    label: ROLE.IM_READ.name,
-  },
-  {
-    id: ROLE.IM_APPROVE.id,
-    label: ROLE.IM_APPROVE.name,
-  },
+  ROLE.LAPORAN_VIEW,
+  ROLE.ASET_VIEW,
+  ROLE.STOCK_VIEW,
   {
     separator: true
   },
-  {
-    id: ROLE.PEMBELIAN_READ.id,
-    label: ROLE.PEMBELIAN_READ.name,
-  },
-  {
-    id: ROLE.PEMBELIAN_APPROVE.id,
-    label: ROLE.PEMBELIAN_APPROVE.name,
-  },
-  {
-    id: ROLE.PEMBELIAN_SELECT_VENDOR.id,
-    label: ROLE.PEMBELIAN_SELECT_VENDOR.name,
-  },
+  ROLE.IM_READ,
+  ROLE.IM_APPROVE,
   {
     separator: true
   },
-  {
-    id: ROLE.EVALUASI_HARGA_READ.id,
-    label: ROLE.EVALUASI_HARGA_READ.name,
-  },
-  {
-    id: ROLE.EVALUASI_HARGA_APPROVE.id,
-    label: ROLE.EVALUASI_HARGA_APPROVE.name,
-  },
+  ROLE.PEMBELIAN_READ,
+  ROLE.PEMBELIAN_APPROVE,
   {
     separator: true
   },
-  {
-    id: ROLE.SELECT_TEKNISI.id,
-    label: ROLE.SELECT_TEKNISI.name,
-  },
+  ROLE.PENAWARAN_VIEW,
+  ROLE.PEMBELIAN_SELECT_VENDOR,
   {
     separator: true
   },
-  {
-    id: ROLE.PERBAIKAN_EKSTERNAL_APPROVE.id,
-    label: ROLE.PERBAIKAN_EKSTERNAL_APPROVE.name,
-  },
-  {
-    id: ROLE.PERBAIKAN_EKSTERNAL_APPROVE.id,
-    label: ROLE.PERBAIKAN_EKSTERNAL_APPROVE.name,
-  },
-  {
-    id: ROLE.PERBAIKAN_EKSTERNAL_ADD_COMPONENT.id,
-    label: ROLE.PERBAIKAN_EKSTERNAL_ADD_COMPONENT.name,
-  },
-  {
-    id: ROLE.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_VENDOR.id,
-    label: ROLE.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_VENDOR.name,
-  },
-  {
-    id: ROLE.PERBAIKAN_EKSTERNAL_TERIMA.id,
-    label: ROLE.PERBAIKAN_EKSTERNAL_TERIMA.name,
-  },
-  {
-    id: ROLE.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_USER.id,
-    label: ROLE.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_USER.name,
-  },
+  ROLE.NEGO_VIEW,
+  ROLE.NEGO_SUBMIT,
   {
     separator: true
   },
+  ROLE.EVALUASI_HARGA_READ,
+  ROLE.EVALUASI_HARGA_APPROVE,
+  {
+    separator: true
+  },
+  ROLE.PO_VIEW,
+  {
+    separator: true
+  },
+  ROLE.GUDANG_REQUEST_VIEW,
+  ROLE.GUDANG_MASUK_VIEW,
+  ROLE.GUDANG_KELUAR_VIEW,
+  {
+    separator: true
+  },
+  ROLE.MUTASI_VIEW,
+  {
+    separator: true
+  },
+  ROLE.PERBAIKAN_PERMINTAAN_VIEW,
+  ROLE.SELECT_TEKNISI,
+  {
+    separator: true
+  },
+  ROLE.PERBAIKAN_EKSTERNAL_VIEW,
+  ROLE.PERBAIKAN_EKSTERNAL_ADD_COMPONENT,
+  ROLE.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_VENDOR,
+  ROLE.PERBAIKAN_EKSTERNAL_TERIMA,
+  ROLE.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_USER,
+  {
+    separator: true
+  },
+  ROLE.PEMINJAMAN_INTERNAL_VIEW,
+  {
+    separator: true
+  },
+  ROLE.PEMINJAMAN_EKSTERNAL_VIEW,
+  {
+    separator: true
+  },
+  ROLE.MASTER_VIEW,
+  ROLE.PENGATURAN_VIEW,
 ] as const
 
 const formSchema = z.object({
@@ -292,7 +289,7 @@ export const Form = ({
                                 />
                               </FormControl>
                               <FormLabel className="text-sm font-normal">
-                                {item.label}
+                                {item.name}
                               </FormLabel>
                             </FormItem>
                           )

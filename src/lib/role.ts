@@ -37,7 +37,7 @@ export const ROLE = {
     name: 'Permintaan Penawaran (view)',
   },
   PEMBELIAN_SELECT_VENDOR: {
-    id: 'pembelian-select-approve',
+    id: 'pembelian-select-vendor',
     name: 'Permintaan Penawaran (select vendor)',
   },
   NEGO_VIEW: {
@@ -113,7 +113,7 @@ export const ROLE = {
     name: 'Peminjaman Internal (view)',
   },
   PEMINJAMAN_EKSTERNAL_VIEW: {
-    id: 'mutasi-view',
+    id: 'peminjaman-eksternal-view',
     name: 'Peminjaman Eksternal (view)',
   },
   MASTER_VIEW: {
@@ -121,7 +121,7 @@ export const ROLE = {
     name: 'Master (view)',
   },
   PENGATURAN_VIEW: {
-    id: 'mutasi-view',
+    id: 'pengaturan-view',
     name: 'Pengaturan (view)',
   },
 }

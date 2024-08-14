@@ -63,7 +63,7 @@ export const userRouter = createTRPCRouter({
 
       return result.map((v) => ({
         ...v,
-        role: v.UserRole.map((v) => v.role.name),
+        role: v.UserRole.map((v) => v.role.id),
         organisasi: v.Department.Organisasi.name,
         department: v.Department.name,
         unit: v.DepartmentUnit?.name
@@ -142,6 +142,7 @@ export const userRouter = createTRPCRouter({
             });
           }
         }
+        console.log("err", error)
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Kemunkingan terjadi kesalahan sistem, silahkan coba lagi",
