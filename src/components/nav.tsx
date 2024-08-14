@@ -23,12 +23,13 @@ import {
 } from './ui/tooltip'
 import { cn } from '@/lib/utils'
 import useCheckActiveNav from '@/hooks/use-check-active-nav'
-import { type SideLink } from '@/data/sidelinks'
+import { sidelinks, type SideLink } from '@/data/sidelinks'
 
 interface NavProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed: boolean
   links: SideLink[]
   closeNav: () => void
+  userRoles: string[]
 }
 
 export default function Nav({
@@ -36,40 +37,61 @@ export default function Nav({
   isCollapsed,
   className,
   closeNav,
+  userRoles
 }: NavProps) {
-  const renderLink = ({ sub, isTitle, ...rest }: SideLink) => {
-    const key = `${rest.title}-${rest.href}`
+  // INI DARI CHATGPT,JK
+  //   const userRole = 'someUserRole'; // Replace with the actual role of the user
 
-    if (isCollapsed && isTitle) {
-      return null
-    }
+  const filteredLinks = sidelinks
+    .map(link => {
+      if (link.sub && link.sub.length > 0) {
+        const filteredSubLinks = link.sub.filter(subLink => {
+          return !subLink.role || userRoles.includes(subLink.role);
+
+        });
+
+        if (filteredSubLinks.length === 0) {
+          return null;
+        }
+
+        return {
+          ...link,
+          sub: filteredSubLinks,
+        };
+      }
+
+      return !link.role || userRoles.includes(link.role) ? link : null;
+    })
+    .filter(Boolean).filter((link, index, array) => {
+      if (link?.title === "Manajemen" && array[index + 1]?.href === "admin") {
+        return false;
+      }
+      return true;
+    });
+
+  const renderLink = ({ sub, isTitle, ...rest }: SideLink) => {
+    const key = `${rest.title}-${rest.href}`;
 
     if (isTitle) {
-      return (
-        <p key={key} className='px-6 font-semibold text-sm pt-6'>{rest.title}</p>
-      )
+      if (isCollapsed) return null;
+      return <p key={key} className="px-6 font-semibold text-sm pt-6">{rest.title}</p>;
     }
 
-    if (isCollapsed && sub)
-      return (
-        <NavLinkIconDropdown
-          {...rest}
-          sub={sub}
-          key={key}
-          closeNav={closeNav}
-        />
-      )
+    if (isCollapsed) {
+      return sub ? (
+        <NavLinkIconDropdown {...rest} sub={sub} key={key} closeNav={closeNav} />
+      ) : (
+        <NavLinkIcon {...rest} key={key} closeNav={closeNav} />
+      );
+    }
 
-    if (isCollapsed)
-      return <NavLinkIcon {...rest} key={key} closeNav={closeNav} />
+    return sub ? (
+      <NavLinkDropdown {...rest} sub={sub} key={key} closeNav={closeNav} />
+    ) : (
+      <NavLink {...rest} key={key} closeNav={closeNav} />
+    );
+  };
 
-    if (sub)
-      return (
-        <NavLinkDropdown {...rest} sub={sub} key={key} closeNav={closeNav} />
-      )
-
-    return <NavLink {...rest} key={key} closeNav={closeNav} />
-  }
   return (
     <div
       data-collapsed={isCollapsed}
@@ -80,7 +102,8 @@ export default function Nav({
     >
       <TooltipProvider delayDuration={0}>
         <nav className='grid gap-1 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2'>
-          {links.map(renderLink)}
+          {/* @ts-ignore */}
+          {filteredLinks.map(renderLink)}
         </nav>
       </TooltipProvider>
     </div>

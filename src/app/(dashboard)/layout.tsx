@@ -26,7 +26,7 @@ const Search = () => {
 export default async function LayoutYa({ children }: Props) {
   const result = await api.user.me()
   return (
-    <AppShell>
+    <AppShell userRoles={result.userRoles}>
       <Layout>
         <LayoutHeader>
           <Search />

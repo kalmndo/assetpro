@@ -9,12 +9,14 @@ import { ChevronLeft, Menu, X } from 'lucide-react'
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
   isCollapsed: boolean
   setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>
+  userRoles: string[]
 }
 
 export default function Sidebar2({
   className,
   isCollapsed,
   setIsCollapsed,
+  userRoles
 }: SidebarProps) {
   const [navOpened, setNavOpened] = useState(false)
 
@@ -100,6 +102,7 @@ export default function Sidebar2({
           closeNav={() => setNavOpened(false)}
           isCollapsed={isCollapsed}
           links={sidelinks}
+          userRoles={userRoles}
         />
 
         {/* Scrollbar width toggle button */}

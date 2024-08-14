@@ -16,6 +16,7 @@ export const userRouter = createTRPCRouter({
           id: userId
         },
         include: {
+          UserRole: true,
           NotificationTo: {
             include: {
               From: true
@@ -35,7 +36,8 @@ export const userRouter = createTRPCRouter({
       return {
         ...user,
         image: user.image ?? '',
-        notifications: user.NotificationTo
+        notifications: user.NotificationTo,
+        userRoles: user.UserRole.map((v) => v.roleId)
       }
     }),
   getAll: protectedProcedure

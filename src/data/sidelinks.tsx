@@ -1,3 +1,4 @@
+import { ROLE } from '@/lib/role'
 import {
   FileClock,
   FolderSync,
@@ -15,7 +16,8 @@ export interface NavLink {
   label?: string
   href: string
   icon: JSX.Element,
-  isTitle?: boolean
+  isTitle?: boolean,
+  role?: string
 }
 
 export interface SideLink extends NavLink {
@@ -33,19 +35,22 @@ export const sidelinks: SideLink[] = [
     title: 'Laporan',
     label: '',
     href: '/laporan',
-    icon: <LayoutDashboard size={18} />
+    icon: <LayoutDashboard size={18} />,
+    role: ROLE.LAPORAN_VIEW.id
   },
   {
     title: 'Daftar Aset',
     label: '',
     href: '/daftar-aset',
-    icon: <LayoutDashboard size={18} />
+    icon: <LayoutDashboard size={18} />,
+    role: ROLE.ASET_VIEW.id
   },
   {
     title: 'Kartu Stok',
     label: '',
     href: '/kartu-stok',
-    icon: <LayoutDashboard size={18} />
+    icon: <LayoutDashboard size={18} />,
+    role: ROLE.STOCK_VIEW.id
   },
   {
     title: 'Permintaan',
@@ -84,6 +89,7 @@ export const sidelinks: SideLink[] = [
     label: '',
     href: '/permintaan-barang',
     icon: <FileClock size={18} />,
+    role: ROLE.IM_READ.id
   },
   {
     title: 'Pengadaan',
@@ -96,30 +102,35 @@ export const sidelinks: SideLink[] = [
         label: '',
         href: '/pengadaan/permintaan-pembelian',
         icon: <LayoutDashboard size={18} />,
+        role: ROLE.PEMBELIAN_READ.id
       },
       {
         title: 'Permintaan Penawaran',
         label: '',
         href: '/pengadaan/permintaan-penawaran',
         icon: <LayoutDashboard size={18} />,
+        role: ROLE.PENAWARAN_VIEW.id
       },
       {
         title: 'Penawaran Harga',
         label: '',
         href: '/pengadaan/penawaran-harga',
         icon: <LayoutDashboard size={18} />,
+        role: ROLE.NEGO_VIEW.id
       },
       {
         title: 'Evaluasi Harga',
         label: '',
         href: '/pengadaan/evaluasi-harga',
         icon: <LayoutDashboard size={18} />,
+        role: ROLE.EVALUASI_HARGA_READ.id
       },
       {
         title: 'Purchase Order',
         label: '',
         href: '/pengadaan/purchase-order',
         icon: <LayoutDashboard size={18} />,
+        role: ROLE.PO_VIEW.id
       },
     ],
   },
@@ -134,18 +145,21 @@ export const sidelinks: SideLink[] = [
         label: '',
         href: '/gudang/permintaan',
         icon: <PackagePlus size={18} />,
+        role: ROLE.GUDANG_REQUEST_VIEW.id
       },
       {
         title: 'Masuk',
         label: '',
         href: '/gudang/masuk',
         icon: <PackagePlus size={18} />,
+        role: ROLE.GUDANG_MASUK_VIEW.id
       },
       {
         title: 'Keluar',
         label: '',
         href: '/gudang/keluar',
         icon: <PackageMinus size={18} />,
+        role: ROLE.GUDANG_KELUAR_VIEW.id
       },
     ]
   },
@@ -154,6 +168,7 @@ export const sidelinks: SideLink[] = [
     label: '',
     href: '/gudang/mutasi-barang',
     icon: <FolderSync size={18} />,
+    role: ROLE.MUTASI_VIEW.id
   },
   {
     title: 'Perbaikan',
@@ -166,12 +181,14 @@ export const sidelinks: SideLink[] = [
         label: '',
         href: '/perbaikan/permintaan',
         icon: <LayoutDashboard size={18} />,
+        role: ROLE.PERBAIKAN_PERMINTAAN_VIEW.id
       },
       {
         title: 'Eksternal',
         label: '',
         href: '/perbaikan/eksternal',
         icon: <LayoutDashboard size={18} />,
+        role: ROLE.PERBAIKAN_EKSTERNAL_VIEW.id
       },
     ]
   },
@@ -186,12 +203,14 @@ export const sidelinks: SideLink[] = [
         label: '',
         href: '/peminjama/internal',
         icon: <LayoutDashboard size={18} />,
+        role: ROLE.PEMINJAMAN_INTERNAL_VIEW.id
       },
       {
         title: 'external',
         label: '',
         href: '/peminjaman/external',
         icon: <LayoutDashboard size={18} />,
+        role: ROLE.PEMINJAMAN_EKSTERNAL_VIEW.id
       },
     ]
   },
@@ -207,11 +226,13 @@ export const sidelinks: SideLink[] = [
     label: '',
     href: '/master',
     icon: <LayoutDashboard size={18} />,
+    role: ROLE.MASTER_VIEW.id
   },
   {
     title: 'Pengaturan',
     label: '',
     href: '/pengaturan',
     icon: <LayoutDashboard size={18} />,
+    role: ROLE.PENGATURAN_VIEW.id
   },
 ]

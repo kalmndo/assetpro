@@ -4,6 +4,18 @@ type RoleType = {
 }
 
 export const ROLE = {
+  LAPORAN_VIEW: {
+    id: 'laporan-view',
+    name: 'Laporan (view)',
+  },
+  ASET_VIEW: {
+    id: 'aset-view',
+    name: 'Daftar Aset (view)',
+  },
+  STOCK_VIEW: {
+    id: 'stock-view',
+    name: 'Kartu Stock (view)',
+  },
   IM_READ: {
     id: 'im-view',
     name: 'Internal Memo (view)',
@@ -20,13 +32,21 @@ export const ROLE = {
     id: 'pembelian-approve',
     name: 'Permintaan Pembelian (approve)',
   },
+  PENAWARAN_VIEW: {
+    id: 'penawaran-view',
+    name: 'Permintaan Penawaran (view)',
+  },
   PEMBELIAN_SELECT_VENDOR: {
     id: 'pembelian-select-approve',
-    name: 'Permintaan Pembelian (select vendor)',
+    name: 'Permintaan Penawaran (select vendor)',
   },
-  SELECT_TEKNISI: {
-    id: 'perbaikan-select-approve',
-    name: 'Perbaikan (select teknisi)',
+  NEGO_VIEW: {
+    id: 'nego-view',
+    name: 'Penawaran Harga (view)',
+  },
+  NEGO_SUBMIT: {
+    id: 'nego-submit',
+    name: 'Penawaran Harga (negosiasi)',
   },
   EVALUASI_HARGA_READ: {
     id: 'evaluasi-read',
@@ -35,6 +55,38 @@ export const ROLE = {
   EVALUASI_HARGA_APPROVE: {
     id: 'evaluasi-approve',
     name: 'Evaluasi Harga (approve)',
+  },
+  PO_VIEW: {
+    id: 'po-view',
+    name: 'PO (view)',
+  },
+  GUDANG_REQUEST_VIEW: {
+    id: 'gudang-request-view',
+    name: 'Gudang Permintaan (view)',
+  },
+  GUDANG_MASUK_VIEW: {
+    id: 'gudang-masuk-view',
+    name: 'Gudang Masuk (view)',
+  },
+  GUDANG_KELUAR_VIEW: {
+    id: 'gudang-keluar-view',
+    name: 'Gudang Keluar (view)',
+  },
+  MUTASI_VIEW: {
+    id: 'mutasi-view',
+    name: 'Mutasi (view)',
+  },
+  PERBAIKAN_PERMINTAAN_VIEW: {
+    id: 'perbaikan-permintaan-view',
+    name: 'Perbaikan Permintaan (view)',
+  },
+  SELECT_TEKNISI: {
+    id: 'perbaikan-select-approve',
+    name: 'Perbaikan (select teknisi)',
+  },
+  PERBAIKAN_EKSTERNAL_VIEW: {
+    id: 'perbaikan-eksternal-view',
+    name: 'Perbaikan Eksternal (view)',
   },
   PERBAIKAN_EKSTERNAL_APPROVE: {
     id: 'perbaikan-eksternal-approve',
@@ -55,7 +107,23 @@ export const ROLE = {
   PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_USER: {
     id: 'perbaikan-eksternal-diserahkan-ke-user',
     name: 'Perbaikan Eksternal (send to user)',
-  }
+  },
+  PEMINJAMAN_INTERNAL_VIEW: {
+    id: 'peminjaman-internal-view',
+    name: 'Peminjaman Internal (view)',
+  },
+  PEMINJAMAN_EKSTERNAL_VIEW: {
+    id: 'mutasi-view',
+    name: 'Peminjaman Eksternal (view)',
+  },
+  MASTER_VIEW: {
+    id: 'master-view',
+    name: 'Master (view)',
+  },
+  PENGATURAN_VIEW: {
+    id: 'mutasi-view',
+    name: 'Pengaturan (view)',
+  },
 }
 
 export const getStatus = (id: string) => {
