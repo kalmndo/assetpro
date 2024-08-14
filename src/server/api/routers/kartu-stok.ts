@@ -2,7 +2,6 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@/server/api/trpc";
-import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -118,7 +117,7 @@ export const kartuStokRouter = createTRPCRouter({
         tanggal: v.FttbItem.createdAt.toLocaleDateString("id-ID")
       }))
 
-      let keluar: { id: string, no: string, pemohon: string, noIm: string, jumlah: number, tanggal: string }[] = []
+      const keluar: { id: string, no: string, pemohon: string, noIm: string, jumlah: number, tanggal: string }[] = []
 
       for (const v of result.MasterBarang.FtkbItem) {
         const no = v.Ftkb.no
@@ -182,7 +181,7 @@ function createKartuStokPergerakan(data: Data[]) {
   // Initialize a map to track existing months
   const monthMap = new Map<number, Data>();
 
-  let year: number = 0
+  let year = 0
 
   for (const entry of data) {
     monthMap.set(entry.month, entry);

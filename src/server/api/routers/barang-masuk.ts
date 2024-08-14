@@ -185,7 +185,7 @@ export const barangMasukRouter = createTRPCRouter({
             }
           })
 
-          let imIds: string[] = []
+          const imIds: string[] = []
 
           for (const value of poBarangs) {
             const code = value.Barang.PembelianBarang.MasterBarang.fullCode
@@ -253,6 +253,7 @@ export const barangMasukRouter = createTRPCRouter({
                     barangId: masterBarangId,
                     fttbItemId: fttbItem.id,
                     status: STATUS.ASET_IDLE.id,
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
                     umur: subKat?.umur!
                   }
                 })

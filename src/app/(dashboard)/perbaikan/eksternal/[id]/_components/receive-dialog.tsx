@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
-import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -108,7 +107,7 @@ export default function ReceiveDialog({
         </DialogHeader>
         <div>
           <p className="text-sm">Apakah anda yakin menerima barang ini?</p>
-          <p className="text-sm">Silahkan pilih <span className="font-semibold">"SELESAI"</span> atau <span className="font-semibold">"TIDAK SELESAI"</span></p>
+          <p className="text-sm">Silahkan pilih <span className="font-semibold">{"SELESAI"}</span> atau <span className="font-semibold">{"TIDAK SELESAI"}</span></p>
         </div>
         <TheForm isPending={isPending} onSubmit={onSubmit} />
 

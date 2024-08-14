@@ -19,6 +19,7 @@ type CheckKetersediaanByBarangResult = {
   permintaanBarang: PermintaanBarangResult[];
   imQty: string;
   qty: string;
+  permintaanBarangId: string[];
 };
 
 type PermintaanBarangResult = {
@@ -31,6 +32,9 @@ type PermintaanBarangResult = {
   qtyOrder: string;
   beli: number;
   status: string;
+  toTransfer: number
+  noInventaris: string[]
+  pemohonId: string
 };
 
 

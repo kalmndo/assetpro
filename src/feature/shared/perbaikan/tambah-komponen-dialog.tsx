@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/form"
 import { z } from "zod";
 import { useEffect, useState } from "react";
-import { api, RouterOutputs } from "@/trpc/react";
+import { api, type RouterOutputs } from "@/trpc/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
@@ -125,6 +125,7 @@ const TheForm = ({
               />
               {
                 form.watch("imId") ?
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
                   imComponents.find((v) => v.imId === form.watch("imId"))?.barang.length! > 0 ?
                     <FormField
                       control={form.control}
@@ -227,7 +228,7 @@ const TheForm = ({
               <FormField
                 control={form.control}
                 name="biaya"
-                render={({ field }) => (
+                render={({ }) => (
                   <FormItem>
                     <FormLabel>Biaya</FormLabel>
                     <FormControl>

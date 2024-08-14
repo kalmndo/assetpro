@@ -100,8 +100,8 @@ export default async function Page({ params: { id } }: { params: { id: string } 
                 <p className="text-sm">Garansi</p>
                 <p className="font-semibold">{data.garansi}</p>
               </div>
-              {data.info.map((v) => (
-                <div className="space-y-2">
+              {data.info.map((v, i) => (
+                <div key={i} className="space-y-2">
                   <p className="text-sm">{v.name}</p>
                   <p className="font-semibold">{v.value}</p>
                 </div>

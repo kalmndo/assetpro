@@ -60,7 +60,7 @@ export default function Content({
       } else {
         setIsUser(false)
       }
-    })
+    }).catch((v) => console.log("v", v))
   }, [])
 
   const form = useForm<z.infer<typeof formSchema>>({
