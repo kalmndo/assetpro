@@ -112,6 +112,18 @@ export const ROLE = {
     id: 'peminjaman-internal-view',
     name: 'Peminjaman Internal (view)',
   },
+  PEMINJAMAN_INTERNAL_APPROVE: {
+    id: 'peminjaman-internal-approve',
+    name: 'Peminjaman Internal (approve)',
+  },
+  PEMINJAMAN_INTERNAL_SEND_TO_USER: {
+    id: 'peminjaman-internal-send-to-user',
+    name: 'Peminjaman Internal (send to user)',
+  },
+  PEMINJAMAN_INTERNAL_RECEIVE_FROM_USER: {
+    id: 'peminjaman-internal-receive-from-user',
+    name: 'Peminjaman Internal (receive from user)',
+  },
   PEMINJAMAN_EKSTERNAL_VIEW: {
     id: 'peminjaman-eksternal-view',
     name: 'Peminjaman Eksternal (view)',

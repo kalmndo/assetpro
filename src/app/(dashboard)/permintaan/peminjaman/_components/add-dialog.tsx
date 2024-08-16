@@ -7,30 +7,29 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { api, RouterOutputs } from "@/trpc/react"
+import { api, type RouterOutputs } from "@/trpc/react"
 import { Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Form } from "./form"
 import { toast } from "sonner"
 
-
 export const AddDialog = ({
-  asets
+  data
 }: {
-  asets: RouterOutputs['daftarAset']['getSelectUser']
+  data: RouterOutputs['peminjaman']['getAll']['data']
 }) => {
   const router = useRouter()
-  // const { mutateAsync, isPending } = api.perbaikan.create.useMutation()
+  const { mutateAsync, isPending } = api.peminjaman.create.useMutation()
   const [open, setOpen] = useState(false)
 
   async function onSubmit(values: any) {
     try {
-      console.log("value", values)
-      // const result = await mutateAsync(values)
-      setOpen(false)
-      // toast.success(result.message)
+      console.log("values", values)
+      const result = await mutateAsync(values)
+      toast.success(result.message)
       router.refresh()
+      setOpen(false)
     } catch (error: any) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
       toast.error(error.message)
@@ -50,9 +49,9 @@ export const AddDialog = ({
           <DialogTitle>Buat Permintaan Peminjaman</DialogTitle>
         </DialogHeader>
         <Form
-          isPending={false}
+          isPending={isPending}
           onSubmit={onSubmit}
-          asets={asets}
+          data={data}
         />
       </DialogContent>
     </Dialog>

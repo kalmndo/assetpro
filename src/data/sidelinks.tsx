@@ -201,7 +201,7 @@ export const sidelinks: SideLink[] = [
       {
         title: 'internal',
         label: '',
-        href: '/peminjama/internal',
+        href: '/peminjaman/internal',
         icon: <LayoutDashboard size={18} />,
         role: ROLE.PEMINJAMAN_INTERNAL_VIEW.id
       },

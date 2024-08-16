@@ -104,6 +104,21 @@ export const STATUS = {
     id: 'aset-idle',
     name: 'Idle',
     color: '#15803c'
+  },
+  DISERAHKAN_KE_USER: {
+    id: 'send-to-user',
+    name: 'Diserahkan ke user',
+    color: '#15803c'
+  },
+  DIGUNAKAN: {
+    id: 'used',
+    name: 'Digunakan',
+    color: '#15803c'
+  },
+  RETURNING: {
+    id: 'returning',
+    name: 'Mengembalikan',
+    color: '#15803c'
   }
 }
 

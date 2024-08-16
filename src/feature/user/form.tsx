@@ -94,6 +94,9 @@ const items: Items[] = [
     separator: true
   },
   ROLE.PEMINJAMAN_INTERNAL_VIEW,
+  ROLE.PEMINJAMAN_INTERNAL_APPROVE,
+  ROLE.PEMINJAMAN_INTERNAL_SEND_TO_USER,
+  ROLE.PEMINJAMAN_INTERNAL_RECEIVE_FROM_USER,
   {
     separator: true
   },
