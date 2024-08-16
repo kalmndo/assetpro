@@ -20,17 +20,12 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { z } from "zod";
-import { useEffect, useState } from "react";
-import { api, RouterOutputs } from "@/trpc/react";
+import { useState } from "react";
+import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CurrencyInput } from "@/components/currency-input";
-import SearchSelect from "@/components/search-select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getInitials } from "@/lib/utils";
 
 const formSchema = z.object({
   "name": z.string().min(1).max(255),
@@ -87,7 +82,7 @@ const TheForm = ({
           <FormField
             control={form.control}
             name="biaya"
-            render={({ field }) => (
+            render={({ }) => (
               <FormItem>
                 <FormLabel>Biaya</FormLabel>
                 <FormControl>

@@ -128,6 +128,22 @@ export const ROLE = {
     id: 'peminjaman-eksternal-view',
     name: 'Peminjaman Eksternal (view)',
   },
+  PEMINJAMAN_EKSTERNAL_CREATE: {
+    id: 'peminjaman-eksternal-create',
+    name: 'Peminjaman Eksternal (create)',
+  },
+  PEMINJAMAN_EKSTERNAL_APPROVE: {
+    id: 'peminjaman-eksternal-approve',
+    name: 'Peminjaman Eksternal (approve)',
+  },
+  PEMINJAMAN_EKSTERNAL_SEND_TO_USER: {
+    id: 'peminjaman-eksternal-send-to-user',
+    name: 'Peminjaman Eksternal (send to user)',
+  },
+  PEMINJAMAN_EKSTERNAL_RECEIVE_FROM_USER: {
+    id: 'peminjaman-eksternal-receive-from-user',
+    name: 'Peminjaman Eksternal (receive from user)',
+  },
   MASTER_VIEW: {
     id: 'master-view',
     name: 'Master (view)',

@@ -1,3 +1,4 @@
+import { CurrencyInput } from "@/components/currency-input"
 import SearchSelect from "@/components/search-select"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -26,7 +27,9 @@ const formSchema = z.object({
   "type": z.string().min(1).max(255),
   'barangId': z.string().min(1),
   'ruangId': z.string().min(1),
+  'peminjam': z.string().min(1),
   'peruntukan': z.string().min(1),
+  'biaya': z.string().min(1),
   'jumlah': z.string().min(1),
   "date": z.object({
     from: z.date(),
@@ -56,6 +59,7 @@ export const Form = ({
       type: "0",
       barangId: '',
       ruangId: '',
+      peminjam: '',
       peruntukan: "",
       jumlah: '0'
     },
@@ -131,6 +135,42 @@ export const Form = ({
           <div>
             <FormField
               control={form.control}
+              name="biaya"
+              render={({ }) => (
+                <FormItem>
+                  <FormLabel>Biaya</FormLabel>
+                  <FormControl>
+                    <CurrencyInput
+                      // {...field}
+                      placeholder="Rp ..."
+                      onValueChange={(_v, _n, value) => {
+                        form.setValue("biaya", value!.value)
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div>
+            <FormField
+              control={form.control}
+              name="peminjam"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Peminjam</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Peminjam" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div>
+            <FormField
+              control={form.control}
               name="peruntukan"
               render={({ field }) => (
                 <FormItem>
@@ -174,7 +214,7 @@ export const Form = ({
                             format(field.value.from, "LLL dd, y")
                           )
                         ) : (
-                          <span>Pilih tanggal</span>
+                          <span>Pilih Tanggal</span>
                         )}
                       </Button>
                     </FormControl>

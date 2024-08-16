@@ -206,9 +206,9 @@ export const sidelinks: SideLink[] = [
         role: ROLE.PEMINJAMAN_INTERNAL_VIEW.id
       },
       {
-        title: 'external',
+        title: 'eksternal',
         label: '',
-        href: '/peminjaman/external',
+        href: '/peminjaman/eksternal',
         icon: <LayoutDashboard size={18} />,
         role: ROLE.PEMINJAMAN_EKSTERNAL_VIEW.id
       },

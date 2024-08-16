@@ -52,6 +52,7 @@ model User {
     Perbaikan                  Perbaikan[]
     Teknisi                    Teknisi?
     Peminjaman                 Peminjaman[]
+    PeminjamanExternal         PeminjamanExternal[]
 }
 
 model UserRole {
@@ -680,8 +681,9 @@ model Peminjaman {
     Ruang    MasterRuang?  @relation(fields: [ruangId], references: [id])
     Peminjam User          @relation(fields: [peminjamId], references: [id])
 
-    createdAt         DateTime            @default(now())
-    updatedAt         DateTime            @updatedAt
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
     PeminjamanHistory PeminjamanHistory[]
 }
 
@@ -700,16 +702,35 @@ model PeminjamanHistory {
 model PeminjamanExternal {
     id         String   @id @default(cuid())
     no         String
-    type       String
+    type       Int
+    pemohonId  String
     peminjam   String
-    asetId     String?
+    barangId   String?
     ruangId    String?
     peruntukan String
     tglPinjam  DateTime
     tglKembali DateTime
     status     String
-    jumlah     Int
+    jumlah     Int?
     biaya      Int
+
+    Pemohon User          @relation(fields: [pemohonId], references: [id])
+    Barang  MasterBarang? @relation(fields: [barangId], references: [id])
+    Ruang   MasterRuang?  @relation(fields: [ruangId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    PeminjamanExternalHistory PeminjamanExternalHistory[]
+}
+
+model PeminjamanExternalHistory {
+    id           String  @id @default(cuid())
+    desc         String
+    catatan      String?
+    peminjamanId String
+
+    PeminjamanExternal PeminjamanExternal @relation(fields: [peminjamanId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -870,6 +891,7 @@ model MasterBarang {
     PermintaanPembelianBarang PermintaanPembelianBarang[]
     FtkbItem                  FtkbItem[]
     Peminjaman                Peminjaman[]
+    PeminjamanExternal        PeminjamanExternal[]
 }
 
 model MasterBarangUnit {
@@ -902,9 +924,10 @@ model MasterRuang {
 
     PermintaanBarang PermintaanBarang[]
 
-    createdAt  DateTime     @default(now())
-    updatedAt  DateTime     @updatedAt
-    Peminjaman Peminjaman[]
+    createdAt          DateTime             @default(now())
+    updatedAt          DateTime             @updatedAt
+    Peminjaman         Peminjaman[]
+    PeminjamanExternal PeminjamanExternal[]
 }
 
 model MasterNomor {
