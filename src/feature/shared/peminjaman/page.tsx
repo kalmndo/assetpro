@@ -11,6 +11,8 @@ import SendToUserDialog from "./send-to-user-dialog";
 import UserReceiveDialog from "./user-receive-dialog";
 import UserReturnDialog from "./user-return-dialog";
 import ReceiveDialog from "./receive-dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import formatDate from "@/lib/formatDate";
 
 export default async function Page({ data }: { data: RouterOutputs['peminjaman']['get'] }) {
   const { color, name: status } = getStatus(data.status)
@@ -125,6 +127,30 @@ export default async function Page({ data }: { data: RouterOutputs['peminjaman']
         </div>
         <div className="p-4">
           {/* <Table data={data} modalData={modalData} /> */}
+        </div>
+        <div className="p-4">
+          <p className="font-semibold text-lg">Riwayat</p>
+          <div className="border rounded-lg p-4">
+            <ScrollArea className="h-[400px]">
+              <div className="w-full max-w-4xl mx-auto ml-4">
+                <div className="relative pl-6 after:absolute after:inset-y-0 after:left-0 after:w-px after:bg-muted-foreground/20">
+                  <div className="grid gap-8">
+                    {data.riwayat.map((v, i) => {
+                      const { day, hours, minutes, monthName } = formatDate(v.createdAt)
+                      return (
+                        <div key={i} className="grid gap-2 text-sm relative">
+                          <div className="aspect-square w-3 bg-primary rounded-full absolute left-0 translate-x-[-29.5px] z-10 top-1"></div>
+                          <div className="font-medium">{day}, {monthName} {hours}:{minutes} WIB</div>
+                          <div className="font-semibold">{v.desc}</div>
+                          <div className="text-sm ">{v.catatan}</div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            </ScrollArea>
+          </div>
         </div>
       </div>
     </div>
