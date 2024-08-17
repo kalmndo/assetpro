@@ -68,6 +68,24 @@ export const daftarAsetRouter = createTRPCRouter({
           id
         },
         include: {
+          PeminjamanAsetEksternal: {
+            include: {
+              Peminjaman: {
+                include: {
+                  Pemohon: true
+                }
+              }
+            }
+          },
+          PeminjamanAsetInternal: {
+            include: {
+              Peminjaman: {
+                include: {
+                  Peminjam: true
+                }
+              }
+            }
+          },
           DaftarAsetAudit: true,
           DaftarAsetAdditional: true,
           FtkbItemPemohonAset: {
@@ -263,13 +281,36 @@ export const daftarAsetRouter = createTRPCRouter({
           title: pj?.title,
           department: `${pj?.Department.name} - ${pj?.DepartmentUnit?.name}`,
         },
-        // riwayat mutasi, terima barang, keluar barang, perbaikan
+        // riwayat mutasi, terima barang, keluar barang, perbaikan, peminjaman
         perbaikan,
         terima,
         keluar,
         mutasi: [],
-        audit: res.DaftarAsetAudit
+        audit: res.DaftarAsetAudit,
+        peminjaman: [
+          ...res.PeminjamanAsetInternal.map((v) => ({
+            id: v.id,
+            tipe: 'Internal',
+            no: v.Peminjaman.no,
+            peminjam: v.Peminjaman.Peminjam.name,
+            peruntukan: v.Peminjaman.peruntukan,
+            from: v.from.toLocaleDateString("id-ID"),
+            to: v.to.toLocaleDateString("id-ID"),
+            status: v.Peminjaman.status
+          })),
+          ...res.PeminjamanAsetEksternal.map((v) => ({
+            id: v.id,
+            tipe: 'Eksternal',
+            no: v.Peminjaman.no,
+            peminjam: v.Peminjaman.Pemohon.name,
+            peruntukan: v.Peminjaman.peruntukan,
+            from: v.from.toLocaleDateString("id-ID"),
+            to: v.to.toLocaleDateString("id-ID"),
+            status: v.Peminjaman.status
+            // @ts-ignore
+          }))].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
       }
+
       return result
     }),
   addInfo: protectedProcedure

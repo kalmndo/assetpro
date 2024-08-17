@@ -1,3 +1,5 @@
+"use client"
+
 import { Separator } from "@/components/ui/separator";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import Link from "next/link";
@@ -13,8 +15,11 @@ import UserReturnDialog from "./user-return-dialog";
 import ReceiveDialog from "./receive-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import formatDate from "@/lib/formatDate";
+import SelectAsetDialog from "./select-aset-dialog";
+import { DataTable } from "@/components/data-table";
+import { DataTableColumnHeader } from "@/components/data-table/column-header";
 
-export default async function Page({ data }: { data: RouterOutputs['peminjaman']['get'] }) {
+export default function Page({ data }: { data: RouterOutputs['peminjaman']['get'] }) {
   const { color, name: status } = getStatus(data.status)
 
   return (
@@ -83,6 +88,14 @@ export default async function Page({ data }: { data: RouterOutputs['peminjaman']
               <p className="text-sm">{data.tipe}</p>
               <p className="font-semibold">{data.item}</p>
             </div>
+          </div>
+          {
+            data.tipe === "Barang" && <div className="space-y-2 mb-4">
+              <p className="text-sm">Jumlah</p>
+              <p className="font-semibold">{data.jumlah} Pcs</p>
+            </div>
+          }
+          <div className="flex gap-10 mb-4">
             <div className="space-y-2">
               <p className="text-sm">Tanggal peminjaman</p>
               <p className="font-semibold">{data.from}</p>
@@ -96,6 +109,49 @@ export default async function Page({ data }: { data: RouterOutputs['peminjaman']
             <p className="text-sm">Peruntukaan</p>
             <p className="text-sm">{data.peruntukan}</p>
           </div>
+          {data.asets.length > 0 && <div className="space-y-2 mt-8">
+            <p className="text-sm">Daftar aset yang di pinjam</p>
+            <DataTable
+              data={data.asets}
+              columns={[
+                {
+                  id: "no",
+                  header: ({ column }) => (
+                    <DataTableColumnHeader column={column} title='No Inventaris' />
+                  ),
+                  cell: ({ row }) => {
+                    return (
+                      <div className={`flex space-x-4 items-center`}>
+                        <p className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
+                          {row.original.Aset.id}
+                        </p>
+                      </div>
+                    )
+                  },
+                  enableSorting: false,
+                  enableHiding: false,
+                },
+                {
+                  id: 'pengguna',
+                  header: ({ column }) => (
+                    <DataTableColumnHeader column={column} title='Pengguna' />
+                  ),
+                  cell: ({ row }) => {
+                    return (
+                      <div className='flex space-x-4'>
+                        <span className={`max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem] `}>
+                          {row.original.Aset.Pengguna?.name}
+                        </span>
+                      </div>
+                    )
+                  },
+                  enableSorting: false,
+                  enableHiding: false,
+                },
+              ]}
+              isPagintation={false}
+            />
+          </div>}
         </div>
         <div className="p-4" >
           {data.isAtasanCanApprove &&
@@ -103,10 +159,20 @@ export default async function Page({ data }: { data: RouterOutputs['peminjaman']
               <AtasanApproveDialog id={data.id} />
             </div>
           }
-          {data.isCanApprove &&
-            <div className="flex justify-end space-x-4">
-              <ApproveDialog id={data.id} />
-            </div>
+          {
+            data.isCanApprove && (
+              <div className="flex justify-end space-x-4">
+                {data.tipe === "Barang" ? (
+                  <SelectAsetDialog
+                    id={data.id}
+                    data={data.listAvailableAsets}
+                    jumlah={data.jumlah!}
+                  />
+                ) : (
+                  <ApproveDialog id={data.id} />
+                )}
+              </div>
+            )
           }
           {data.isCanSendToUser &&
             <div className="flex justify-end space-x-4">

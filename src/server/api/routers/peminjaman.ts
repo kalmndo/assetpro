@@ -4,6 +4,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@/server/api/trpc";
+import { type Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -40,8 +41,17 @@ export const peminjamanRouter = createTRPCRouter({
               DepartmentUnit: true
             }
           },
-          PeminjamanHistory: true
-        }
+          PeminjamanHistory: true,
+          PeminjamanAsetInternal: {
+            include: {
+              Aset: {
+                include: {
+                  Pengguna: true
+                }
+              }
+            }
+          }
+        },
       })
 
       if (!res) {
@@ -60,6 +70,40 @@ export const peminjamanRouter = createTRPCRouter({
       const isMalCanReceive = userRoles?.includes(ROLE.PEMINJAMAN_INTERNAL_RECEIVE_FROM_USER.id) && status === STATUS.RETURNING.id
 
       const peminjam = res.Peminjam
+      let listAvailableAsets: Prisma.DaftarAsetGetPayload<{ include: { Pengguna: true } }>[] = []
+
+      if (res.type) {
+        const aset = await ctx.db.daftarAset.findMany({
+          where: {
+            barangId: res.Barang!.id,
+            PeminjamanAsetInternal: {
+              none: {
+                from: {
+                  lte: res.tglKembali,
+                },
+                to: {
+                  gte: res.tglPinjam,
+                }
+              }
+            },
+            PeminjamanAsetEksternal: {
+              none: {
+                from: {
+                  lte: res.tglKembali,
+                },
+                to: {
+                  gte: res.tglPinjam,
+                }
+              }
+            }
+          },
+          include: {
+            Pengguna: true
+          }
+        })
+
+        listAvailableAsets = aset
+      }
 
       return {
         id: res.id,
@@ -79,7 +123,9 @@ export const peminjamanRouter = createTRPCRouter({
         isCanSendToUser,
         isUserCanReceive,
         isUserCanReturn,
-        isMalCanReceive
+        isMalCanReceive,
+        listAvailableAsets,
+        asets: res.PeminjamanAsetInternal
       }
     }),
   getAll: protectedProcedure
@@ -354,6 +400,56 @@ export const peminjamanRouter = createTRPCRouter({
         });
       }
     }),
+  approveAset: protectedProcedure
+    .input(z.object({
+      id: z.string(),
+      asetIds: z.array(z.string())
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const {
+        id,
+        asetIds
+      } = input
+
+      try {
+        await ctx.db.$transaction(async (tx) => {
+          const result = await tx.peminjaman.update({
+            where: {
+              id
+            },
+            data: {
+              status: STATUS.IM_APPROVE.id
+            }
+          })
+
+          await tx.peminjamanAsetInternal.createMany({
+            data: asetIds.map((v) => ({
+              asetId: v,
+              from: result.tglPinjam,
+              to: result.tglKembali,
+              peminjamanId: id
+            }))
+          })
+
+          await tx.peminjamanHistory.create({
+            data: {
+              desc: "Permohonan disetujui",
+              peminjamanId: id
+            }
+          })
+        })
+        return {
+          ok: true,
+          message: 'Berhasil menyetujui permintan peminjaman'
+        }
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Kemunkingan terjadi kesalahan sistem, silahkan coba lagi",
+          cause: error,
+        });
+      }
+    }),
   reject: protectedProcedure
     .input(z.object({
       id: z.string(),
@@ -527,7 +623,6 @@ export const peminjamanRouter = createTRPCRouter({
 
       try {
         await ctx.db.$transaction(async (tx) => {
-
           await tx.peminjaman.update({
             where: {
               id

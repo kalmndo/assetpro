@@ -684,7 +684,8 @@ model Peminjaman {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    PeminjamanHistory PeminjamanHistory[]
+    PeminjamanHistory      PeminjamanHistory[]
+    PeminjamanAsetInternal PeminjamanAsetInternal[]
 }
 
 model PeminjamanHistory {
@@ -722,6 +723,7 @@ model PeminjamanExternal {
     updatedAt DateTime @updatedAt
 
     PeminjamanExternalHistory PeminjamanExternalHistory[]
+    PeminjamanAsetEksternal   PeminjamanAsetEksternal[]
 }
 
 model PeminjamanExternalHistory {
@@ -731,6 +733,34 @@ model PeminjamanExternalHistory {
     peminjamanId String
 
     PeminjamanExternal PeminjamanExternal @relation(fields: [peminjamanId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model PeminjamanAsetInternal {
+    id           String   @id @default(cuid())
+    asetId       String
+    peminjamanId String
+    from         DateTime
+    to           DateTime
+
+    Aset       DaftarAset @relation(fields: [asetId], references: [id])
+    Peminjaman Peminjaman @relation(fields: [peminjamanId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model PeminjamanAsetEksternal {
+    id           String   @id @default(cuid())
+    asetId       String
+    peminjamanId String
+    from         DateTime
+    to           DateTime
+
+    Aset       DaftarAset         @relation(fields: [asetId], references: [id])
+    Peminjaman PeminjamanExternal @relation(fields: [peminjamanId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -984,12 +1014,14 @@ model DaftarAset {
     FttbItem     FttbItem     @relation(fields: [fttbItemId], references: [id])
     Pengguna     User?        @relation(fields: [penggunaId], references: [id])
 
-    createdAt            DateTime               @default(now())
-    updatedAt            DateTime               @updatedAt
-    FtkbItemPemohonAset  FtkbItemPemohonAset[]
-    Perbaikan            Perbaikan[]
-    DaftarAsetAdditional DaftarAsetAdditional[]
-    DaftarAsetAudit      DaftarAsetAudit[]
+    createdAt               DateTime                  @default(now())
+    updatedAt               DateTime                  @updatedAt
+    FtkbItemPemohonAset     FtkbItemPemohonAset[]
+    Perbaikan               Perbaikan[]
+    DaftarAsetAdditional    DaftarAsetAdditional[]
+    DaftarAsetAudit         DaftarAsetAudit[]
+    PeminjamanAsetInternal  PeminjamanAsetInternal[]
+    PeminjamanAsetEksternal PeminjamanAsetEksternal[]
 }
 
 model DaftarAsetAdditional {

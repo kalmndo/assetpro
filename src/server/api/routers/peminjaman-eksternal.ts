@@ -4,6 +4,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@/server/api/trpc";
+import { type Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -40,7 +41,16 @@ export const peminjamanEksternalRouter = createTRPCRouter({
               DepartmentUnit: true
             }
           },
-          PeminjamanExternalHistory: true
+          PeminjamanExternalHistory: true,
+          PeminjamanAsetEksternal: {
+            include: {
+              Aset: {
+                include: {
+                  Pengguna: true
+                }
+              }
+            }
+          }
         }
       })
 
@@ -57,6 +67,41 @@ export const peminjamanEksternalRouter = createTRPCRouter({
       const isMalCanReceive = userRoles?.includes(ROLE.PEMINJAMAN_INTERNAL_RECEIVE_FROM_USER.id) && status === STATUS.DIGUNAKAN.id
 
       const pemohon = res.Pemohon
+
+      let listAvailableAsets: Prisma.DaftarAsetGetPayload<{ include: { Pengguna: true } }>[] = []
+
+      if (res.type) {
+        const aset = await ctx.db.daftarAset.findMany({
+          where: {
+            barangId: res.Barang!.id,
+            PeminjamanAsetInternal: {
+              none: {
+                from: {
+                  lte: res.tglKembali,
+                },
+                to: {
+                  gte: res.tglPinjam,
+                }
+              }
+            },
+            PeminjamanAsetEksternal: {
+              none: {
+                from: {
+                  lte: res.tglKembali,
+                },
+                to: {
+                  gte: res.tglPinjam,
+                }
+              }
+            }
+          },
+          include: {
+            Pengguna: true
+          }
+        })
+
+        listAvailableAsets = aset
+      }
 
       return {
         id: res.id,
@@ -75,7 +120,9 @@ export const peminjamanEksternalRouter = createTRPCRouter({
         isCanSendToUser,
         isMalCanReceive,
         peminjam: res.peminjam,
-        biaya: "Rp" + " " + res.biaya.toLocaleString('id-ID')
+        biaya: "Rp" + " " + res.biaya.toLocaleString('id-ID'),
+        listAvailableAsets,
+        asets: res.PeminjamanAsetEksternal
       }
     }),
   getAll: protectedProcedure
@@ -275,6 +322,56 @@ export const peminjamanEksternalRouter = createTRPCRouter({
         return {
           ok: true,
           message: 'Berhasil menyetujui permintan peminjaman eksternal'
+        }
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Kemunkingan terjadi kesalahan sistem, silahkan coba lagi",
+          cause: error,
+        });
+      }
+    }),
+  approveAset: protectedProcedure
+    .input(z.object({
+      id: z.string(),
+      asetIds: z.array(z.string())
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const {
+        id,
+        asetIds
+      } = input
+
+      try {
+        await ctx.db.$transaction(async (tx) => {
+          const result = await tx.peminjamanExternal.update({
+            where: {
+              id
+            },
+            data: {
+              status: STATUS.IM_APPROVE.id
+            }
+          })
+
+          await tx.peminjamanAsetEksternal.createMany({
+            data: asetIds.map((v) => ({
+              asetId: v,
+              from: result.tglPinjam,
+              to: result.tglKembali,
+              peminjamanId: id
+            }))
+          })
+
+          await tx.peminjamanExternalHistory.create({
+            data: {
+              desc: "Permohonan disetujui",
+              peminjamanId: id
+            }
+          })
+        })
+        return {
+          ok: true,
+          message: 'Berhasil menyetujui permintan peminjaman'
         }
       } catch (error) {
         throw new TRPCError({

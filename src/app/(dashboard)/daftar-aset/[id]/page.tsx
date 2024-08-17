@@ -13,9 +13,7 @@ import { columnsTerima } from "./_components/column-terima";
 import { columnsPenyusutan } from "./_components/column-penyusutan";
 import Menu from "./_components/menu";
 import Card from "./_components/card"
-
-// vendor
-// tanggal pembe
+import { columnsPeminjaman } from "./_components/column-peminjaman";
 
 export default async function Page({ params: { id } }: { params: { id: string } }) {
   const data = await api.daftarAset.get({ id })
@@ -145,6 +143,7 @@ export default async function Page({ params: { id } }: { params: { id: string } 
               <TabsTrigger value="perbaikan">Perbaikan</TabsTrigger>
               <TabsTrigger value="keluar">Keluar</TabsTrigger>
               <TabsTrigger value="masuk">Masuk</TabsTrigger>
+              <TabsTrigger value="peminjaman">Peminjaman</TabsTrigger>
             </TabsList>
             <TabsContent value="perbaikan">
               <DataTable
@@ -162,6 +161,12 @@ export default async function Page({ params: { id } }: { params: { id: string } 
               <DataTable
                 data={[data.terima]}
                 columns={columnsTerima}
+              />
+            </TabsContent>
+            <TabsContent value="peminjaman">
+              <DataTable
+                data={data.peminjaman}
+                columns={columnsPeminjaman}
               />
             </TabsContent>
           </Tabs>
