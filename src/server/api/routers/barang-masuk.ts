@@ -178,7 +178,7 @@ export const barangMasukRouter = createTRPCRouter({
             }
           })
 
-          const fttb = await ctx.db.fttb.create({
+          const fttb = await tx.fttb.create({
             data: {
               poId,
               no: Math.random().toString(),
@@ -240,6 +240,7 @@ export const barangMasukRouter = createTRPCRouter({
 
 
 
+              // TODO: Bugs disini
               const subKat = await tx.masterBarangSubSubKategori.findFirst({
                 where: {
                   fullCode: code.split('.').slice(0, 4).join('.')
