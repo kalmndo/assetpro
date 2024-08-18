@@ -238,9 +238,6 @@ export const barangMasukRouter = createTRPCRouter({
                 }
               })
 
-
-
-              // TODO: Bugs disini
               const subKat = await tx.masterBarangSubSubKategori.findFirst({
                 where: {
                   fullCode: code.split('.').slice(0, 4).join('.')
@@ -255,7 +252,7 @@ export const barangMasukRouter = createTRPCRouter({
                     fttbItemId: fttbItem.id,
                     status: STATUS.ASET_IDLE.id,
                     // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-                    umur: subKat?.umur!
+                    umur: subKat?.umur ?? 10
                   }
                 })
               }
