@@ -25,6 +25,7 @@ export const vendorRouter = createTRPCRouter({
           id
         },
         include: {
+          Vendor: true,
           Penawaran: true,
           PermintaanPenawaranBarangVendor: {
             include: {
@@ -69,6 +70,9 @@ export const vendorRouter = createTRPCRouter({
       return {
         ...result,
         barang,
+        vendor: {
+          ...result.Vendor
+        },
         no: result.Penawaran.no,
         tanggal: result.Penawaran.createdAt.toLocaleDateString()
       }

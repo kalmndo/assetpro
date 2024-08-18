@@ -27,7 +27,11 @@ export default async function Page({ params: { id } }: { params: { id: string } 
         </div>
         <Separator />
         <div className="grid grid-cols-3 gap-4 p-4">
-          <div className="col-span-1 space-y-4">
+          <div className="col-span-2 space-y-4">
+            <div className="space-y-2">
+              <p className="text-sm">Dari</p>
+              <p className="font-semibold">Yayasan Alfian Husin</p>
+            </div>
             <div className="space-y-2">
               <p className="text-sm">Nomor</p>
               <p className="font-semibold">{data.no}</p>
@@ -35,6 +39,13 @@ export default async function Page({ params: { id } }: { params: { id: string } 
             <div className="space-y-2">
               <p className="text-sm">Tanggal</p>
               <p className="font-semibold">{data.tanggal}</p>
+            </div>
+          </div>
+          <div className="col-span-1 space-y-4">
+            <div className="space-y-2">
+              <p className="text-sm">Kepada</p>
+              <p className="font-semibold">{data.Vendor.name}</p>
+              <p className="text-sm">{data.Vendor.alamat}</p>
             </div>
           </div>
         </div>

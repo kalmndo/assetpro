@@ -68,7 +68,7 @@ export default function Items({
             }
           </div>
           <div>
-            <Label htmlFor="termin">Termin pembayaran</Label>
+            <Label htmlFor="termin">{!status && <span className="text-red-600">*</span>} Termin pembayaran</Label>
             {status ?
               <p className="text-sm">{barang.termin}</p>
               :
@@ -86,7 +86,7 @@ export default function Items({
             }
           </div>
           <div>
-            <Label htmlFor="delivery">Waktu pengiriman</Label>
+            <Label htmlFor="delivery">{!status && <span className="text-red-600">*</span>} Waktu pengiriman</Label>
             {status ?
               <p className="text-sm">{barang.delivery}</p>
               :
@@ -104,7 +104,7 @@ export default function Items({
             }
           </div>
           <div>
-            <Label htmlFor="garansi">Garansi</Label>
+            <Label htmlFor="garansi">{!status && <span className="text-red-600">*</span>} Garansi</Label>
             {status ?
               <p className="text-sm">{barang.garansi}</p>
               :
@@ -131,7 +131,7 @@ export default function Items({
             </div>
             :
             <div>
-              <Label htmlFor="quantity">Harga satuan</Label>
+              <Label htmlFor="quantity"> {!status && <span className="text-red-600">*</span>} Harga satuan</Label>
               <CurrencyInput
                 name="harga"
                 placeholder="Rp ..."

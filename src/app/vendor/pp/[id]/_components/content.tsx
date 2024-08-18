@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { LoaderCircle } from "lucide-react"
 
-const barangsAtom = atom([])
+const barangsAtom = atom<RouterOutputs['vendor']['getPermintaanPenawaran']['barang']>([])
 
 export default function Content({
   data
@@ -58,19 +58,24 @@ const TheContent = ({
       toast.error(error.message)
     }
   }
+
+  const isNotValid = barang.every((v) => (!v.termin || !v.delivery || !v.garansi || !v.harga))
+
   return (
     <div>
       {barangs.map((v: any, i) => (
         <Items key={i} barangAtom={v} status={status} />
       ))}
       <div className="flex justify-end my-4">
-        {!status && <Button disabled={isPending} onClick={onSubmit}>
-          {isPending ?
-            <LoaderCircle className="animate-spin" />
-            :
-            "Kirim Penawaran"
-          }
-        </Button>}
+        {!status &&
+          <Button disabled={isPending || isNotValid} onClick={onSubmit}>
+            {isPending ?
+              <LoaderCircle className="animate-spin" />
+              :
+              "Kirim Penawaran"
+            }
+          </Button>
+        }
       </div>
     </div>
   )
