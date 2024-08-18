@@ -46,12 +46,13 @@ const TheContent = ({
 
   const onSubmit = async () => {
     try {
-      const result = await mutateAsync({
-        id,
-        barang
-      })
-      toast.success(result.message)
-      router.refresh()
+      console.log("barang", barang)
+      // const result = await mutateAsync({
+      //   id,
+      //   barang
+      // })
+      // toast.success(result.message)
+      // router.refresh()
     } catch (error) {
       // @ts-ignore
       toast.error(error.message)

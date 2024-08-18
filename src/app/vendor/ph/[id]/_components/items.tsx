@@ -18,7 +18,6 @@ export default function Items({
     uom: string;
     harga: number | null;
     hargaString: string
-    hargaPrev: number | null | undefined
     hargaNego: number | undefined
     totalHarga: number | null;
     delivery: string | null;
@@ -30,7 +29,6 @@ export default function Items({
 }) {
   const [barang, setBarang] = useAtom(barangAtom)
 
-  const totalHargaPrev = barang.hargaPrev! * barang.qty
   const totalHargaNego = barang.hargaNego! * barang.qty
   return (
     <div className="flex flex-col md:flex-row items-start gap-6 p-6 rounded-lg border mb-5">
@@ -151,7 +149,7 @@ export default function Items({
               <CurrencyInput
                 name="harga"
                 placeholder="Rp ..."
-                value={!barang.harga ? barang.hargaPrev! : barang.harga}
+                value={barang.harga!}
                 onValueChange={(_value, _name, values) => {
                   setBarang((v) => ({
                     ...v,
@@ -164,13 +162,9 @@ export default function Items({
               />
             </div>
           }
-          {/* <div className="flex">
-            <Label htmlFor="total">Total Harga</Label>
-            <div className="text-lg font-semibold">Rp {barang.totalHarga ? barang.totalHarga?.toLocaleString("id-Id") : totalHargaPrev?.toLocaleString("id-ID")}</div>
-          </div> */}
           <div>
             <Label htmlFor="prevHarga">Total Harga</Label>
-            <p className="font-bold text-green-800 "> Rp {barang.totalHarga ? barang.totalHarga?.toLocaleString("id-Id") : totalHargaPrev?.toLocaleString("id-ID")}</p>
+            <p className="font-bold text-green-800 "> Rp {barang.totalHarga?.toLocaleString("id-Id")}</p>
           </div>
         </div>
       </div>

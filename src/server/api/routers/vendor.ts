@@ -145,6 +145,7 @@ export const vendorRouter = createTRPCRouter({
           id
         },
         include: {
+          Vendor: true,
           PenawaraanHarga: true,
           PenawaranHargaBarangVendor: {
             include: {
@@ -179,28 +180,33 @@ export const vendorRouter = createTRPCRouter({
         });
       }
 
-      const barang = result.PenawaranHargaBarangVendor.map((v) => ({
-        id: v.id,
-        name: v.PembelianBarang.MasterBarang.name,
-        image: v.PembelianBarang.MasterBarang.image,
-        kode: v.PembelianBarang.MasterBarang.fullCode,
-        desc: v.PembelianBarang.MasterBarang.deskripsi,
-        qty: v.PembelianBarang.qty,
-        uom: v.PembelianBarang.MasterBarang.Uom.name,
-        harga: v.harga ?? 0,
-        hargaString: String(v.harga ?? 0),
-        hargaPrev: v.PembelianBarang.PermintaanPenawaranBarangVendor.filter((a) => a.Vendor.Vendor.id === result.vendorId)[0]?.harga,
-        catatan: v.PembelianBarang.PermintaanPenawaranBarangVendor.find((v) => v.Vendor.Vendor.id === result.vendorId)?.catatan,
-        termin: v.PembelianBarang.PermintaanPenawaranBarangVendor.find((v) => v.Vendor.Vendor.id === result.vendorId)?.termin,
-        garansi: v.PembelianBarang.PermintaanPenawaranBarangVendor.find((v) => v.Vendor.Vendor.id === result.vendorId)?.garansi,
-        delivery: v.PembelianBarang.PermintaanPenawaranBarangVendor.find((v) => v.Vendor.Vendor.id === result.vendorId)?.delivery,
-        hargaNego: v.PembelianBarang.PenawaranHargaBarangNego?.hargaNego,
-        totalHarga: v.totalHarga
-      }))
+      const barang = result.PenawaranHargaBarangVendor.map((v) => {
+        const harga = v.harga ?? v.PembelianBarang.PermintaanPenawaranBarangVendor.filter((a) => a.Vendor.Vendor.id === result.vendorId)[0]?.harga
+        return ({
+          id: v.id,
+          name: v.PembelianBarang.MasterBarang.name,
+          image: v.PembelianBarang.MasterBarang.image,
+          kode: v.PembelianBarang.MasterBarang.fullCode,
+          desc: v.PembelianBarang.MasterBarang.deskripsi,
+          qty: v.PembelianBarang.qty,
+          uom: v.PembelianBarang.MasterBarang.Uom.name,
+          harga,
+          hargaString: String(harga),
+          catatan: v.PembelianBarang.PermintaanPenawaranBarangVendor.find((v) => v.Vendor.Vendor.id === result.vendorId)?.catatan,
+          termin: v.PembelianBarang.PermintaanPenawaranBarangVendor.find((v) => v.Vendor.Vendor.id === result.vendorId)?.termin,
+          garansi: v.PembelianBarang.PermintaanPenawaranBarangVendor.find((v) => v.Vendor.Vendor.id === result.vendorId)?.garansi,
+          delivery: v.PembelianBarang.PermintaanPenawaranBarangVendor.find((v) => v.Vendor.Vendor.id === result.vendorId)?.delivery,
+          hargaNego: v.PembelianBarang.PenawaranHargaBarangNego?.hargaNego,
+          totalHarga: v.totalHarga ?? harga! * v.PembelianBarang.qty
+        })
+      })
 
       return {
         ...result,
         barang,
+        vendor: {
+          ...result.Vendor
+        },
         no: result.PenawaraanHarga.no,
         tanggal: result.PenawaraanHarga.createdAt.toLocaleDateString()
       }
