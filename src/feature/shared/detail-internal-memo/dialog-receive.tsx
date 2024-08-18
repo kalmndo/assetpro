@@ -8,10 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { LoaderCircle } from "lucide-react"
-import { useState } from "react"
 import { api } from "@/trpc/react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation";
@@ -33,7 +30,6 @@ export const DialogReceive = (
 ) => {
   const { mutateAsync, isPending } = api.permintaanBarang.receive.useMutation()
   const router = useRouter()
-  console.log("barang", barang)
   const onSubmit = async () => {
     try {
       const result = await mutateAsync({

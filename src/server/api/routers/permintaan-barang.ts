@@ -195,14 +195,10 @@ export const permintaanBarangRouter = createTRPCRouter({
       imId: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
-
-
-
       const { permintaanBarangId, imId, barangId } = input
 
       try {
-
-        const result = await ctx.db.$transaction(async (tx) => {
+        await ctx.db.$transaction(async (tx) => {
           const im = await tx.permintaanBarang.findUnique({
             where: {
               id: imId
@@ -312,7 +308,7 @@ export const permintaanBarangRouter = createTRPCRouter({
         })
         return {
           ok: true,
-          message: ''
+          message: 'Berhasil menerima barang'
         }
       } catch (error) {
         throw new TRPCError({
@@ -321,8 +317,6 @@ export const permintaanBarangRouter = createTRPCRouter({
           cause: error,
         });
       }
-
-
     }),
   create: protectedProcedure
     .input(z.object({
