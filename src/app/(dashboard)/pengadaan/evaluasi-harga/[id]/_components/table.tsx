@@ -55,6 +55,7 @@ export function Table({
       <DialogSelectVendor
         open={dialog.open}
         data={dialog.data}
+        canApprove={data.canApprove}
         onOpenChange={handleCloseDialog}
         setBarang={setBarang as any}
       />
@@ -64,6 +65,26 @@ export function Table({
           barang={barang}
         />}
       </div>
+      {data.riwayat.length > 0 && (
+        <div className="">
+          <p className="font-semibold">Riwayat</p>
+          {data.riwayat.map((v) => {
+            return (
+              <div key={v.id} className="mt-4">
+                <div className="text-sm font-semibold">{v.name}</div>
+                <div className="mt-2">
+                  {v.barang.map((va) => (
+                    <div key={va.kode}>
+                      <p className="text-sm font-semibold">{va.name}</p>
+                      <p className="text-sm">{va.vendor.name}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

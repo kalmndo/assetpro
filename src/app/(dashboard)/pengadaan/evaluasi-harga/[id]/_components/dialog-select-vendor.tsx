@@ -44,11 +44,13 @@ export default function DialogSelectVendor({
   data,
   open,
   onOpenChange,
+  canApprove,
   // @ts-ignore
   setBarang
 }: {
   data: any,
   open: boolean,
+  canApprove: boolean
   onOpenChange(): void,
   setBarang: Dispatch<SetStateAction<{
     id: string;
@@ -101,6 +103,8 @@ export default function DialogSelectVendor({
     }
   }, [data.selectionDefault, setSelection])
 
+  const unchecked = Object.keys(selection)[0] === '-1'
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-6xl">
@@ -119,10 +123,10 @@ export default function DialogSelectVendor({
                   onCheckedChange={(value) => {
                     table.toggleAllPageRowsSelected(false)
                     row.toggleSelected(!!value)
-                  }
-                  }
+                  }}
                   aria-label='Select row'
                   className='translate-y-[2px]'
+                  disabled={!canApprove}
                 />
               ),
               enableSorting: false,
@@ -142,13 +146,14 @@ export default function DialogSelectVendor({
         />
 
         <DialogFooter>
-          <Button
+          {canApprove && <Button
             type="submit"
             size="lg"
             onClick={onSubmit}
+            disabled={unchecked}
           >
             Pilih
-          </Button>
+          </Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

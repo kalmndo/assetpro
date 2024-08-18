@@ -79,7 +79,15 @@ export const evaluasiHargaRouter = createTRPCRouter({
           },
           EvaluasiVendorTerpilihUser: {
             include: {
-              EvaluasiVendorTerpilihVendor: true
+              User: true,
+              EvaluasiVendorTerpilihVendor: {
+                include: {
+                  Barang: true,
+                  Vendor: {
+                    include: { Vendor: { include: { Vendor: true } } }
+                  }
+                }
+              }
             }
           },
           EvaluasiBarang: {
@@ -140,8 +148,10 @@ export const evaluasiHargaRouter = createTRPCRouter({
       if (result.status === STATUS.MENUNGGU.id) {
         getVendors = await ctx.db.vendor.findMany()
       }
-      const barang = result.EvaluasiBarang.map((v) => {
 
+
+
+      const barang = result.EvaluasiBarang.map((v) => {
         return ({
           id: v.id,
           name: v.PembelianBarang!.MasterBarang.name,
@@ -168,6 +178,23 @@ export const evaluasiHargaRouter = createTRPCRouter({
         })
       })
 
+      const riwayat = usersSelectedVendor.map((v) => {
+        return {
+          ...v.User,
+          barang: v.EvaluasiVendorTerpilihVendor.map((a) => {
+            const b = barang.find((v) => v.id === a.Barang.id)!
+            return {
+              name: b.name,
+              kode: b.kode,
+              image: b.image,
+              uom: b.uom,
+              qty: b.qty,
+              vendor: { ...a.Vendor.Vendor.Vendor },
+            }
+          })
+        }
+      })
+
       return {
         id: result.id,
         no: result.no,
@@ -181,7 +208,8 @@ export const evaluasiHargaRouter = createTRPCRouter({
         getVendors: getVendors ?? [],
         canApprove,
         penawaranDeadline: result.PenawaranHarga.deadline?.toLocaleDateString(),
-        // deadline: result.deadline?.toLocaleDateString()
+        deadline: result.PenawaranHarga.deadline?.toLocaleDateString(),
+        riwayat
       }
     }),
   checkEvaluasi: protectedProcedure
