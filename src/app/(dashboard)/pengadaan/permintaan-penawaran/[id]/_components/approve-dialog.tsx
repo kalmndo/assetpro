@@ -62,7 +62,17 @@ export default function ApproveDialog({
         </DialogHeader>
         <div className="space-y-4">
           <p className="text-sm">Silahka isi tanggal batas waktu akhir vendor dapat mengisi harga penawaran?</p>
-          <DatePickerWithPresets date={date} setDate={setDate} />
+          <DatePickerWithPresets
+            date={date}
+            setDate={setDate}
+            calendarProps={{
+              disabled(date) {
+                return (
+                  date < new Date()
+                )
+              },
+            }}
+          />
         </div>
         <DialogFooter>
           <Button

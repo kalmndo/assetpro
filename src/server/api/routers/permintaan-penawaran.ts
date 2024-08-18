@@ -83,6 +83,17 @@ export const permintaanPenawaranRouter = createTRPCRouter({
 
       if (result.status === STATUS.MENUNGGU.id) {
         getVendors = await ctx.db.vendor.findMany()
+      } else {
+        const res = await ctx.db.permintaanPenawaranVendor.findMany({
+          where: { penawaranId: id },
+          include: {
+            Vendor: true
+          }
+        })
+
+        getVendors = res.map((v) => ({
+          ...v.Vendor
+        }))
       }
 
       const barang = result.Pembelian.PermintaanPembelianBarang.map((v) => ({

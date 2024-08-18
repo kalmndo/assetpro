@@ -9,7 +9,7 @@ import { addDays, format } from "date-fns"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
+import { Calendar, type CalendarProps } from "@/components/ui/calendar"
 import {
   Popover,
   PopoverContent,
@@ -25,12 +25,13 @@ import {
 
 export function DatePickerWithPresets({
   date,
-  setDate
+  setDate,
+  calendarProps
 }: {
   date: Date | undefined,
-  setDate: Dispatch<SetStateAction<Date | undefined>>
+  setDate: Dispatch<SetStateAction<Date | undefined>>,
+  calendarProps?: CalendarProps
 }) {
-
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -65,7 +66,7 @@ export function DatePickerWithPresets({
           </SelectContent>
         </Select>
         <div className="rounded-md border">
-          <Calendar mode="single" selected={date} onSelect={setDate} />
+          <Calendar {...calendarProps} mode="single" selected={date} onSelect={setDate} />
         </div>
       </PopoverContent>
     </Popover>

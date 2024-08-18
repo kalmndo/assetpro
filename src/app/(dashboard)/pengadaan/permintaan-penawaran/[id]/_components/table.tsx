@@ -43,6 +43,7 @@ export function Table({
       />
       <DialogSelectVendor
         vendors={data.getVendors}
+        status={data.status}
         open={dialog.open}
         data={{ id: dialog.data.id, name: dialog.data.name }}
         onOpenChange={handleCloseDialog}

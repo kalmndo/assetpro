@@ -12,6 +12,7 @@ import { type Dispatch, type SetStateAction, useState, useEffect } from "react";
 import { DataTable } from "@/components/data-table";
 import { columns } from "./columns-select-vendor";
 import { Checkbox } from "@/components/ui/checkbox";
+import { STATUS } from "@/lib/status";
 
 export default function DialogSelectVendor({
   data,
@@ -19,6 +20,7 @@ export default function DialogSelectVendor({
   open,
   onOpenChange,
   vendorIds,
+  status,
   // @ts-ignore
   setBarang
 }: {
@@ -27,6 +29,7 @@ export default function DialogSelectVendor({
   open: boolean,
   onOpenChange(): void,
   vendorIds: string[],
+  status: string
   setBarang: Dispatch<SetStateAction<{
     id: string;
     name: string;
@@ -75,59 +78,65 @@ export default function DialogSelectVendor({
 
   }, [open, vendorIds, vendors])
 
+  const newColumns = status === STATUS.SELESAI.id
+    ?
+    columns
+    :
+    [
+      {
+        id: 'select',
+        // @ts-ignore
+        header: ({ table }) => (
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && 'indeterminate')
+            }
+            onCheckedChange={(value) => {
+              table.toggleAllPageRowsSelected(!!value)
+            }}
+            aria-label='Select all'
+            className='translate-y-[2px]'
+          />
+        ),
+        // @ts-ignore
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label='Select row'
+            className='translate-y-[2px]'
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+      },
+      ...columns
+    ];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-6xl">
         <DialogHeader>
-          <DialogTitle>Pilih vendor</DialogTitle>
+          <DialogTitle>{status === STATUS.SELESAI.id ? "Vendor terpilih" : "Pilih vendor"}</DialogTitle>
         </DialogHeader>
-        <p>Pilih vendor untuk barang {data.name}</p>
+        <p>{status === STATUS.SELESAI.id ? "Vendor terpilih" : "Pilih vendor"} untuk barang {data.name}</p>
         <DataTable
-
           data={vendors}
-          columns={[
-            {
-              id: 'select',
-              header: ({ table, }) => (
-                <Checkbox
-                  checked={
-                    table.getIsAllPageRowsSelected() ||
-                    (table.getIsSomePageRowsSelected() && 'indeterminate')
-                  }
-                  onCheckedChange={(value) => {
-                    table.toggleAllPageRowsSelected(!!value)
-                  }}
-                  aria-label='Select all'
-                  className='translate-y-[2px]'
-                />
-              ),
-              cell: ({ row }) => (
-                <Checkbox
-                  checked={row.getIsSelected()}
-                  onCheckedChange={(value) => row.toggleSelected(!!value)}
-                  aria-label='Select row'
-                  className='translate-y-[2px]'
-                />
-              ),
-              enableSorting: false,
-              enableHiding: false,
-            },
-            ...columns
-          ]}
-          rowSelection={selection}
-          setRowSelection={setSelection}
+          columns={newColumns}
+          {...(status !== STATUS.SELESAI.id && { rowSelection: selection, setRowSelection: setSelection })}
           filter={{ column: 'name', placeholder: 'Nama ...' }}
           columnVisibilityDefaultState={{ kategori: false, subKategori: false, subSubKategori: false }}
         />
 
         <DialogFooter>
-          <Button
+          {status !== STATUS.SELESAI.id && <Button
             type="submit"
             size="lg"
             onClick={onSubmit}
           >
             Pilih
-          </Button>
+          </Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>
