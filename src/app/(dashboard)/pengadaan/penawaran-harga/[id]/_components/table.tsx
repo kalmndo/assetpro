@@ -21,7 +21,7 @@ export function Table({
     setDialog({ open: false, data: {} })
   }
 
-
+  const isValid = barang.every((v) => v.hargaNego)
 
   return (
     <div>
@@ -43,6 +43,8 @@ export function Table({
         isPagintation={false}
       />
       <DialogSelectVendor
+        status={data.status}
+        canSend={data.canSend}
         open={dialog.open}
         data={dialog.data}
         onOpenChange={handleCloseDialog}
@@ -52,7 +54,9 @@ export function Table({
         {data.canSend && <ApproveDialog
           id={data.id}
           barang={barang}
-        />}
+          disabled={!isValid}
+        />
+        }
       </div>
     </div>
   )

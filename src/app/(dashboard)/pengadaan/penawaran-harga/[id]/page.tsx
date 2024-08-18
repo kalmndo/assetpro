@@ -78,9 +78,6 @@ export default async function Page({ params: { id } }: { params: { id: string } 
         </div>
         <div className="p-4">
           <Table data={data} />
-          {/* <div className="my-4 flex justify-end">
-            {data.isApprove && <ApproveDialog id={data.id} />}
-          </div> */}
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { STATUS } from "@/lib/status";
 import sendWhatsAppMessage from "@/lib/send-whatsapp";
 import { v4 as uuidv4 } from 'uuid'
 import formatPhoneNumber from "@/lib/formatPhoneNumber";
+import isTodayOrAfter from "@/lib/isTodayOrAfter";
 // import isTodayOrAfter from "@/lib/isTodayOrAfter";
 
 export const penawaranHargaRouter = createTRPCRouter({
@@ -126,9 +127,7 @@ export const penawaranHargaRouter = createTRPCRouter({
         status: result.status,
         tanggal: result.createdAt.toLocaleDateString(),
         getVendors: getVendors ?? [],
-        // TODO: hapus ini
-        canSend: true,
-        // canSend: isTodayOrAfter(result.PermintaanPenawaran.deadline),
+        canSend: isTodayOrAfter(result.PermintaanPenawaran.deadline) && result.status === STATUS.MENUNGGU.id,
         penawaranDeadline: result.PermintaanPenawaran.deadline?.toLocaleDateString(),
         deadline: result.deadline?.toLocaleDateString()
       }

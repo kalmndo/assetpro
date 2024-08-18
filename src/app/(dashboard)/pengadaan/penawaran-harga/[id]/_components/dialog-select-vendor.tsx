@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/currency-input";
 import { type Row } from "@tanstack/react-table";
 import { type RouterOutputs } from "@/trpc/react";
+import { STATUS } from "@/lib/status";
 
 
 const renderSubComponent = ({ row }: { row: Row<RouterOutputs['penawaranHarga']['get']['barang'][0]['vendor'][0]> }) => {
@@ -40,9 +41,13 @@ export default function DialogSelectVendor({
   open,
   onOpenChange,
   // @ts-ignore
-  setBarang
+  setBarang,
+  status,
+  canSend
 }: {
   data: any,
+  status: string
+  canSend: boolean
   // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   open: boolean,
   onOpenChange(): void,
@@ -111,6 +116,7 @@ export default function DialogSelectVendor({
               name="input-name"
               placeholder="Rp ..."
               onValueChange={onChange}
+              disabled={!canSend || status === STATUS.SELESAI.id}
             />
           </div>
           <div className="space-y-1 text-right">
@@ -130,13 +136,16 @@ export default function DialogSelectVendor({
         />
 
         <DialogFooter>
-          <Button
-            type="submit"
-            size="lg"
-            onClick={onSubmit}
-          >
-            Simpan
-          </Button>
+          {
+            status !== STATUS.SELESAI.id && <Button
+              type="submit"
+              size="lg"
+              onClick={onSubmit}
+              disabled={!harga}
+            >
+              Simpan
+            </Button>
+          }
         </DialogFooter>
       </DialogContent>
     </Dialog>

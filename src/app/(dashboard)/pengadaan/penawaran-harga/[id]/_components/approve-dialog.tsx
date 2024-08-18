@@ -17,10 +17,12 @@ import { DatePickerWithPresets } from "@/components/date-picker-with-preset";
 
 export default function ApproveDialog({
   id,
-  barang
+  barang,
+  disabled
 }: {
   id: string,
   barang: RouterOutputs['penawaranHarga']['get']['barang']
+  disabled: boolean
 }) {
   const router = useRouter()
   const [date, setDate] = useState<Date>()
@@ -45,26 +47,28 @@ export default function ApproveDialog({
     }
   }
 
-  // function disabled() {
-  //   let isDisabled = true
-  //   const vendorTerpilihArr = barang.map((v) => v.vendorTerpilih)
-  //   for (const v of vendorTerpilihArr) {
-  //     isDisabled = v.length > 0 ? false : true
-  //   }
-  //   return isDisabled
-  // }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="lg">Kirim Penawaran</Button>
+        <Button size="lg" disabled={disabled}>Kirim Penawaran</Button>
       </DialogTrigger>
       <DialogContent >
         <DialogHeader>
           <DialogTitle>Kirim penawaran ke vendor</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <p className="text-sm">Silahka isi tanggal batas waktu akhir vendor dapat mengisi harga penawaran?</p>
-          <DatePickerWithPresets date={date} setDate={setDate} />
+          <p className="text-sm">Silahkan isi tanggal batas waktu akhir vendor dapat mengisi harga penawaran?</p>
+          <DatePickerWithPresets
+            date={date}
+            setDate={setDate}
+            calendarProps={{
+              disabled(date) {
+                return (
+                  date < new Date()
+                )
+              },
+            }}
+          />
         </div>
         <DialogFooter>
           <Button
