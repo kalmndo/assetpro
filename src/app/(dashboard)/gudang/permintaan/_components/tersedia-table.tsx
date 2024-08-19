@@ -31,15 +31,18 @@ import { api } from "@/trpc/react"
 import { tersediaColumns } from "./tersedia-columns"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { Checkbox } from "@/components/ui/checkbox"
 
 function FormDialog({
   open,
   data,
-  onOpenChange
+  onOpenChange,
+  setSelection
 }: {
   open: boolean,
   onOpenChange(): void,
-  data: any[]
+  data: any[],
+  setSelection: any
 }) {
   const { mutateAsync, isPending } = api.barangKeluar.create.useMutation()
   const router = useRouter()
@@ -49,6 +52,7 @@ function FormDialog({
       const result = await mutateAsync(data.map((v) => v.id))
       onOpenChange()
       toast.success(result.message)
+      setSelection({})
       router.refresh()
     } catch (error: any) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
@@ -175,11 +179,50 @@ export default function TersediaTable({ data }: { data: any[] }) {
       variant: 'default'
     },
   ]
+
   return (
     <>
       <DataTable
         data={data}
-        columns={tersediaColumns}
+        columns={[
+          {
+            id: 'select',
+            header: ({ table }) => (
+              <Checkbox
+                checked={
+                  table.getIsAllPageRowsSelected() ||
+                  (table.getIsSomePageRowsSelected() && 'indeterminate')
+                }
+                // onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                onCheckedChange={(value) => {
+                  const shouldSelect = !!value;
+                  table.toggleAllPageRowsSelected(false); // Deselect all first
+
+                  // Only select rows that are not disabled
+                  table.getRowModel().rows.forEach((row) => {
+                    if (row.original.tersedia !== 0) {
+                      row.toggleSelected(shouldSelect);
+                    }
+                  });
+                }}
+                aria-label='Select all'
+                className='translate-y-[2px]'
+              />
+            ),
+            cell: ({ row }) => (
+              <Checkbox
+                disabled={row.original.tersedia === 0}
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label='Select row'
+                className='translate-y-[2px]'
+              />
+            ),
+            enableSorting: false,
+            enableHiding: false,
+          },
+          ...tersediaColumns
+        ]}
         filter={{ column: 'name', placeholder: 'Nama ...' }}
         checkboxToolbarActions={checkboxToolbarActions}
         rowSelection={selection}
@@ -188,6 +231,7 @@ export default function TersediaTable({ data }: { data: any[] }) {
       <FormDialog
         data={dialog.data}
         open={dialog.open}
+        setSelection={setSelection}
         onOpenChange={handleDialogClose}
       />
     </>

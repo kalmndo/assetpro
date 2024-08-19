@@ -65,7 +65,7 @@ export default async function checkKetersediaanByBarang(ctx: any, barangGroupRes
 
   const tersedia = [
     // @ts-ignore
-    ...mapBarangTersedia(daftarAsetGroup, groupGolonganAset, "idle"),
+    ...mapBarangTersedia(daftarAsetGroup, groupGolonganAset, "idle").filter((v) => v.permintaan > 0),
     // @ts-ignore
     ...mapBarangTersedia(kartuStok, groupGolonganPersediaan, "qty"),
   ];
