@@ -17,7 +17,7 @@ interface Props {
   id: string,
   barang: any
   open: boolean
-  onOpenChange(open: boolean): void
+  onOpenChange(): void
 }
 
 export const DialogReceive = (
@@ -39,6 +39,7 @@ export const DialogReceive = (
       })
 
       toast.success(result.message)
+      onOpenChange()
       router.refresh()
     } catch (error: any) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
