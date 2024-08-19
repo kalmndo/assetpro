@@ -20,7 +20,7 @@ interface Props {
 
 export const EditDialog = ({ users, open, onOpenChange, value }: Props) => {
   const router = useRouter()
-  const { mutateAsync, isPending } = api.department.update.useMutation()
+  const { mutateAsync, isPending } = api.mEvaluasi.update.useMutation()
 
   async function onSubmit(values: any) {
     try {

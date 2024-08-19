@@ -1,3 +1,4 @@
+import { CurrencyInput } from "@/components/currency-input"
 import SearchSelect from "@/components/search-select"
 import { Button } from "@/components/ui/button"
 import { DialogFooter } from "@/components/ui/dialog"
@@ -9,7 +10,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import { type SelectProps } from "@/lib/type"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { LoaderCircle } from "lucide-react"
@@ -59,11 +59,18 @@ export const Form = ({
           <FormField
             control={form.control}
             name="nilai"
-            render={({ field }) => (
+            render={({ }) => (
               <FormItem>
                 <FormLabel>Nilai</FormLabel>
                 <FormControl>
-                  <Input type='number' placeholder="Nilai" {...field} />
+                  {/* <Input type='number' placeholder="Nilai" {...field} /> */}
+                  <CurrencyInput
+                    placeholder="Rp ..."
+                    value={form.watch('nilai')}
+                    onValueChange={(_v, _n, value) => {
+                      form.setValue("nilai", value!.value)
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

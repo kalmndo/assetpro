@@ -7,7 +7,7 @@ import { getInitials } from '@/lib/utils'
 
 export const schema = z.object({
   name: z.string(),
-  nilai: z.string(),
+  nilai: z.number(),
   User: z.object({
     image: z.string(),
     name: z.string()
@@ -47,7 +47,7 @@ export const columns: ColumnDef<Schema>[] = [
       return (
         <div className='flex space-x-2 items-center'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('nilai')}
+            Rp {row.original.nilai.toLocaleString("id-ID")}
           </span>
         </div>
       )
