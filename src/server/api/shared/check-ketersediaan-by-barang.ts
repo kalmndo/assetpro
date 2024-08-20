@@ -1,7 +1,10 @@
 import { STATUS } from "@/lib/status";
 import { type PrismaClient, type PermintaanBarangBarangGroup } from "@prisma/client";
 
-export default async function checkKetersediaanByBarang(ctx: PrismaClient, barangGroupResult: PermintaanBarangBarangGroup[]) {
+export default async function checkKetersediaanByBarang(
+  ctx: PrismaClient,
+  barangGroupResult: PermintaanBarangBarangGroup[]
+) {
   const barangIds = barangGroupResult.map((v) => v.barangId)
   const permintaanBarangIds = barangGroupResult.flatMap((v) => v.permintaanBarang)
 

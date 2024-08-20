@@ -6,6 +6,7 @@ import { z } from "zod";
 import checkKetersediaanByBarang from "../shared/check-ketersediaan-by-barang";
 import { STATUS } from "@/lib/status";
 import { TRPCError } from "@trpc/server";
+import { type PrismaClient } from "@prisma/client";
 
 export const barangKeluarRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -121,7 +122,7 @@ export const barangKeluarRouter = createTRPCRouter({
               barangId: { in: input }
             }
           })
-          const { tersedia } = await checkKetersediaanByBarang(tx, barangGroupResult)
+          const { tersedia } = await checkKetersediaanByBarang(tx as PrismaClient, barangGroupResult)
 
           const ftkb = await tx.ftkb.create({
             data: {
