@@ -1,12 +1,28 @@
 import { ROLE } from '@/lib/role'
 import {
+  ArchiveRestore,
+  BaggageClaim,
+  Briefcase,
+  Building,
+  ChartColumnDecreasing,
+  Drill,
   FileClock,
   FolderSync,
+  HandCoins,
+  Handshake,
   Inbox,
   LayoutDashboard,
+  Luggage,
+  MonitorCog,
+  Package,
   PackageMinus,
   PackagePlus,
+  PackageSearch,
+  Percent,
+  ScreenShare,
+  Settings,
   ShoppingCart,
+  SquareChartGantt,
   Warehouse,
   Wrench
 } from 'lucide-react'
@@ -35,28 +51,28 @@ export const sidelinks: SideLink[] = [
     title: 'Laporan',
     label: '',
     href: '/laporan',
-    icon: <LayoutDashboard size={18} />,
+    icon: <ChartColumnDecreasing size={18} />,
     role: ROLE.LAPORAN_VIEW.id
   },
   {
     title: 'Daftar Aset',
     label: '',
     href: '/daftar-aset',
-    icon: <LayoutDashboard size={18} />,
+    icon: <Building size={18} />,
     role: ROLE.ASET_VIEW.id
   },
   {
     title: 'Kartu Stok',
     label: '',
     href: '/kartu-stok',
-    icon: <LayoutDashboard size={18} />,
+    icon: <Package size={18} />,
     role: ROLE.STOCK_VIEW.id
   },
   {
     title: 'Permintaan',
     label: '',
     href: '/permintaan',
-    icon: <LayoutDashboard size={18} />,
+    icon: <PackageSearch size={18} />,
     isTitle: true
   },
   {
@@ -75,7 +91,7 @@ export const sidelinks: SideLink[] = [
     title: 'Peminjaman',
     label: '',
     href: '/permintaan/peminjaman',
-    icon: <FileClock size={18} />,
+    icon: <ArchiveRestore size={18} />,
   },
   {
     title: 'Manajemen',
@@ -101,35 +117,35 @@ export const sidelinks: SideLink[] = [
         title: 'Permintaan Pembelian',
         label: '',
         href: '/pengadaan/permintaan-pembelian',
-        icon: <LayoutDashboard size={18} />,
+        icon: <ScreenShare size={18} />,
         role: ROLE.PEMBELIAN_READ.id
       },
       {
         title: 'Permintaan Penawaran',
         label: '',
         href: '/pengadaan/permintaan-penawaran',
-        icon: <LayoutDashboard size={18} />,
+        icon: <HandCoins size={18} />,
         role: ROLE.PENAWARAN_VIEW.id
       },
       {
         title: 'Penawaran Harga',
         label: '',
         href: '/pengadaan/penawaran-harga',
-        icon: <LayoutDashboard size={18} />,
+        icon: <Percent size={18} />,
         role: ROLE.NEGO_VIEW.id
       },
       {
         title: 'Evaluasi Harga',
         label: '',
         href: '/pengadaan/evaluasi-harga',
-        icon: <LayoutDashboard size={18} />,
+        icon: <Handshake size={18} />,
         role: ROLE.EVALUASI_HARGA_READ.id
       },
       {
         title: 'Purchase Order',
         label: '',
         href: '/pengadaan/purchase-order',
-        icon: <LayoutDashboard size={18} />,
+        icon: <SquareChartGantt size={18} />,
         role: ROLE.PO_VIEW.id
       },
     ],
@@ -174,20 +190,20 @@ export const sidelinks: SideLink[] = [
     title: 'Perbaikan',
     label: '',
     href: '',
-    icon: <LayoutDashboard size={18} />,
+    icon: <Wrench size={18} />,
     sub: [
       {
-        title: 'Permintaan',
+        title: 'Internal',
         label: '',
         href: '/perbaikan/permintaan',
-        icon: <LayoutDashboard size={18} />,
+        icon: <Drill size={18} />,
         role: ROLE.PERBAIKAN_PERMINTAAN_VIEW.id
       },
       {
         title: 'Eksternal',
         label: '',
         href: '/perbaikan/eksternal',
-        icon: <LayoutDashboard size={18} />,
+        icon: <Luggage size={18} />,
         role: ROLE.PERBAIKAN_EKSTERNAL_VIEW.id
       },
     ]
@@ -196,20 +212,20 @@ export const sidelinks: SideLink[] = [
     title: 'Peminjaman',
     label: '',
     href: '',
-    icon: <LayoutDashboard size={18} />,
+    icon: <ArchiveRestore size={18} />,
     sub: [
       {
-        title: 'internal',
+        title: 'Internal',
         label: '',
         href: '/peminjaman/internal',
-        icon: <LayoutDashboard size={18} />,
+        icon: <Briefcase size={18} />,
         role: ROLE.PEMINJAMAN_INTERNAL_VIEW.id
       },
       {
-        title: 'eksternal',
+        title: 'Eksternal',
         label: '',
         href: '/peminjaman/eksternal',
-        icon: <LayoutDashboard size={18} />,
+        icon: <BaggageClaim size={18} />,
         role: ROLE.PEMINJAMAN_EKSTERNAL_VIEW.id
       },
     ]
@@ -225,14 +241,14 @@ export const sidelinks: SideLink[] = [
     title: 'Master',
     label: '',
     href: '/master',
-    icon: <LayoutDashboard size={18} />,
+    icon: <MonitorCog size={18} />,
     role: ROLE.MASTER_VIEW.id
   },
   {
     title: 'Pengaturan',
     label: '',
     href: '/pengaturan',
-    icon: <LayoutDashboard size={18} />,
+    icon: <Settings size={18} />,
     role: ROLE.PENGATURAN_VIEW.id
   },
 ]
