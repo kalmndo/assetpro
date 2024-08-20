@@ -105,6 +105,11 @@ export const STATUS = {
     name: 'Idle',
     color: '#15803c'
   },
+  BOOKED: {
+    id: 'booked',
+    name: 'Booked',
+    color: '#15803c'
+  },
   DISERAHKAN_KE_USER: {
     id: 'send-to-user',
     name: 'Diserahkan ke user',
@@ -119,7 +124,7 @@ export const STATUS = {
     id: 'returning',
     name: 'Mengembalikan',
     color: '#15803c'
-  }
+  },
 }
 
 export const getStatus = (id: string) => {

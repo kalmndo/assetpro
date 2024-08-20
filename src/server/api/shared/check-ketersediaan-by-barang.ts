@@ -1,60 +1,20 @@
-type BarangGroupResultType = {
-  barangId: string;
-  qty: number;
-  permintaanBarang: string[];
-  golongan: number;
-  createdAt: Date;
-  updatedAt: Date;
-}[];
+import { STATUS } from "@/lib/status";
+import { type PrismaClient, type PermintaanBarangBarangGroup } from "@prisma/client";
 
-type CheckKetersediaanByBarangResult = {
-  id: string;
-  image: string;
-  name: string;
-  kode: string;
-  permintaan: number;
-  uom: string;
-  tersedia: number;
-  golongan: string;
-  permintaanBarang: PermintaanBarangResult[];
-  imQty: string;
-  qty: string;
-  permintaanBarangId: string[];
-};
-
-type PermintaanBarangResult = {
-  id: string;
-  name: string;
-  im: string;
-  href: string;
-  qty: string;
-  permintaan: number;
-  qtyOrder: string;
-  beli: number;
-  status: string;
-  toTransfer: number
-  noInventaris: string[]
-  pemohonId: string
-};
-
-
-export default async function checkKetersediaanByBarang(ctx: any, barangGroupResult: BarangGroupResultType) {
+export default async function checkKetersediaanByBarang(ctx: PrismaClient, barangGroupResult: PermintaanBarangBarangGroup[]) {
   const barangIds = barangGroupResult.map((v) => v.barangId)
   const permintaanBarangIds = barangGroupResult.flatMap((v) => v.permintaanBarang)
 
   const permintaanBarangResult = await fetchPermintaanBarang(ctx, permintaanBarangIds);
 
-
   const mergeBarangGroupResult = barangGroupResult.map((v) => {
-    // && a.status === STATUS.IM_APPROVE.name
-    // TODO: intinya filter status by approve or progress entah lah
     return {
       ...v,
       permintaanBarang: permintaanBarangResult.filter((a: any) => a.barangId === v.barangId)
     }
   })
 
-  const [groupGolonganAset, groupGolonganPersediaan] = partitionByGolongan(
+  const { daftarAset, persediaan } = partitionByGolongan(
     mergeBarangGroupResult
   );
 
@@ -65,16 +25,16 @@ export default async function checkKetersediaanByBarang(ctx: any, barangGroupRes
 
   const tersedia = [
     // @ts-ignore
-    ...mapBarangTersedia(daftarAsetGroup, groupGolonganAset, "idle").filter((v) => v.permintaan > 0),
+    ...mapBarangTersedia(daftarAsetGroup, daftarAset, "idle").filter((v) => v.permintaan > 0),
     // @ts-ignore
-    ...mapBarangTersedia(kartuStok, groupGolonganPersediaan, "qty"),
+    ...mapBarangTersedia(kartuStok, persediaan, "qty"),
   ];
 
   const takTersedia = [
     // @ts-ignore
-    ...mapBarangTakTersedia(daftarAsetGroup, groupGolonganAset, "idle"),
+    ...mapBarangTakTersedia(daftarAsetGroup, daftarAset, "idle"),
     // @ts-ignore
-    ...mapBarangTakTersedia(kartuStok, groupGolonganPersediaan, "qty"),
+    ...mapBarangTakTersedia(kartuStok, persediaan, "qty"),
   ];
 
   return {
@@ -83,7 +43,7 @@ export default async function checkKetersediaanByBarang(ctx: any, barangGroupRes
   };
 }
 
-function fetchPermintaanBarang(ctx: any, permintaanBarangIds: string[]) {
+function fetchPermintaanBarang(ctx: PrismaClient, permintaanBarangIds: string[]) {
   return ctx.permintaanBarangBarang.findMany({
     where: {
       id: { in: permintaanBarangIds },
@@ -101,39 +61,53 @@ function fetchPermintaanBarang(ctx: any, permintaanBarangIds: string[]) {
   });
 }
 
-function partitionByGolongan(mergeBarangGroupResult: BarangGroupResultType) {
+type MergeBarangGroup = Omit<PermintaanBarangBarangGroup, 'permintaanBarang'> & {
+  permintaanBarang: Awaited<Promise<ReturnType<typeof fetchPermintaanBarang>>>;
+}
+
+function partitionByGolongan(mergeBarangGroupResult: MergeBarangGroup[]) {
+
   const filterGolongan = (golongan: number) =>
     mergeBarangGroupResult.filter((v) => v.golongan === golongan);
 
-  return [filterGolongan(1), filterGolongan(2)];
+  return {
+    daftarAset: filterGolongan(1),
+    persediaan: filterGolongan(1)
+  }
 }
 
-function fetchKetersediaan(ctx: any, model: string, ids: string[]) {
-  // @ts-ignore
-  return ctx[model].findMany({
+function fetchKetersediaan(ctx: PrismaClient, model: 'daftarAsetGroup' | 'kartuStok', ids: string[]) {
+  const args = {
     where: { id: { in: ids } },
     include: {
       MasterBarang: {
         include: {
           Uom: true,
-          DaftarAset: true,
+          ...(model === 'daftarAsetGroup' && { DaftarAset: { where: { status: STATUS.ASET_IDLE.id } } }),
         },
       },
     },
-  });
+  }
+
+  if (model === 'daftarAsetGroup') {
+    return ctx.daftarAsetGroup.findMany(args);
+  } else {
+    return ctx.kartuStok.findMany(args);
+  }
 }
 
 function mapBarang(
-  barang: any[],
-  golonganData: any[],
-  qtyField: string
-): any[] {
+  barang: Awaited<Promise<ReturnType<typeof fetchKetersediaan>>>,
+  golonganData: MergeBarangGroup[],
+  qtyField: 'idle' | 'qty'
+) {
   return barang.map((v) => {
-    const permintaan = golonganData.find((a) => a.barangId === v.id);
-    const permintaanBarang = permintaan.permintaanBarang.map((item: any) =>
+    const permintaan = golonganData.find((a) => a.barangId === v.id)!;
+    const permintaanBarang = permintaan?.permintaanBarang.map((item: any) =>
       mapPermintaanBarang(item, v.MasterBarang)
     );
-
+    //TODO: find no inv === fttb inv
+    // console.log("permintaanBarang", v.MasterBarang)
     return {
       id: permintaan.barangId,
       image: v.MasterBarang.image,
@@ -148,6 +122,7 @@ function mapBarang(
       permintaanBarangId: permintaanBarang.map((v: any) => v.id),
       imQty: permintaan.permintaanBarang.length,
       noInventaris: v.MasterBarang?.DaftarAset.map((v: any) => v.id),
+      daftarAset: v.MasterBarang.DaftarAset
     };
   });
 }
@@ -179,10 +154,11 @@ function getGolonganLabel(golongan: number) {
 }
 
 function mapBarangTersedia(
-  barang: any[],
-  golonganData: any[],
-  qtyField: string
-): CheckKetersediaanByBarangResult[] {
+  barang: Awaited<Promise<ReturnType<typeof fetchKetersediaan>>>,
+  golonganData: MergeBarangGroup[],
+  qtyField: 'idle' | 'qty'
+) {
+
   return mapBarang(barang, golonganData, qtyField).map((v) => {
     let quota = v.tersedia;
     const noInventarisArr = v.noInventaris;
@@ -232,10 +208,10 @@ function calculateToTransfer(permintaan: number, quota: number, noInventarisArr:
 }
 
 function mapBarangTakTersedia(
-  barang: any[],
-  golonganData: any[],
-  qtyField: string
-): CheckKetersediaanByBarangResult[] {
+  barang: Awaited<Promise<ReturnType<typeof fetchKetersediaan>>>,
+  golonganData: MergeBarangGroup[],
+  qtyField: 'idle' | 'qty'
+) {
   return mapBarang(barang, golonganData, qtyField)
     .map((v) => {
       const remainingPermintaan = v.permintaan - v.ordered;
