@@ -3,9 +3,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
-import { type RouterOutputs } from "@/trpc/react";
 import { getStatus } from "@/lib/status";
-import { type SelectProps } from "@/lib/type";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import formatDate from "@/lib/formatDate";
 import { api } from "@/trpc/server";

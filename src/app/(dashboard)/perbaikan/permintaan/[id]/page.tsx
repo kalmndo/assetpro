@@ -1,7 +1,7 @@
 import { api } from "@/trpc/server";
 import Content from "@/feature/shared/perbaikan/page";
-import { SelectProps } from "@/lib/type";
-import { RouterOutputs } from "@/trpc/react";
+import { type SelectProps } from "@/lib/type";
+import { type RouterOutputs } from "@/trpc/react";
 
 export default async function Page({ params: { id } }: { params: { id: string } }) {
   const data = await api.perbaikan.get({ id })
@@ -22,6 +22,6 @@ export default async function Page({ params: { id } }: { params: { id: string } 
   }
 
   return (
-    <Content data={data} teknisi={[]} vendors={vendors} imComponents={imComponents} />
+    <Content data={data} teknisi={teknisi} vendors={vendors} imComponents={imComponents} />
   )
 }
