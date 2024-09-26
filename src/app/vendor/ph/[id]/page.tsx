@@ -1,29 +1,36 @@
-"use server"
+"use server";
 
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/trpc/server";
 import { getStatus } from "@/lib/status";
 import Content from "./_components/content";
 
-export default async function Page({ params: { id } }: { params: { id: string } }) {
-  const data = await api.vendor.getPenawaranHarga({ id })
+export default async function Page({
+  params: { id },
+}: {
+  params: { id: string };
+}) {
+  const data = await api.vendor.getPenawaranHarga({ id });
 
-  const { color, name: status } = getStatus(data.status ? 'selesai' : 'menunggu')
+  const { color, name: status } = getStatus(
+    data.status ? "selesai" : "menunggu",
+  );
 
   return (
-    <div className="container max-w-5xl mx-auto mt-[100px]">
+    <div className="container mx-auto mt-[100px] max-w-5xl">
       <div className="my-4 flex justify-between">
         <div className="">
-          <h1 className='text-2xl font-bold tracking-tight'>
+          <h1 className="text-2xl font-bold tracking-tight">
             Permintaan harga penawaran
           </h1>
         </div>
-        <div className="">
-        </div>
+        <div className=""></div>
       </div>
       <div className="rounded-sm border">
         <div className="flex justify-between p-4">
-          <div style={{ color }} className="font-semibold">{status}</div>
+          <div style={{ color }} className="font-semibold">
+            {status}
+          </div>
         </div>
         <Separator />
         <div className="grid grid-cols-3 gap-4 p-4">
@@ -54,5 +61,5 @@ export default async function Page({ params: { id } }: { params: { id: string } 
         </div>
       </div>
     </div>
-  )
+  );
 }
