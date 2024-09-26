@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { DataTable } from "@/components/data-table";
 import { type RouterOutputs } from "@/trpc/react";
@@ -12,14 +12,17 @@ import ApproveDialog from "./approve-dialog";
 export function Table({
   data,
 }: {
-  data: RouterOutputs['evaluasiHarga']['get'],
+  data: RouterOutputs["evaluasiHarga"]["get"];
 }) {
-  const [barang, setBarang] = useState(data.barang)
-  const [dialog, setDialog] = useState({ open: false, data: {} as any })
+  const [barang, setBarang] = useState(data.barang);
+  const [dialog, setDialog] = useState({
+    open: false,
+    data: {} as typeof data,
+  });
 
   const handleCloseDialog = () => {
-    setDialog({ open: false, data: {} })
-  }
+    setDialog({ open: false, data: {} as typeof data });
+  };
 
   return (
     <div>
@@ -28,22 +31,31 @@ export function Table({
         columns={[
           ...columns,
           {
-            id: 'actions',
+            id: "actions",
             cell: ({ row }) => (
               <DataTableRowActions>
                 <DropdownMenuItem
                   onSelect={() => {
                     // @ts-ignore
-                    const vendorTerpilihIndex = row.original.vendor?.map((v) => v.id).findIndex((id) => id === row.original.vendorTerpilihId)
+                    const vendorTerpilihIndex = row.original.vendor
+                      // @ts-ignore
+                      ?.map((v: any) => v.id)
+                      .findIndex(
+                        // @ts-ignore
+                        (id: any) => id === row.original.vendorTerpilihId,
+                      );
                     setDialog({
                       open: true,
                       data: {
                         ...row.original,
-                        selectionDefault: { [vendorTerpilihIndex]: true }
-                      }
-                    })
+                        // @ts-ignore
+                        selectionDefault: { [vendorTerpilihIndex]: true },
+                      },
+                    });
                   }}
-                >Pilih Vendor</DropdownMenuItem>
+                >
+                  Pilih Vendor
+                </DropdownMenuItem>
               </DataTableRowActions>
             ),
             enableSorting: false,
@@ -59,11 +71,8 @@ export function Table({
         onOpenChange={handleCloseDialog}
         setBarang={setBarang as any}
       />
-      <div className="py-4 flex justify-end">
-        {data.canApprove && <ApproveDialog
-          id={data.id}
-          barang={barang}
-        />}
+      <div className="flex justify-end py-4">
+        {data.canApprove && <ApproveDialog id={data.id} barang={barang} />}
       </div>
       {data.riwayat.length > 0 && (
         <div className="">
@@ -81,10 +90,11 @@ export function Table({
                   ))}
                 </div>
               </div>
-            )
+            );
           })}
         </div>
       )}
     </div>
-  )
+  );
 }
+
