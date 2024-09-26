@@ -85,6 +85,7 @@ model PermintaanBarang {
   PBPP            PBPP[]
   FtkbItemPemohon FtkbItemPemohon[]
   ImPerbaikan     ImPerbaikan[]
+  DaftarAset      DaftarAset[]
 }
 
 model PermintaanBarangBarang {
@@ -1013,10 +1014,12 @@ model DaftarAset {
   penggunaId String?
   status     String
   umur       Int
+  imId       String?
 
-  MasterBarang MasterBarang @relation(fields: [barangId], references: [id])
-  FttbItem     FttbItem     @relation(fields: [fttbItemId], references: [id])
-  Pengguna     User?        @relation(fields: [penggunaId], references: [id])
+  MasterBarang MasterBarang      @relation(fields: [barangId], references: [id])
+  FttbItem     FttbItem          @relation(fields: [fttbItemId], references: [id])
+  Pengguna     User?             @relation(fields: [penggunaId], references: [id])
+  IM           PermintaanBarang? @relation(fields: [imId], references: [id])
 
   createdAt               DateTime                  @default(now())
   updatedAt               DateTime                  @updatedAt
