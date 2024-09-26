@@ -2,1086 +2,1090 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-    // Further reading:
-    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
+  // Further reading:
+  // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
+  // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+  url      = env("DATABASE_URL")
 }
 
 model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    @@index([name])
+  @@index([name])
 }
 
 model User {
-    id               String  @id @default(cuid())
-    name             String
-    email            String  @unique
-    image            String?
-    password         String
-    title            String
-    departmentId     String
-    departmentUnitId String?
-    atasanId         String?
+  id               String  @id @default(cuid())
+  name             String
+  email            String  @unique
+  image            String?
+  password         String
+  title            String
+  departmentId     String
+  departmentUnitId String?
+  atasanId         String?
 
-    atasan         User?           @relation("AtasanBawahan", fields: [atasanId], references: [id])
-    bawahan        User[]          @relation("AtasanBawahan")
-    UserRole       UserRole[]
-    Department     Department      @relation(fields: [departmentId], references: [id])
-    DepartmentUnit DepartmentUnit? @relation(fields: [departmentUnitId], references: [id])
+  atasan         User?           @relation("AtasanBawahan", fields: [atasanId], references: [id])
+  bawahan        User[]          @relation("AtasanBawahan")
+  UserRole       UserRole[]
+  Department     Department      @relation(fields: [departmentId], references: [id])
+  DepartmentUnit DepartmentUnit? @relation(fields: [departmentUnitId], references: [id])
 
-    createdAt        DateTime           @default(now())
-    updatedAt        DateTime           @updatedAt
-    PermintaanBarang PermintaanBarang[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  PermintaanBarang PermintaanBarang[]
 
-    NotificationFrom           Notification[]               @relation("From")
-    NotificationTo             Notification[]               @relation("To")
-    MasterEvaluasiUser         MasterEvaluasiUser[]
-    EvaluasiVendorTerpilihUser EvaluasiVendorTerpilihUser[]
-    DaftarAset                 DaftarAset[]
-    Perbaikan                  Perbaikan[]
-    Teknisi                    Teknisi?
-    Peminjaman                 Peminjaman[]
-    PeminjamanExternal         PeminjamanExternal[]
+  NotificationFrom           Notification[]               @relation("From")
+  NotificationTo             Notification[]               @relation("To")
+  MasterEvaluasiUser         MasterEvaluasiUser[]
+  EvaluasiVendorTerpilihUser EvaluasiVendorTerpilihUser[]
+  DaftarAset                 DaftarAset[]
+  Perbaikan                  Perbaikan[]
+  Teknisi                    Teknisi?
+  Peminjaman                 Peminjaman[]
+  PeminjamanExternal         PeminjamanExternal[]
 }
 
 model UserRole {
-    id     String @id @default(cuid())
-    roleId String
-    userId String
+  id     String @id @default(cuid())
+  roleId String
+  userId String
 
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-    role Role @relation(fields: [roleId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PermintaanBarang {
-    id         String @id @default(cuid())
-    no         String @unique
-    status     String
-    perihal    String
-    ruangId    String
-    pemohondId String
-    peruntukan Int    @default(0) // 0 personal 1 stock 2 perbaikan
+  id         String @id @default(cuid())
+  no         String @unique
+  status     String
+  perihal    String
+  ruangId    String
+  pemohondId String
+  peruntukan Int    @default(0) // 0 personal 1 stock 2 perbaikan
 
-    Pemohon                User                     @relation(fields: [pemohondId], references: [id])
-    Ruang                  MasterRuang              @relation(fields: [ruangId], references: [id])
-    PermintaanBarangBarang PermintaanBarangBarang[]
+  Pemohon                User                     @relation(fields: [pemohondId], references: [id])
+  Ruang                  MasterRuang              @relation(fields: [ruangId], references: [id])
+  PermintaanBarangBarang PermintaanBarangBarang[]
 
-    createdAt       DateTime          @default(now())
-    updatedAt       DateTime          @updatedAt
-    PBPP            PBPP[]
-    FtkbItemPemohon FtkbItemPemohon[]
-    ImPerbaikan     ImPerbaikan[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  PBPP            PBPP[]
+  FtkbItemPemohon FtkbItemPemohon[]
+  ImPerbaikan     ImPerbaikan[]
 }
 
 model PermintaanBarangBarang {
-    id           String @id @default(cuid())
-    permintaanId String
-    barangId     String
-    status       String
-    qty          Int
-    qtyOrdered   Int
-    qtyOut       Int
-    uomId        String
+  id           String @id @default(cuid())
+  permintaanId String
+  barangId     String
+  status       String
+  qty          Int
+  qtyOrdered   Int
+  qtyOut       Int
+  uomId        String
 
-    Permintaan                         PermintaanBarang                     @relation(fields: [permintaanId], references: [id])
-    Barang                             MasterBarang                         @relation(fields: [barangId], references: [id])
-    Uom                                MasterUnit                           @relation(fields: [uomId], references: [id])
-    PermintaanBarangBarangSplit        PermintaanBarangBarangSplit[]
-    PermintaanBarangBarangHistory      PermintaanBarangBarangHistory[]
-    PermintaanBarangBarangKodeAnggaran PermintaanBarangBarangKodeAnggaran[]
+  Permintaan                         PermintaanBarang                     @relation(fields: [permintaanId], references: [id])
+  Barang                             MasterBarang                         @relation(fields: [barangId], references: [id])
+  Uom                                MasterUnit                           @relation(fields: [uomId], references: [id])
+  PermintaanBarangBarangSplit        PermintaanBarangBarangSplit[]
+  PermintaanBarangBarangHistory      PermintaanBarangBarangHistory[]
+  PermintaanBarangBarangKodeAnggaran PermintaanBarangBarangKodeAnggaran[]
 
-    createdAt         DateTime            @default(now())
-    updatedAt         DateTime            @updatedAt
-    PerbaikanKomponen PerbaikanKomponen[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  PerbaikanKomponen PerbaikanKomponen[]
 }
 
 // Persetujuan History
 model PermintaanBarangBarangHistory {
-    id     String @id @default(cuid())
-    pbbId  String
-    desc   String
-    status String
+  id     String @id @default(cuid())
+  pbbId  String
+  desc   String
+  status String
 
-    Barang PermintaanBarangBarang @relation(fields: [pbbId], references: [id])
+  Barang PermintaanBarangBarang @relation(fields: [pbbId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PermintaanBarangBarangGroup {
-    barangId         String   @unique
-    qty              Int
-    permintaanBarang String[]
-    golongan         Int // 1 aset, 2 persediaang
-    ordered          Int
+  barangId         String   @unique
+  qty              Int
+  permintaanBarang String[]
+  golongan         Int // 1 aset, 2 persediaang
+  ordered          Int
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PermintaanBarangBarangKodeAnggaran {
-    id             String @id @default(cuid())
-    pbbId          String
-    kodeAnggaranId String
+  id             String @id @default(cuid())
+  pbbId          String
+  kodeAnggaranId String
 
-    Barang       PermintaanBarangBarang @relation(fields: [pbbId], references: [id])
-    KodeAnggaran MasterKodeAnggaran     @relation(fields: [kodeAnggaranId], references: [id])
+  Barang       PermintaanBarangBarang @relation(fields: [pbbId], references: [id])
+  KodeAnggaran MasterKodeAnggaran     @relation(fields: [kodeAnggaranId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PermintaanBarangBarangSplit {
-    id     String  @id @default(cuid())
-    pbbId  String
-    status String
-    qty    Int
-    foto   String?
+  id     String  @id @default(cuid())
+  pbbId  String
+  status String
+  qty    Int
+  foto   String?
 
-    Barang                             PermintaanBarangBarang               @relation(fields: [pbbId], references: [id])
-    PermintaanBarangBarangSplitHistory PermintaanBarangBarangSplitHistory[]
+  Barang                             PermintaanBarangBarang               @relation(fields: [pbbId], references: [id])
+  PermintaanBarangBarangSplitHistory PermintaanBarangBarangSplitHistory[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    PBSPBB    PBSPBB[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  PBSPBB    PBSPBB[]
 }
 
 model PermintaanBarangBarangSplitHistory {
-    id            String @id @default(cuid())
-    barangSplitId String
-    formType      String // misal permintaan pembelian, evaluasi
-    formNo        String @default("")
-    desc          String @default("")
+  id            String @id @default(cuid())
+  barangSplitId String
+  formType      String // misal permintaan pembelian, evaluasi
+  formNo        String @default("")
+  desc          String @default("")
 
-    BarangSplit PermintaanBarangBarangSplit @relation(fields: [barangSplitId], references: [id])
+  BarangSplit PermintaanBarangBarangSplit @relation(fields: [barangSplitId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // --------------------------- PEMBELIAN --------------------------------
 
 model PermintaanPembelian {
-    id     String @id @default(cuid())
-    no     String @unique
-    status String
+  id     String @id @default(cuid())
+  no     String @unique
+  status String
 
-    createdAt                 DateTime                    @default(now())
-    updatedAt                 DateTime                    @updatedAt
-    PBPP                      PBPP[]
-    PermintaanPembelianBarang PermintaanPembelianBarang[]
-    PermintaanPenawaran       PermintaanPenawaran[]
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  PBPP                      PBPP[]
+  PermintaanPembelianBarang PermintaanPembelianBarang[]
+  PermintaanPenawaran       PermintaanPenawaran[]
 }
 
 model PermintaanPembelianBarang {
-    id       String @id @default(cuid())
-    formId   String
-    barangId String
-    qty      Int
+  id       String @id @default(cuid())
+  formId   String
+  barangId String
+  qty      Int
 
-    PermintaanPembelian PermintaanPembelian @relation(fields: [formId], references: [id])
-    MasterBarang        MasterBarang        @relation(fields: [barangId], references: [id])
+  PermintaanPembelian PermintaanPembelian @relation(fields: [formId], references: [id])
+  MasterBarang        MasterBarang        @relation(fields: [barangId], references: [id])
 
-    createdAt                       DateTime                          @default(now())
-    updatedAt                       DateTime                          @updatedAt
-    PBSPBB                          PBSPBB[]
-    PermintaanPenawaranBarangVendor PermintaanPenawaranBarangVendor[]
-    PenawaranHargaBarangVendor      PenawaranHargaBarangVendor[]
-    PenawaranHargaBarangNego        PenawaranHargaBarangNego?
-    EvaluasiBarang                  EvaluasiBarang?
+  createdAt                       DateTime                          @default(now())
+  updatedAt                       DateTime                          @updatedAt
+  PBSPBB                          PBSPBB[]
+  PermintaanPenawaranBarangVendor PermintaanPenawaranBarangVendor[]
+  PenawaranHargaBarangVendor      PenawaranHargaBarangVendor[]
+  PenawaranHargaBarangNego        PenawaranHargaBarangNego?
+  EvaluasiBarang                  EvaluasiBarang?
 }
 
 model PBPP {
-    id           String @id @default(cuid())
-    permintaanId String
-    pembelianId  String
+  id           String @id @default(cuid())
+  permintaanId String
+  pembelianId  String
 
-    Permintaan PermintaanBarang    @relation(fields: [permintaanId], references: [id])
-    Pembelian  PermintaanPembelian @relation(fields: [pembelianId], references: [id])
+  Permintaan PermintaanBarang    @relation(fields: [permintaanId], references: [id])
+  Pembelian  PermintaanPembelian @relation(fields: [pembelianId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    @@map("PB_PP")
+  @@map("PB_PP")
 }
 
 model PBSPBB {
-    id                String @id @default(cuid())
-    barangSplitId     String
-    pembelianBarangId String
+  id                String @id @default(cuid())
+  barangSplitId     String
+  pembelianBarangId String
 
-    BarangSplit     PermintaanBarangBarangSplit @relation(fields: [barangSplitId], references: [id])
-    PembelianBarang PermintaanPembelianBarang   @relation(fields: [pembelianBarangId], references: [id])
+  BarangSplit     PermintaanBarangBarangSplit @relation(fields: [barangSplitId], references: [id])
+  PembelianBarang PermintaanPembelianBarang   @relation(fields: [pembelianBarangId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    @@map("PBS_PBB")
+  @@map("PBS_PBB")
 }
 
 // --------------------------- PERMINTAAN PENAWARAN --------------------------------
 
 model PermintaanPenawaran {
-    id          String    @id @default(cuid())
-    no          String    @unique
-    status      String
-    pembelianId String
-    deadline    DateTime?
+  id          String    @id @default(cuid())
+  no          String    @unique
+  status      String
+  pembelianId String
+  deadline    DateTime?
 
-    Pembelian PermintaanPembelian @relation(fields: [pembelianId], references: [id])
+  Pembelian PermintaanPembelian @relation(fields: [pembelianId], references: [id])
 
-    createdAt                 DateTime                    @default(now())
-    updatedAt                 DateTime                    @updatedAt
-    PermintaanPenawaranVendor PermintaanPenawaranVendor[]
-    PenawaranHarga            PenawaranHarga[]
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  PermintaanPenawaranVendor PermintaanPenawaranVendor[]
+  PenawaranHarga            PenawaranHarga[]
 }
 
 model PermintaanPenawaranVendor {
-    id          String  @id @default(cuid())
-    url         String
-    vendorId    String
-    penawaranId String
-    status      Boolean @default(false)
+  id          String  @id @default(cuid())
+  url         String
+  vendorId    String
+  penawaranId String
+  status      Boolean @default(false)
 
-    Vendor    Vendor              @relation(fields: [vendorId], references: [id])
-    Penawaran PermintaanPenawaran @relation(fields: [penawaranId], references: [id])
+  Vendor    Vendor              @relation(fields: [vendorId], references: [id])
+  Penawaran PermintaanPenawaran @relation(fields: [penawaranId], references: [id])
 
-    createdAt                       DateTime                          @default(now())
-    updatedAt                       DateTime                          @updatedAt
-    PermintaanPenawaranBarangVendor PermintaanPenawaranBarangVendor[]
+  createdAt                       DateTime                          @default(now())
+  updatedAt                       DateTime                          @updatedAt
+  PermintaanPenawaranBarangVendor PermintaanPenawaranBarangVendor[]
 }
 
 model PermintaanPenawaranBarangVendor {
-    id                String  @id @default(cuid())
-    vendorId          String
-    pembelianBarangId String
-    harga             Int?
-    totalHarga        Int?
-    catatan           String?
-    termin            String?
-    delivery          String?
-    garansi           String?
+  id                String  @id @default(cuid())
+  vendorId          String
+  pembelianBarangId String
+  harga             Int?
+  totalHarga        Int?
+  catatan           String?
+  termin            String?
+  delivery          String?
+  garansi           String?
 
-    PembelianBarang PermintaanPembelianBarang @relation(fields: [pembelianBarangId], references: [id])
-    Vendor          PermintaanPenawaranVendor @relation(fields: [vendorId], references: [id])
+  PembelianBarang PermintaanPembelianBarang @relation(fields: [pembelianBarangId], references: [id])
+  Vendor          PermintaanPenawaranVendor @relation(fields: [vendorId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // --------------------------- PENAWARAN HARGA --------------------------------
 
 model PenawaranHarga {
-    id          String    @id @default(cuid())
-    no          String    @unique
-    status      String
-    penawaranId String
-    deadline    DateTime?
+  id          String    @id @default(cuid())
+  no          String    @unique
+  status      String
+  penawaranId String
+  deadline    DateTime?
 
-    PermintaanPenawaran PermintaanPenawaran @relation(fields: [penawaranId], references: [id])
+  PermintaanPenawaran PermintaanPenawaran @relation(fields: [penawaranId], references: [id])
 
-    createdAt            DateTime               @default(now())
-    updatedAt            DateTime               @updatedAt
-    PenawaranHargaVendor PenawaranHargaVendor[]
-    Evaluasi             Evaluasi[]
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  PenawaranHargaVendor PenawaranHargaVendor[]
+  Evaluasi             Evaluasi[]
 }
 
 model PenawaranHargaBarangNego {
-    id                String  @id @default(cuid())
-    pembelianBarangId String? @unique
-    hargaNego         Int
+  id                String  @id @default(cuid())
+  pembelianBarangId String? @unique
+  hargaNego         Int
+  catatan           String?
+  termin            String?
+  delivery          String?
+  garansi           String?
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    PembelianBarang PermintaanPembelianBarang? @relation(fields: [pembelianBarangId], references: [id])
+  PembelianBarang PermintaanPembelianBarang? @relation(fields: [pembelianBarangId], references: [id])
 }
 
 model PenawaranHargaVendor {
-    id          String  @id @default(cuid())
-    url         String
-    vendorId    String
-    penawaranId String
-    status      Boolean @default(false)
+  id          String  @id @default(cuid())
+  url         String
+  vendorId    String
+  penawaranId String
+  status      Boolean @default(false)
 
-    Vendor          Vendor         @relation(fields: [vendorId], references: [id])
-    PenawaraanHarga PenawaranHarga @relation(fields: [penawaranId], references: [id])
+  Vendor          Vendor         @relation(fields: [vendorId], references: [id])
+  PenawaraanHarga PenawaranHarga @relation(fields: [penawaranId], references: [id])
 
-    createdAt                  DateTime                     @default(now())
-    updatedAt                  DateTime                     @updatedAt
-    PenawaranHargaBarangVendor PenawaranHargaBarangVendor[]
+  createdAt                  DateTime                     @default(now())
+  updatedAt                  DateTime                     @updatedAt
+  PenawaranHargaBarangVendor PenawaranHargaBarangVendor[]
 }
 
 model PenawaranHargaBarangVendor {
-    id                String  @id @default(cuid())
-    vendorId          String
-    pembelianBarangId String
-    harga             Int?
-    totalHarga        Int?
-    catatan           String?
-    termin            String?
-    delivery          String?
-    garansi           String?
+  id                String  @id @default(cuid())
+  vendorId          String
+  pembelianBarangId String
+  harga             Int?
+  totalHarga        Int?
+  catatan           String?
+  termin            String?
+  delivery          String?
+  garansi           String?
 
-    PembelianBarang PermintaanPembelianBarang @relation(fields: [pembelianBarangId], references: [id])
-    Vendor          PenawaranHargaVendor      @relation(fields: [vendorId], references: [id])
-    EvaluasiBarang  EvaluasiBarang?
+  PembelianBarang PermintaanPembelianBarang @relation(fields: [pembelianBarangId], references: [id])
+  Vendor          PenawaranHargaVendor      @relation(fields: [vendorId], references: [id])
+  EvaluasiBarang  EvaluasiBarang?
 
-    createdAt                    DateTime                       @default(now())
-    updatedAt                    DateTime                       @updatedAt
-    EvaluasiVendorTerpilihVendor EvaluasiVendorTerpilihVendor[]
-    PoBarang                     PoBarang[]
+  createdAt                    DateTime                       @default(now())
+  updatedAt                    DateTime                       @updatedAt
+  EvaluasiVendorTerpilihVendor EvaluasiVendorTerpilihVendor[]
+  PoBarang                     PoBarang[]
 }
 
 // --------------------------- EVALUASI --------------------------------
 
 model Evaluasi {
-    id               String @id @default(cuid())
-    no               String @unique
-    status           String
-    penawaranHargaId String
+  id               String @id @default(cuid())
+  no               String @unique
+  status           String
+  penawaranHargaId String
 
-    PenawaranHarga PenawaranHarga @relation(fields: [penawaranHargaId], references: [id])
+  PenawaranHarga PenawaranHarga @relation(fields: [penawaranHargaId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    EvaluasiVendorTerpilihUser EvaluasiVendorTerpilihUser[]
-    EvaluasiBarang             EvaluasiBarang[]
-    PO                         PO[]
+  EvaluasiVendorTerpilihUser EvaluasiVendorTerpilihUser[]
+  EvaluasiBarang             EvaluasiBarang[]
+  PO                         PO[]
 }
 
 model EvaluasiBarang {
-    id                           String  @id @default(cuid())
-    evaluasiId                   String
-    pembelianBarangId            String? @unique
-    penawaranHargaBarangVendorId String? @unique
+  id                           String  @id @default(cuid())
+  evaluasiId                   String
+  pembelianBarangId            String? @unique
+  penawaranHargaBarangVendorId String? @unique
 
-    PembelianBarang            PermintaanPembelianBarang?  @relation(fields: [pembelianBarangId], references: [id])
-    PenawaranHargaBarangVendor PenawaranHargaBarangVendor? @relation(fields: [penawaranHargaBarangVendorId], references: [id])
-    Evaluasi                   Evaluasi                    @relation(fields: [evaluasiId], references: [id])
+  PembelianBarang            PermintaanPembelianBarang?  @relation(fields: [pembelianBarangId], references: [id])
+  PenawaranHargaBarangVendor PenawaranHargaBarangVendor? @relation(fields: [penawaranHargaBarangVendorId], references: [id])
+  Evaluasi                   Evaluasi                    @relation(fields: [evaluasiId], references: [id])
 
-    createdAt                    DateTime                       @default(now())
-    updatedAt                    DateTime                       @updatedAt
-    EvaluasiVendorTerpilihVendor EvaluasiVendorTerpilihVendor[]
+  createdAt                    DateTime                       @default(now())
+  updatedAt                    DateTime                       @updatedAt
+  EvaluasiVendorTerpilihVendor EvaluasiVendorTerpilihVendor[]
 }
 
 model EvaluasiVendorTerpilihUser {
-    id         String  @id @default(cuid())
-    evaluasiId String
-    userId     String
-    isTerpilih Boolean @default(false)
+  id         String  @id @default(cuid())
+  evaluasiId String
+  userId     String
+  isTerpilih Boolean @default(false)
 
-    User     User     @relation(fields: [userId], references: [id])
-    Evaluasi Evaluasi @relation(fields: [evaluasiId], references: [id])
+  User     User     @relation(fields: [userId], references: [id])
+  Evaluasi Evaluasi @relation(fields: [evaluasiId], references: [id])
 
-    createdAt                    DateTime                       @default(now())
-    updatedAt                    DateTime                       @updatedAt
-    EvaluasiVendorTerpilihVendor EvaluasiVendorTerpilihVendor[]
+  createdAt                    DateTime                       @default(now())
+  updatedAt                    DateTime                       @updatedAt
+  EvaluasiVendorTerpilihVendor EvaluasiVendorTerpilihVendor[]
 }
 
 model EvaluasiVendorTerpilihVendor {
-    id       String @id @default(cuid())
-    vendorId String
-    userId   String
-    barangId String
+  id       String @id @default(cuid())
+  vendorId String
+  userId   String
+  barangId String
 
-    Barang EvaluasiBarang             @relation(fields: [barangId], references: [id])
-    Vendor PenawaranHargaBarangVendor @relation(fields: [vendorId], references: [id])
-    User   EvaluasiVendorTerpilihUser @relation(fields: [userId], references: [id])
+  Barang EvaluasiBarang             @relation(fields: [barangId], references: [id])
+  Vendor PenawaranHargaBarangVendor @relation(fields: [vendorId], references: [id])
+  User   EvaluasiVendorTerpilihUser @relation(fields: [userId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model MasterEvaluasiUser {
-    id     String @id @default(cuid())
-    userId String
-    nilai  Int
+  id     String @id @default(cuid())
+  userId String
+  nilai  Int
 
-    User User @relation(fields: [userId], references: [id])
+  User User @relation(fields: [userId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // --------------------------- PURCHASE ORDER --------------------------------
 
 model PO {
-    id         String @id @default(cuid())
-    no         String @unique
-    evaluasiId String
-    vendorId   String
-    status     String
+  id         String @id @default(cuid())
+  no         String @unique
+  evaluasiId String
+  vendorId   String
+  status     String
 
-    Evaluasi Evaluasi @relation(fields: [evaluasiId], references: [id])
-    Vendor   Vendor   @relation(fields: [vendorId], references: [id])
+  Evaluasi Evaluasi @relation(fields: [evaluasiId], references: [id])
+  Vendor   Vendor   @relation(fields: [vendorId], references: [id])
 
-    createdAt DateTime   @default(now())
-    updatedAt DateTime   @updatedAt
-    PoBarang  PoBarang[]
-    Fttb      Fttb[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  PoBarang  PoBarang[]
+  Fttb      Fttb[]
 }
 
 model PoBarang {
-    id       String @id @default(cuid())
-    poId     String
-    barangId String
-    status   Int // 0 waiting, 1 done
+  id       String @id @default(cuid())
+  poId     String
+  barangId String
+  status   Int // 0 waiting, 1 done
 
-    PO     PO                         @relation(fields: [poId], references: [id])
-    Barang PenawaranHargaBarangVendor @relation(fields: [barangId], references: [id])
+  PO     PO                         @relation(fields: [poId], references: [id])
+  Barang PenawaranHargaBarangVendor @relation(fields: [barangId], references: [id])
 
-    createdAt DateTime   @default(now())
-    updatedAt DateTime   @updatedAt
-    FttbItem  FttbItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  FttbItem  FttbItem[]
 }
 
 // --------------------------- FTTB --------------------------------
 
 model Fttb {
-    id   String @id @default(cuid())
-    no   String
-    poId String
+  id   String @id @default(cuid())
+  no   String
+  poId String
 
-    Po PO @relation(fields: [poId], references: [id])
+  Po PO @relation(fields: [poId], references: [id])
 
-    createdAt DateTime   @default(now())
-    updatedAt DateTime   @updatedAt
-    FttbItem  FttbItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  FttbItem  FttbItem[]
 }
 
 model FttbItem {
-    id         String @id @default(cuid())
-    fttbId     String
-    poBarangId String
+  id         String @id @default(cuid())
+  fttbId     String
+  poBarangId String
 
-    Fttb     Fttb     @relation(fields: [fttbId], references: [id])
-    PoBarang PoBarang @relation(fields: [poBarangId], references: [id])
+  Fttb     Fttb     @relation(fields: [fttbId], references: [id])
+  PoBarang PoBarang @relation(fields: [poBarangId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    DaftarAset         DaftarAset[]
-    FttbItemKartuStock FttbItemKartuStock[]
+  DaftarAset         DaftarAset[]
+  FttbItemKartuStock FttbItemKartuStock[]
 }
 
 model FttbItemKartuStock {
-    id          String @id @default(cuid())
-    kartuStokId String
-    fttbItemId  String
+  id          String @id @default(cuid())
+  kartuStokId String
+  fttbItemId  String
 
-    FttbItem  FttbItem  @relation(fields: [fttbItemId], references: [id])
-    KartuStok KartuStok @relation(fields: [kartuStokId], references: [id])
+  FttbItem  FttbItem  @relation(fields: [fttbItemId], references: [id])
+  KartuStok KartuStok @relation(fields: [kartuStokId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // --------------------------- FTKB --------------------------------
 
 model Ftkb {
-    id     String @id @default(cuid())
-    no     String
-    status String
+  id     String @id @default(cuid())
+  no     String
+  status String
 
-    createdAt DateTime   @default(now())
-    updatedAt DateTime   @updatedAt
-    FtkbItem  FtkbItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  FtkbItem  FtkbItem[]
 }
 
 model FtkbItem {
-    id       String @id @default(cuid())
-    ftkbId   String
-    barangId String
-    qty      Int
-    status   Int    @default(0)
+  id       String @id @default(cuid())
+  ftkbId   String
+  barangId String
+  qty      Int
+  status   Int    @default(0)
 
-    Ftkb   Ftkb         @relation(fields: [ftkbId], references: [id])
-    Barang MasterBarang @relation(fields: [barangId], references: [id])
+  Ftkb   Ftkb         @relation(fields: [ftkbId], references: [id])
+  Barang MasterBarang @relation(fields: [barangId], references: [id])
 
-    createdAt       DateTime          @default(now())
-    updatedAt       DateTime          @updatedAt
-    FtkbItemPemohon FtkbItemPemohon[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  FtkbItemPemohon FtkbItemPemohon[]
 }
 
 model FtkbItemPemohon {
-    id         String @id @default(cuid())
-    imId       String
-    ftkbItemId String
-    qty        Int
-    status     Int    @default(0)
+  id         String @id @default(cuid())
+  imId       String
+  ftkbItemId String
+  qty        Int
+  status     Int    @default(0)
 
-    FtkbItem FtkbItem         @relation(fields: [ftkbItemId], references: [id])
-    IM       PermintaanBarang @relation(fields: [imId], references: [id])
+  FtkbItem FtkbItem         @relation(fields: [ftkbItemId], references: [id])
+  IM       PermintaanBarang @relation(fields: [imId], references: [id])
 
-    createdAt           DateTime              @default(now())
-    updatedAt           DateTime              @updatedAt
-    FtkbItemPemohonAset FtkbItemPemohonAset[]
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  FtkbItemPemohonAset FtkbItemPemohonAset[]
 }
 
 model FtkbItemPemohonAset {
-    id                String @id @default(cuid())
-    ftkbItemPemohonId String
-    daftarAsetId      String
+  id                String @id @default(cuid())
+  ftkbItemPemohonId String
+  daftarAsetId      String
 
-    FtkbItemPemohon FtkbItemPemohon @relation(fields: [ftkbItemPemohonId], references: [id])
-    DaftarAset      DaftarAset      @relation(fields: [daftarAsetId], references: [id])
+  FtkbItemPemohon FtkbItemPemohon @relation(fields: [ftkbItemPemohonId], references: [id])
+  DaftarAset      DaftarAset      @relation(fields: [daftarAsetId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // --------------------------- PERBAIKAN --------------------------------
 
 model Perbaikan {
-    id             String  @id @default(cuid())
-    no             String
-    userId         String
-    teknisiId      String?
-    keluhan        String
-    asetId         String
-    status         String
-    catatanTeknisi String?
+  id             String  @id @default(cuid())
+  no             String
+  userId         String
+  teknisiId      String?
+  keluhan        String
+  asetId         String
+  status         String
+  catatanTeknisi String?
 
-    User    User       @relation(fields: [userId], references: [id])
-    Aset    DaftarAset @relation(fields: [asetId], references: [id])
-    Teknisi Teknisi?   @relation(fields: [teknisiId], references: [id])
+  User    User       @relation(fields: [userId], references: [id])
+  Aset    DaftarAset @relation(fields: [asetId], references: [id])
+  Teknisi Teknisi?   @relation(fields: [teknisiId], references: [id])
 
-    createdAt         DateTime            @default(now())
-    updatedAt         DateTime            @updatedAt
-    PerbaikanExternal PerbaikanExternal[]
-    PerbaikanHistory  PerbaikanHistory[]
-    PerbaikanKomponen PerbaikanKomponen[]
-    ImPerbaikan       ImPerbaikan[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  PerbaikanExternal PerbaikanExternal[]
+  PerbaikanHistory  PerbaikanHistory[]
+  PerbaikanKomponen PerbaikanKomponen[]
+  ImPerbaikan       ImPerbaikan[]
 }
 
 model ImPerbaikan {
-    id String @id @default(cuid())
+  id String @id @default(cuid())
 
-    perbaikanId String
-    imId        String
+  perbaikanId String
+  imId        String
 
-    Perbaikan Perbaikan        @relation(fields: [perbaikanId], references: [id])
-    IM        PermintaanBarang @relation(fields: [imId], references: [id])
+  Perbaikan Perbaikan        @relation(fields: [perbaikanId], references: [id])
+  IM        PermintaanBarang @relation(fields: [imId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PerbaikanKomponen {
-    id          String  @id @default(cuid())
-    perbaikanId String
-    type        Int
-    name        String?
-    barangId    String?
-    noInv       String?
-    biaya       Int
-    jumlah      Int
+  id          String  @id @default(cuid())
+  perbaikanId String
+  type        Int
+  name        String?
+  barangId    String?
+  noInv       String?
+  biaya       Int
+  jumlah      Int
 
-    Perbaikan Perbaikan               @relation(fields: [perbaikanId], references: [id])
-    Barang    PermintaanBarangBarang? @relation(fields: [barangId], references: [id])
+  Perbaikan Perbaikan               @relation(fields: [perbaikanId], references: [id])
+  Barang    PermintaanBarangBarang? @relation(fields: [barangId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PerbaikanHistory {
-    id          String  @id @default(cuid())
-    perbaikanId String
-    desc        String
-    catatan     String?
+  id          String  @id @default(cuid())
+  perbaikanId String
+  desc        String
+  catatan     String?
 
-    Perbaikan Perbaikan @relation(fields: [perbaikanId], references: [id])
+  Perbaikan Perbaikan @relation(fields: [perbaikanId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // --------------------------- PERBAIKAN EKSTERNAL --------------------------------
 
 model PerbaikanExternal {
-    id          String @id @default(cuid())
-    no          String
-    perbaikanId String
-    vendorId    String
-    status      String // permohanan, setujui, diserahkan ke vendor, diterima, di terima user
+  id          String @id @default(cuid())
+  no          String
+  perbaikanId String
+  vendorId    String
+  status      String // permohanan, setujui, diserahkan ke vendor, diterima, di terima user
 
-    Perbaikan Perbaikan @relation(fields: [perbaikanId], references: [id])
-    Vendor    Vendor    @relation(fields: [vendorId], references: [id])
+  Perbaikan Perbaikan @relation(fields: [perbaikanId], references: [id])
+  Vendor    Vendor    @relation(fields: [vendorId], references: [id])
 
-    createdAt                  DateTime                     @default(now())
-    updatedAt                  DateTime                     @updatedAt
-    PerbaikanExternalHistory   PerbaikanExternalHistory[]
-    PerbaikanEksternalKomponen PerbaikanEksternalKomponen[]
+  createdAt                  DateTime                     @default(now())
+  updatedAt                  DateTime                     @updatedAt
+  PerbaikanExternalHistory   PerbaikanExternalHistory[]
+  PerbaikanEksternalKomponen PerbaikanEksternalKomponen[]
 }
 
 model PerbaikanEksternalKomponen {
-    id                  String @id @default(cuid())
-    perbaikanExternalId String
-    name                String
-    biaya               Int
-    jumlah              Int
+  id                  String @id @default(cuid())
+  perbaikanExternalId String
+  name                String
+  biaya               Int
+  jumlah              Int
 
-    PerbaikanEksternal PerbaikanExternal @relation(fields: [perbaikanExternalId], references: [id])
+  PerbaikanEksternal PerbaikanExternal @relation(fields: [perbaikanExternalId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PerbaikanExternalHistory {
-    id                  String  @id @default(cuid())
-    perbaikanExternalId String
-    desc                String
-    catatan             String?
+  id                  String  @id @default(cuid())
+  perbaikanExternalId String
+  desc                String
+  catatan             String?
 
-    PerbaikanExternal PerbaikanExternal @relation(fields: [perbaikanExternalId], references: [id])
+  PerbaikanExternal PerbaikanExternal @relation(fields: [perbaikanExternalId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PerbaikanChat {
-    id String @id @default(cuid())
+  id String @id @default(cuid())
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // --------------------------- PEMINJAMAN --------------------------------
 
 model Peminjaman {
-    id         String   @id @default(cuid())
-    no         String
-    type       Int // 0 ruang 1 barang
-    barangId   String?
-    ruangId    String?
-    peminjamId String
-    peruntukan String
-    tglPinjam  DateTime
-    tglKembali DateTime
-    status     String
-    jumlah     Int?
+  id         String   @id @default(cuid())
+  no         String
+  type       Int // 0 ruang 1 barang
+  barangId   String?
+  ruangId    String?
+  peminjamId String
+  peruntukan String
+  tglPinjam  DateTime
+  tglKembali DateTime
+  status     String
+  jumlah     Int?
 
-    Barang   MasterBarang? @relation(fields: [barangId], references: [id])
-    Ruang    MasterRuang?  @relation(fields: [ruangId], references: [id])
-    Peminjam User          @relation(fields: [peminjamId], references: [id])
+  Barang   MasterBarang? @relation(fields: [barangId], references: [id])
+  Ruang    MasterRuang?  @relation(fields: [ruangId], references: [id])
+  Peminjam User          @relation(fields: [peminjamId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    PeminjamanHistory      PeminjamanHistory[]
-    PeminjamanAsetInternal PeminjamanAsetInternal[]
+  PeminjamanHistory      PeminjamanHistory[]
+  PeminjamanAsetInternal PeminjamanAsetInternal[]
 }
 
 model PeminjamanHistory {
-    id           String  @id @default(cuid())
-    desc         String
-    catatan      String?
-    peminjamanId String
+  id           String  @id @default(cuid())
+  desc         String
+  catatan      String?
+  peminjamanId String
 
-    Peminjaman Peminjaman @relation(fields: [peminjamanId], references: [id])
+  Peminjaman Peminjaman @relation(fields: [peminjamanId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PeminjamanExternal {
-    id         String   @id @default(cuid())
-    no         String
-    type       Int
-    pemohonId  String
-    peminjam   String
-    barangId   String?
-    ruangId    String?
-    peruntukan String
-    tglPinjam  DateTime
-    tglKembali DateTime
-    status     String
-    jumlah     Int?
-    biaya      Int
+  id         String   @id @default(cuid())
+  no         String
+  type       Int
+  pemohonId  String
+  peminjam   String
+  barangId   String?
+  ruangId    String?
+  peruntukan String
+  tglPinjam  DateTime
+  tglKembali DateTime
+  status     String
+  jumlah     Int?
+  biaya      Int
 
-    Pemohon User          @relation(fields: [pemohonId], references: [id])
-    Barang  MasterBarang? @relation(fields: [barangId], references: [id])
-    Ruang   MasterRuang?  @relation(fields: [ruangId], references: [id])
+  Pemohon User          @relation(fields: [pemohonId], references: [id])
+  Barang  MasterBarang? @relation(fields: [barangId], references: [id])
+  Ruang   MasterRuang?  @relation(fields: [ruangId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    PeminjamanExternalHistory PeminjamanExternalHistory[]
-    PeminjamanAsetEksternal   PeminjamanAsetEksternal[]
+  PeminjamanExternalHistory PeminjamanExternalHistory[]
+  PeminjamanAsetEksternal   PeminjamanAsetEksternal[]
 }
 
 model PeminjamanExternalHistory {
-    id           String  @id @default(cuid())
-    desc         String
-    catatan      String?
-    peminjamanId String
+  id           String  @id @default(cuid())
+  desc         String
+  catatan      String?
+  peminjamanId String
 
-    PeminjamanExternal PeminjamanExternal @relation(fields: [peminjamanId], references: [id])
+  PeminjamanExternal PeminjamanExternal @relation(fields: [peminjamanId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PeminjamanAsetInternal {
-    id           String   @id @default(cuid())
-    asetId       String
-    peminjamanId String
-    from         DateTime
-    to           DateTime
+  id           String   @id @default(cuid())
+  asetId       String
+  peminjamanId String
+  from         DateTime
+  to           DateTime
 
-    Aset       DaftarAset @relation(fields: [asetId], references: [id])
-    Peminjaman Peminjaman @relation(fields: [peminjamanId], references: [id])
+  Aset       DaftarAset @relation(fields: [asetId], references: [id])
+  Peminjaman Peminjaman @relation(fields: [peminjamanId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PeminjamanAsetEksternal {
-    id           String   @id @default(cuid())
-    asetId       String
-    peminjamanId String
-    from         DateTime
-    to           DateTime
+  id           String   @id @default(cuid())
+  asetId       String
+  peminjamanId String
+  from         DateTime
+  to           DateTime
 
-    Aset       DaftarAset         @relation(fields: [asetId], references: [id])
-    Peminjaman PeminjamanExternal @relation(fields: [peminjamanId], references: [id])
+  Aset       DaftarAset         @relation(fields: [asetId], references: [id])
+  Peminjaman PeminjamanExternal @relation(fields: [peminjamanId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // --------------------------- MASTER --------------------------------
 
 model Organisasi {
-    id   String @id @default(cuid())
-    name String
+  id   String @id @default(cuid())
+  name String
 
-    Department Department[]
+  Department Department[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Department {
-    id           String @id @default(cuid())
-    name         String
-    organisasiId String
+  id           String @id @default(cuid())
+  name         String
+  organisasiId String
 
-    Organisasi Organisasi @relation(fields: [organisasiId], references: [id])
+  Organisasi Organisasi @relation(fields: [organisasiId], references: [id])
 
-    User               User[]
-    MasterKodeAnggaran MasterKodeAnggaran[]
-    DepartmentUnit     DepartmentUnit[]
+  User               User[]
+  MasterKodeAnggaran MasterKodeAnggaran[]
+  DepartmentUnit     DepartmentUnit[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Vendor {
-    id       String @id @default(cuid())
-    name     String
-    alamat   String
-    whatsapp String
-    nohp     String
-    email    String
+  id       String @id @default(cuid())
+  name     String
+  alamat   String
+  whatsapp String
+  nohp     String
+  email    String
 
-    createdAt                 DateTime                    @default(now())
-    updatedAt                 DateTime                    @updatedAt
-    PermintaanPenawaranVendor PermintaanPenawaranVendor[]
-    PenawaranHargaVendor      PenawaranHargaVendor[]
-    PO                        PO[]
-    PerbaikanExternal         PerbaikanExternal[]
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  PermintaanPenawaranVendor PermintaanPenawaranVendor[]
+  PenawaranHargaVendor      PenawaranHargaVendor[]
+  PO                        PO[]
+  PerbaikanExternal         PerbaikanExternal[]
 }
 
 model Teknisi {
-    id   String @unique // userId
-    User User   @relation(fields: [id], references: [id])
+  id   String @unique // userId
+  User User   @relation(fields: [id], references: [id])
 
-    createdAt DateTime    @default(now())
-    updatedAt DateTime    @updatedAt
-    Perbaikan Perbaikan[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  Perbaikan Perbaikan[]
 }
 
 model DepartmentUnit {
-    id           String @id @default(cuid())
-    name         String
-    departmentId String
+  id           String @id @default(cuid())
+  name         String
+  departmentId String
 
-    Department Department @relation(fields: [departmentId], references: [id])
-    User       User[]
+  Department Department @relation(fields: [departmentId], references: [id])
+  User       User[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Role {
-    id String @id
+  id String @id
 
-    UserRole UserRole[]
+  UserRole UserRole[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model MasterBarangGolongan {
-    id   String @id @default(cuid())
-    name String
-    code Int    @unique
+  id   String @id @default(cuid())
+  name String
+  code Int    @unique
 
-    MasterBarangKategori MasterBarangKategori[]
+  MasterBarangKategori MasterBarangKategori[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model MasterBarangKategori {
-    id         String @id @default(cuid())
-    name       String
-    code       Int
-    classCode  String
-    fullCode   String @unique
-    golonganId String
+  id         String @id @default(cuid())
+  name       String
+  code       Int
+  classCode  String
+  fullCode   String @unique
+  golonganId String
 
-    Golongan                MasterBarangGolongan      @relation(fields: [golonganId], references: [id])
-    MasterBarangSubKategori MasterBarangSubKategori[]
+  Golongan                MasterBarangGolongan      @relation(fields: [golonganId], references: [id])
+  MasterBarangSubKategori MasterBarangSubKategori[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model MasterBarangSubKategori {
-    id         String @id @default(cuid())
-    name       String
-    code       Int
-    classCode  String
-    fullCode   String @unique
-    kategoriId String
+  id         String @id @default(cuid())
+  name       String
+  code       Int
+  classCode  String
+  fullCode   String @unique
+  kategoriId String
 
-    Kategori                   MasterBarangKategori         @relation(fields: [kategoriId], references: [id])
-    MasterBarangSuSubbKategori MasterBarangSubSubKategori[]
+  Kategori                   MasterBarangKategori         @relation(fields: [kategoriId], references: [id])
+  MasterBarangSuSubbKategori MasterBarangSubSubKategori[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model MasterBarangSubSubKategori {
-    id            String @id @default(cuid())
-    name          String
-    code          Int
-    classCode     String
-    fullCode      String @unique
-    subKategoriId String
-    umur          Int? // Aset
-    minimum       Int? // Persediaan
+  id            String @id @default(cuid())
+  name          String
+  code          Int
+  classCode     String
+  fullCode      String @unique
+  subKategoriId String
+  umur          Int? // Aset
+  minimum       Int? // Persediaan
 
-    SubKategori MasterBarangSubKategori @relation(fields: [subKategoriId], references: [id])
+  SubKategori MasterBarangSubKategori @relation(fields: [subKategoriId], references: [id])
 
-    createdAt    DateTime       @default(now())
-    updatedAt    DateTime       @updatedAt
-    MasterBarang MasterBarang[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  MasterBarang MasterBarang[]
 }
 
 model MasterBarang {
-    id               String  @id @default(cuid())
-    image            String?
-    name             String
-    code             Int
-    classCode        String
-    fullCode         String  @unique
-    subSubKategoriId String
-    uomId            String
-    deskripsi        String
+  id               String  @id @default(cuid())
+  image            String?
+  name             String
+  code             Int
+  classCode        String
+  fullCode         String  @unique
+  subSubKategoriId String
+  uomId            String
+  deskripsi        String
 
-    SubSubKategori         MasterBarangSubSubKategori @relation(fields: [subSubKategoriId], references: [id])
-    Uom                    MasterUnit                 @relation(fields: [uomId], references: [id])
-    PermintaanBarangBarang PermintaanBarangBarang[]
-    MasterBarangUnit       MasterBarangUnit[]
+  SubSubKategori         MasterBarangSubSubKategori @relation(fields: [subSubKategoriId], references: [id])
+  Uom                    MasterUnit                 @relation(fields: [uomId], references: [id])
+  PermintaanBarangBarang PermintaanBarangBarang[]
+  MasterBarangUnit       MasterBarangUnit[]
 
-    createdAt                 DateTime                    @default(now())
-    updatedAt                 DateTime                    @updatedAt
-    DaftarAset                DaftarAset[]
-    DaftarAsetGroup           DaftarAsetGroup[]
-    KartuStok                 KartuStok[]
-    PermintaanPembelianBarang PermintaanPembelianBarang[]
-    FtkbItem                  FtkbItem[]
-    Peminjaman                Peminjaman[]
-    PeminjamanExternal        PeminjamanExternal[]
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  DaftarAset                DaftarAset[]
+  DaftarAsetGroup           DaftarAsetGroup[]
+  KartuStok                 KartuStok[]
+  PermintaanPembelianBarang PermintaanPembelianBarang[]
+  FtkbItem                  FtkbItem[]
+  Peminjaman                Peminjaman[]
+  PeminjamanExternal        PeminjamanExternal[]
 }
 
 model MasterBarangUnit {
-    id       String @id @default(cuid())
-    barangId String
-    uomId    String
+  id       String @id @default(cuid())
+  barangId String
+  uomId    String
 
-    Uom          MasterUnit   @relation(fields: [uomId], references: [id])
-    MasterBarang MasterBarang @relation(fields: [barangId], references: [id])
+  Uom          MasterUnit   @relation(fields: [uomId], references: [id])
+  MasterBarang MasterBarang @relation(fields: [barangId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model MasterUnit {
-    id   String @id @default(cuid())
-    name String
+  id   String @id @default(cuid())
+  name String
 
-    PermintaanBarangBarang PermintaanBarangBarang[]
-    MasterBarang           MasterBarang[]
-    MasterBarangUnit       MasterBarangUnit[]
+  PermintaanBarangBarang PermintaanBarangBarang[]
+  MasterBarang           MasterBarang[]
+  MasterBarangUnit       MasterBarangUnit[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model MasterRuang {
-    id   String @id @default(cuid())
-    name String
+  id   String @id @default(cuid())
+  name String
 
-    PermintaanBarang PermintaanBarang[]
+  PermintaanBarang PermintaanBarang[]
 
-    createdAt          DateTime             @default(now())
-    updatedAt          DateTime             @updatedAt
-    Peminjaman         Peminjaman[]
-    PeminjamanExternal PeminjamanExternal[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  Peminjaman         Peminjaman[]
+  PeminjamanExternal PeminjamanExternal[]
 }
 
 model MasterNomor {
-    id            String  @unique
-    name          String
-    format        String
-    reset         Int
-    resetType     Int?
-    currentNumber BigInt?
-    currentMonth  Int
-    currentYear   Int
+  id            String  @unique
+  name          String
+  format        String
+  reset         Int
+  resetType     Int?
+  currentNumber BigInt?
+  currentMonth  Int
+  currentYear   Int
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model MasterKodeAnggaran {
-    id           String @id @unique
-    name         String
-    nilai        Int?
-    departmentId String
+  id           String @id @unique
+  name         String
+  nilai        Int?
+  departmentId String
 
-    Department Department @relation(fields: [departmentId], references: [id])
+  Department Department @relation(fields: [departmentId], references: [id])
 
-    createdAt                          DateTime                             @default(now())
-    updatedAt                          DateTime                             @updatedAt
-    PermintaanBarangBarangKodeAnggaran PermintaanBarangBarangKodeAnggaran[]
+  createdAt                          DateTime                             @default(now())
+  updatedAt                          DateTime                             @updatedAt
+  PermintaanBarangBarangKodeAnggaran PermintaanBarangBarangKodeAnggaran[]
 }
 
 model Notification {
-    id     String  @id @default(cuid())
-    fromId String
-    toId   String
-    link   String
-    desc   String
-    isRead Boolean
+  id     String  @id @default(cuid())
+  fromId String
+  toId   String
+  link   String
+  desc   String
+  isRead Boolean
 
-    From User @relation(name: "From", fields: [fromId], references: [id])
-    To   User @relation(name: "To", fields: [toId], references: [id])
+  From User @relation(name: "From", fields: [fromId], references: [id])
+  To   User @relation(name: "To", fields: [toId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model DaftarAset {
-    id         String  @unique // No Inventaris
-    barangId   String
-    fttbItemId String
-    penggunaId String?
-    status     String
-    umur       Int
+  id         String  @unique // No Inventaris
+  barangId   String
+  fttbItemId String
+  penggunaId String?
+  status     String
+  umur       Int
 
-    MasterBarang MasterBarang @relation(fields: [barangId], references: [id])
-    FttbItem     FttbItem     @relation(fields: [fttbItemId], references: [id])
-    Pengguna     User?        @relation(fields: [penggunaId], references: [id])
+  MasterBarang MasterBarang @relation(fields: [barangId], references: [id])
+  FttbItem     FttbItem     @relation(fields: [fttbItemId], references: [id])
+  Pengguna     User?        @relation(fields: [penggunaId], references: [id])
 
-    createdAt               DateTime                  @default(now())
-    updatedAt               DateTime                  @updatedAt
-    FtkbItemPemohonAset     FtkbItemPemohonAset[]
-    Perbaikan               Perbaikan[]
-    DaftarAsetAdditional    DaftarAsetAdditional[]
-    DaftarAsetAudit         DaftarAsetAudit[]
-    PeminjamanAsetInternal  PeminjamanAsetInternal[]
-    PeminjamanAsetEksternal PeminjamanAsetEksternal[]
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
+  FtkbItemPemohonAset     FtkbItemPemohonAset[]
+  Perbaikan               Perbaikan[]
+  DaftarAsetAdditional    DaftarAsetAdditional[]
+  DaftarAsetAudit         DaftarAsetAudit[]
+  PeminjamanAsetInternal  PeminjamanAsetInternal[]
+  PeminjamanAsetEksternal PeminjamanAsetEksternal[]
 }
 
 model DaftarAsetAdditional {
-    id     String @id @default(cuid())
-    asetId String
-    name   String
-    value  String
+  id     String @id @default(cuid())
+  asetId String
+  name   String
+  value  String
 
-    Aset DaftarAset @relation(fields: [asetId], references: [id])
+  Aset DaftarAset @relation(fields: [asetId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model DaftarAsetAudit {
-    id     String @id @default(cuid())
-    asetId String
-    desc   String
+  id     String @id @default(cuid())
+  asetId String
+  desc   String
 
-    Aset DaftarAset @relation(fields: [asetId], references: [id])
+  Aset DaftarAset @relation(fields: [asetId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model DaftarAsetGroup {
-    id     String @unique // MasterBarang 
-    idle   Int
-    used   Int
-    booked Int
+  id     String @unique // MasterBarang 
+  idle   Int
+  used   Int
+  booked Int
 
-    MasterBarang MasterBarang @relation(fields: [id], references: [id])
+  MasterBarang MasterBarang @relation(fields: [id], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model KartuStok {
-    id  String @unique // MasterBarang
-    qty Int
+  id  String @unique // MasterBarang
+  qty Int
 
-    MasterBarang MasterBarang @relation(fields: [id], references: [id])
+  MasterBarang MasterBarang @relation(fields: [id], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    FttbItemKartuStock  FttbItemKartuStock[]
-    KartuStokPergerakan KartuStokPergerakan[]
+  FttbItemKartuStock  FttbItemKartuStock[]
+  KartuStokPergerakan KartuStokPergerakan[]
 }
 
 model KartuStokPergerakan {
-    id          String @id @default(cuid())
-    year        Int
-    month       Int
-    out         Int    @default(0)
-    in          Int    @default(0)
-    kartuStokId String
+  id          String @id @default(cuid())
+  year        Int
+  month       Int
+  out         Int    @default(0)
+  in          Int    @default(0)
+  kartuStokId String
 
-    KartuStok KartuStok @relation(fields: [kartuStokId], references: [id])
+  KartuStok KartuStok @relation(fields: [kartuStokId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
