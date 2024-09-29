@@ -38,13 +38,11 @@ export default async function checkKetersediaanByBarang(
 
   const tersedia = [
     // @ts-ignore
-    ...mapBarangTersedia(daftarAsetGroup, daftarAset, "idle").filter(
-      (v) => v.permintaan > 0,
-    ),
+
+    ...tersediaAset(daftarAsetGroup, daftarAset),
     // @ts-ignore
     ...mapBarangTersedia(kartuStok, persediaan, "qty"),
   ];
-  console.log(JSON.stringify(tersedia, null, 2));
 
   const takTersedia = [
     // @ts-ignore
@@ -57,6 +55,74 @@ export default async function checkKetersediaanByBarang(
     tersedia,
     takTersedia,
   };
+}
+
+function tersediaAset(
+  barang: Awaited<Promise<ReturnType<typeof fetchKetersediaan>>>,
+  golonganData: MergeBarangGroup[],
+) {
+  // cari imId yang sama
+  //
+  // kalau mau deluan, mutasi barang lewat daftar Aset
+  //
+  // kalau barang nya di ambil lewat mutasi, kasih keterangan kurang berapa karna dimutasi
+  // track status permintaan barang nya kalau sudah done jangan dicheck
+  // artinya permintaan dia sisa berapa lagi?
+  //
+  // kalau qty sama dengan qtyOrder berarti pembelian
+  // dan resiko dari beli ya menunggu datang
+  // kalau mau mutasi kenapa beli?
+  // jadi check imId aja semua
+  //
+  // kalau barang dibeli
+  // tapi imId nya used
+  return barang.map((v) => {
+    const permintaan = golonganData.find((a) => a.barangId === v.id)!;
+    const permintaanBarang = permintaan?.permintaanBarang.map((item: any) =>
+      mapPermintaanBarang(item, v.MasterBarang),
+    );
+    const daftarAset = v.MasterBarang.DaftarAset;
+
+    const filteredAset = daftarAset.filter(
+      (v) => v.status === STATUS.ASET_IDLE.id,
+    );
+
+    for (const val of permintaanBarang) {
+      for (const a of filteredAset) {
+        if (val.href === a.imId) {
+          // @ts-ignore
+          if (val.noInventaris) {
+            // @ts-ignore
+            val.noInventaris = [...val.noInventaris, a.id];
+          } else {
+            // @ts-ignore
+            val.noInventaris = [a.id];
+          }
+        }
+      }
+    }
+
+    const newPermintaanBarang = permintaanBarang.filter((obj) =>
+      obj.hasOwnProperty("noInventaris"),
+    );
+    return {
+      // for table
+      id: permintaan.barangId,
+      image: v.MasterBarang.image,
+      name: v.MasterBarang.name,
+      kode: v.MasterBarang.fullCode,
+      permintaan: permintaan.qty,
+      uom: v.MasterBarang.Uom.name,
+      // tersedia: calculateTersedia(v, qtyField),
+      tersedia: 1,
+      ordered: permintaan.ordered,
+      golongan: getGolonganLabel(permintaan.golongan),
+      // for table
+      permintaanBarang: newPermintaanBarang,
+      permintaanBarangId: newPermintaanBarang.map((v: any) => v.id),
+      imQty: permintaan.permintaanBarang.length,
+    };
+  });
 }
 
 function fetchPermintaanBarang(
@@ -274,4 +340,3 @@ function mapBarangTakTersedia(
 function calculateBeli(permintaan: number, quota: number) {
   return quota > 0 ? Math.min(permintaan, quota) : 0;
 }
-
