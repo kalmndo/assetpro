@@ -113,8 +113,6 @@ function tersediaAset(
       kode: v.MasterBarang.fullCode,
       permintaan: permintaan.qty,
       uom: v.MasterBarang.Uom.name,
-      // tersedia: calculateTersedia(v, qtyField),
-      tersedia: 1,
       ordered: permintaan.ordered,
       golongan: getGolonganLabel(permintaan.golongan),
       // for table
