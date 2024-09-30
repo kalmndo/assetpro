@@ -108,9 +108,22 @@ export const userRouter = createTRPCRouter({
       (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
     );
 
-    const { IM_READ, GUDANG_REQUEST_VIEW } = ROLE;
+    const {
+      IM_READ,
+      GUDANG_REQUEST_VIEW,
+      PEMBELIAN_READ,
+      PENAWARAN_VIEW,
+      NEGO_VIEW,
+      EVALUASI_HARGA_READ,
+    } = ROLE;
 
     const permintaanBarangRole = [IM_READ.id, GUDANG_REQUEST_VIEW.id];
+    const pengadaanRole = [
+      PEMBELIAN_READ.id,
+      PENAWARAN_VIEW.id,
+      NEGO_VIEW.id,
+      EVALUASI_HARGA_READ.id,
+    ];
 
     const overview = {
       permintaan: per.length,
@@ -144,14 +157,41 @@ export const userRouter = createTRPCRouter({
         // @ts-ignore
         result.persetujuan = data;
       }
-      console.log("result", result);
+
       // pengadaan
+      //
+      if (userRoleIds.some((v) => pengadaanRole.includes(v))) {
+        const pembelian = await ctx.db.permintaanPembelian.findMany({
+          where: { status: STATUS.PENGAJUAN.id },
+        });
+        const penawaran = await ctx.db.permintaanPenawaran.findMany({
+          where: { status: STATUS.PENGAJUAN.id },
+        });
+        const nego = await ctx.db.penawaranHarga.findMany({
+          where: { status: STATUS.PENGAJUAN.id },
+        });
+        const evaluasi = await ctx.db.evaluasi.findMany({
+          where: { status: STATUS.PENGAJUAN.id },
+        });
+
+        const data = {
+          pembelian: pembelian.length,
+          penawaran: penawaran.length,
+          nego: nego.length,
+          evaluasi: evaluasi.length,
+        };
+        // @ts-ignore
+        result.pengadaan = data;
+      }
+
       return {
         isUser: false,
         name: userName,
         overview,
         // @ts-ignore
         persetujuan: result.persetujuan,
+        // @ts-ignore
+        pengadaan: result.pengadaan,
       };
     }
 

@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Overview from "./_components/overview";
 import PermintaanBarang from "./_components/permintaan-barang";
 import { api } from "@/trpc/server";
+import Pengadaan from "./_components/pengadaan";
 
 // kalau role user tidak ada tabs
 // kalau ada role tabs nya tergantung role
@@ -35,9 +36,9 @@ export default async function Page() {
               {data.persetujuan && (
                 <TabsTrigger value="permintaan">Permintaan Barang</TabsTrigger>
               )}
-              <TabsTrigger value="pengadaan" disabled>
-                Pengadaan
-              </TabsTrigger>
+              {data.pengadaan && (
+                <TabsTrigger value="pengadaan">Pengadaan</TabsTrigger>
+              )}
               <TabsTrigger value="perbaikan" disabled>
                 Perbaikan
               </TabsTrigger>
@@ -50,6 +51,9 @@ export default async function Page() {
             </TabsContent>
             <TabsContent value="permintaan" className="space-y-4">
               <PermintaanBarang data={data.persetujuan} />
+            </TabsContent>
+            <TabsContent value="pengadaan" className="space-y-4">
+              <Pengadaan data={data.pengadaan} />
             </TabsContent>
           </Tabs>
         ) : (

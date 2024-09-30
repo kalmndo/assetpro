@@ -1,4 +1,4 @@
-import { ROLE } from '@/lib/role'
+import { ROLE } from "@/lib/role";
 import {
   ArchiveRestore,
   BaggageClaim,
@@ -7,7 +7,6 @@ import {
   ChartColumnDecreasing,
   Drill,
   FileClock,
-  FolderSync,
   HandCoins,
   Handshake,
   Inbox,
@@ -24,231 +23,224 @@ import {
   ShoppingCart,
   SquareChartGantt,
   Warehouse,
-  Wrench
-} from 'lucide-react'
+  Wrench,
+} from "lucide-react";
 
 export interface NavLink {
-  title: string
-  label?: string
-  href: string
-  icon: JSX.Element,
-  isTitle?: boolean,
-  role?: string
+  title: string;
+  label?: string;
+  href: string;
+  icon: JSX.Element;
+  isTitle?: boolean;
+  role?: string;
 }
 
 export interface SideLink extends NavLink {
-  sub?: NavLink[]
+  sub?: NavLink[];
 }
 
 export const sidelinks: SideLink[] = [
   {
-    title: 'Dashboard',
-    label: '',
-    href: '/dashboard',
-    icon: <LayoutDashboard size={18} />
+    title: "Dashboard",
+    label: "",
+    href: "/dashboard",
+    icon: <LayoutDashboard size={18} />,
   },
   {
-    title: 'Laporan',
-    label: '',
-    href: '/laporan',
+    title: "Laporan",
+    label: "",
+    href: "/laporan",
     icon: <ChartColumnDecreasing size={18} />,
-    role: ROLE.LAPORAN_VIEW.id
+    role: ROLE.LAPORAN_VIEW.id,
   },
   {
-    title: 'Daftar Aset',
-    label: '',
-    href: '/daftar-aset',
+    title: "Daftar Aset",
+    label: "",
+    href: "/daftar-aset",
     icon: <Building size={18} />,
-    role: ROLE.ASET_VIEW.id
+    role: ROLE.ASET_VIEW.id,
   },
   {
-    title: 'Kartu Stok',
-    label: '',
-    href: '/kartu-stok',
+    title: "Kartu Stok",
+    label: "",
+    href: "/kartu-stok",
     icon: <Package size={18} />,
-    role: ROLE.STOCK_VIEW.id
+    role: ROLE.STOCK_VIEW.id,
   },
   {
-    title: 'Permintaan',
-    label: '',
-    href: '/permintaan',
+    title: "Permintaan",
+    label: "",
+    href: "/permintaan",
     icon: <PackageSearch size={18} />,
-    isTitle: true
+    isTitle: true,
   },
   {
-    title: 'Barang',
-    label: '',
-    href: '/permintaan/barang',
+    title: "Barang",
+    label: "",
+    href: "/permintaan/barang",
     icon: <Inbox size={18} />,
   },
   {
-    title: 'Perbaikan',
-    label: '',
-    href: '/permintaan/perbaikan',
+    title: "Perbaikan",
+    label: "",
+    href: "/permintaan/perbaikan",
     icon: <Wrench size={18} />,
   },
   {
-    title: 'Peminjaman',
-    label: '',
-    href: '/permintaan/peminjaman',
+    title: "Peminjaman",
+    label: "",
+    href: "/permintaan/peminjaman",
     icon: <ArchiveRestore size={18} />,
   },
   {
-    title: 'Manajemen',
-    label: '',
-    href: '/manajemen',
+    title: "Manajemen",
+    label: "",
+    href: "/manajemen",
     icon: <LayoutDashboard size={18} />,
-    isTitle: true
+    isTitle: true,
   },
   {
-    title: 'Permintaan Barang',
-    label: '',
-    href: '/permintaan-barang',
+    title: "Permintaan Barang",
+    label: "",
+    href: "/permintaan-barang",
     icon: <FileClock size={18} />,
-    role: ROLE.IM_READ.id
+    role: ROLE.IM_READ.id,
   },
   {
-    title: 'Pengadaan',
-    label: '3',
-    href: '/tasks',
+    title: "Pengadaan",
+    label: "3",
+    href: "/tasks",
     icon: <ShoppingCart size={18} />,
     sub: [
       {
-        title: 'Permintaan Pembelian',
-        label: '',
-        href: '/pengadaan/permintaan-pembelian',
+        title: "Permintaan Pembelian",
+        label: "",
+        href: "/pengadaan/permintaan-pembelian",
         icon: <ScreenShare size={18} />,
-        role: ROLE.PEMBELIAN_READ.id
+        role: ROLE.PEMBELIAN_READ.id,
       },
       {
-        title: 'Permintaan Penawaran',
-        label: '',
-        href: '/pengadaan/permintaan-penawaran',
+        title: "Permintaan Penawaran",
+        label: "",
+        href: "/pengadaan/permintaan-penawaran",
         icon: <HandCoins size={18} />,
-        role: ROLE.PENAWARAN_VIEW.id
+        role: ROLE.PENAWARAN_VIEW.id,
       },
       {
-        title: 'Penawaran Harga',
-        label: '',
-        href: '/pengadaan/penawaran-harga',
+        title: "Penawaran Harga",
+        label: "",
+        href: "/pengadaan/penawaran-harga",
         icon: <Percent size={18} />,
-        role: ROLE.NEGO_VIEW.id
+        role: ROLE.NEGO_VIEW.id,
       },
       {
-        title: 'Evaluasi Harga',
-        label: '',
-        href: '/pengadaan/evaluasi-harga',
+        title: "Evaluasi Harga",
+        label: "",
+        href: "/pengadaan/evaluasi-harga",
         icon: <Handshake size={18} />,
-        role: ROLE.EVALUASI_HARGA_READ.id
+        role: ROLE.EVALUASI_HARGA_READ.id,
       },
       {
-        title: 'Purchase Order',
-        label: '',
-        href: '/pengadaan/purchase-order',
+        title: "Purchase Order",
+        label: "",
+        href: "/pengadaan/purchase-order",
         icon: <SquareChartGantt size={18} />,
-        role: ROLE.PO_VIEW.id
+        role: ROLE.PO_VIEW.id,
       },
     ],
   },
   {
-    title: 'Gudang',
-    label: '',
-    href: '/',
+    title: "Gudang",
+    label: "",
+    href: "/",
     icon: <Warehouse size={18} />,
     sub: [
       {
-        title: 'Permintaan',
-        label: '',
-        href: '/gudang/permintaan',
+        title: "Permintaan",
+        label: "",
+        href: "/gudang/permintaan",
         icon: <PackagePlus size={18} />,
-        role: ROLE.GUDANG_REQUEST_VIEW.id
+        role: ROLE.GUDANG_REQUEST_VIEW.id,
       },
       {
-        title: 'Masuk',
-        label: '',
-        href: '/gudang/masuk',
+        title: "Masuk",
+        label: "",
+        href: "/gudang/masuk",
         icon: <PackagePlus size={18} />,
-        role: ROLE.GUDANG_MASUK_VIEW.id
+        role: ROLE.GUDANG_MASUK_VIEW.id,
       },
       {
-        title: 'Keluar',
-        label: '',
-        href: '/gudang/keluar',
+        title: "Keluar",
+        label: "",
+        href: "/gudang/keluar",
         icon: <PackageMinus size={18} />,
-        role: ROLE.GUDANG_KELUAR_VIEW.id
+        role: ROLE.GUDANG_KELUAR_VIEW.id,
       },
-    ]
+    ],
   },
   {
-    title: 'Mutasi ',
-    label: '',
-    href: '/gudang/mutasi-barang',
-    icon: <FolderSync size={18} />,
-    role: ROLE.MUTASI_VIEW.id
-  },
-  {
-    title: 'Perbaikan',
-    label: '',
-    href: '',
+    title: "Perbaikan",
+    label: "",
+    href: "",
     icon: <Wrench size={18} />,
     sub: [
       {
-        title: 'Internal',
-        label: '',
-        href: '/perbaikan/permintaan',
+        title: "Internal",
+        label: "",
+        href: "/perbaikan/permintaan",
         icon: <Drill size={18} />,
-        role: ROLE.PERBAIKAN_PERMINTAAN_VIEW.id
+        role: ROLE.PERBAIKAN_PERMINTAAN_VIEW.id,
       },
       {
-        title: 'Eksternal',
-        label: '',
-        href: '/perbaikan/eksternal',
+        title: "Eksternal",
+        label: "",
+        href: "/perbaikan/eksternal",
         icon: <Luggage size={18} />,
-        role: ROLE.PERBAIKAN_EKSTERNAL_VIEW.id
+        role: ROLE.PERBAIKAN_EKSTERNAL_VIEW.id,
       },
-    ]
+    ],
   },
   {
-    title: 'Peminjaman',
-    label: '',
-    href: '',
+    title: "Peminjaman",
+    label: "",
+    href: "",
     icon: <ArchiveRestore size={18} />,
     sub: [
       {
-        title: 'Internal',
-        label: '',
-        href: '/peminjaman/internal',
+        title: "Internal",
+        label: "",
+        href: "/peminjaman/internal",
         icon: <Briefcase size={18} />,
-        role: ROLE.PEMINJAMAN_INTERNAL_VIEW.id
+        role: ROLE.PEMINJAMAN_INTERNAL_VIEW.id,
       },
       {
-        title: 'Eksternal',
-        label: '',
-        href: '/peminjaman/eksternal',
+        title: "Eksternal",
+        label: "",
+        href: "/peminjaman/eksternal",
         icon: <BaggageClaim size={18} />,
-        role: ROLE.PEMINJAMAN_EKSTERNAL_VIEW.id
+        role: ROLE.PEMINJAMAN_EKSTERNAL_VIEW.id,
       },
-    ]
+    ],
   },
   {
-    title: '',
-    label: '',
-    href: 'admin',
+    title: "",
+    label: "",
+    href: "admin",
     icon: <LayoutDashboard size={18} />,
-    isTitle: true
+    isTitle: true,
   },
   {
-    title: 'Master',
-    label: '',
-    href: '/master',
+    title: "Master",
+    label: "",
+    href: "/master",
     icon: <MonitorCog size={18} />,
-    role: ROLE.MASTER_VIEW.id
+    role: ROLE.MASTER_VIEW.id,
   },
   {
-    title: 'Pengaturan',
-    label: '',
-    href: '/pengaturan',
+    title: "Pengaturan",
+    label: "",
+    href: "/pengaturan",
     icon: <Settings size={18} />,
-    role: ROLE.PENGATURAN_VIEW.id
+    role: ROLE.PENGATURAN_VIEW.id,
   },
-]
+];

@@ -115,6 +115,8 @@ function tersediaAset(
       uom: v.MasterBarang.Uom.name,
       ordered: permintaan.ordered,
       golongan: getGolonganLabel(permintaan.golongan),
+      // @ts-ignore
+      tersedia: v.idle - v.booked,
       // for table
       permintaanBarang: newPermintaanBarang,
       permintaanBarangId: newPermintaanBarang.map((v: any) => v.id),
