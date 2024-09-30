@@ -16,12 +16,14 @@ import { api } from "@/trpc/server";
 // kalau ada role tabs nya tergantung role
 
 export default async function Page() {
-  const data = await api.user.getDashboard()
+  const data = await api.user.getDashboard();
   return (
     <div>
       <div className="flex justify-between">
         <div className="">
-          <h1 className="text-2xl font-bold tracking-tight">Welcome, Adam</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Welcome, {data.name}
+          </h1>
           <p className="text-muted-foreground">Here is what happened</p>
         </div>
       </div>
@@ -30,7 +32,9 @@ export default async function Page() {
           <Tabs defaultValue="overview" className="space-y-4">
             <TabsList>
               <TabsTrigger value="overview">Permintaan</TabsTrigger>
-              <TabsTrigger value="permintaan">Permintaan Barang</TabsTrigger>
+              {data.persetujuan && (
+                <TabsTrigger value="permintaan">Permintaan Barang</TabsTrigger>
+              )}
               <TabsTrigger value="pengadaan" disabled>
                 Pengadaan
               </TabsTrigger>
@@ -45,7 +49,7 @@ export default async function Page() {
               <Overview data={data.overview} />
             </TabsContent>
             <TabsContent value="permintaan" className="space-y-4">
-              <PermintaanBarang data={data.overview} />
+              <PermintaanBarang data={data.persetujuan} />
             </TabsContent>
           </Tabs>
         ) : (
@@ -58,4 +62,3 @@ export default async function Page() {
     </div>
   );
 }
-

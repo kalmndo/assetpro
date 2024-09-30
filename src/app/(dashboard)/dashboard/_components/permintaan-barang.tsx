@@ -27,7 +27,7 @@ export default function PermintaanBarang({ data }: { data: any }) {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.permintaan}</div>
+            <div className="text-2xl font-bold">{data.approval}</div>
           </CardContent>
         </Card>
         <Card>
@@ -49,7 +49,7 @@ export default function PermintaanBarang({ data }: { data: any }) {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.perbaikan}</div>
+            <div className="text-2xl font-bold">{data.tersedia}</div>
           </CardContent>
         </Card>
         <Card>
@@ -72,7 +72,7 @@ export default function PermintaanBarang({ data }: { data: any }) {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.peminjaman}</div>
+            <div className="text-2xl font-bold">{data.takTersedia}</div>
           </CardContent>
         </Card>
         <Card>
@@ -92,7 +92,7 @@ export default function PermintaanBarang({ data }: { data: any }) {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.persetujuan}</div>
+            <div className="text-2xl font-bold">{data.tolak}</div>
           </CardContent>
         </Card>
       </div>
