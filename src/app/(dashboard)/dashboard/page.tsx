@@ -10,23 +10,13 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Overview from "./_components/overview";
 import PermintaanBarang from "./_components/permintaan-barang";
+import { api } from "@/trpc/server";
 
 // kalau role user tidak ada tabs
 // kalau ada role tabs nya tergantung role
 
-const data = {
-  isUser: false,
-  overview: {
-    permintaan: 2,
-    peminjaman: 3,
-    perbaikan: 5,
-    persetujuan: 3,
-    recent: [{}],
-    persetujuanRecent: [{}],
-  },
-};
-
-export default function Page() {
+export default async function Page() {
+  const data = await api.user.getDashboard()
   return (
     <div>
       <div className="flex justify-between">

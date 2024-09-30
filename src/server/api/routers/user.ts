@@ -6,6 +6,9 @@ import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import bcrypt from 'bcryptjs'
+import { ROLE } from "@/lib/role";
+import { STATUS } from "@/lib/status";
+import checkKetersediaanByBarang from "../shared/check-ketersediaan-by-barang";
 
 export const userRouter = createTRPCRouter({
   me: protectedProcedure
@@ -83,7 +86,68 @@ export const userRouter = createTRPCRouter({
         value: v.id
       }))
     }),
+  getDashboard: protectedProcedure
+    .query(async ({ ctx }) => {
+      const userId = ctx.session.user.id
 
+      const userRoles = await ctx.db.userRole.findMany({ where: { userId } })
+      const userRoleIds = userRoles.map((v) => v.roleId)
+
+      const isRole = userRoles.length > 0
+
+      const per = await ctx.db.permintaanBarang.findMany({ where: { pemohondId: userId }, orderBy: { createdAt: "desc" } })
+      const pem = await ctx.db.peminjaman.findMany({ where: { peminjamId: userId }, orderBy: { createdAt: "desc" } })
+      const perb = await ctx.db.perbaikan.findMany({ where: { userId }, orderBy: { createdAt: "desc" } })
+      // const pers = await ctx.db.permintaanBarang.findMany({where: {}})
+
+      // @ts-ignore
+      const al = [...per, ...pem, ...perb].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+
+      const {
+        IM_READ,
+        GUDANG_REQUEST_VIEW,
+
+      } = ROLE
+
+      const permintaanBarangRole = [IM_READ.id, GUDANG_REQUEST_VIEW.id]
+
+      const overview = {
+        permintaan: per.length,
+        peminjaman: pem.length,
+        perbaikan: perb.length,
+        persetujuan: 0,
+        recent: al.slice(0, 4),
+        persetujuanRecent: []
+      }
+
+      if (isRole) {
+        // permintaan barang
+        if (userRoleIds.some((v) => permintaanBarangRole.includes(v))) {
+          const approval = await ctx.db.permintaanBarang.findMany({ where: { status: STATUS.IM_APPROVE.id } })
+
+          const pbbg = await ctx.db.permintaanBarangBarangGroup.findMany()
+          const { tersedia, takTersedia } = await checkKetersediaanByBarang(ctx.db, pbbg)
+
+          tersedia.length
+          const data = {
+            approval,
+            tersedia: tersedia.length,
+            takTersedia: takTersedia.length,
+            tolak: 0
+          }
+        }
+        // pengadaan
+        return {
+          isUser: false,
+          overview
+        }
+      }
+
+      return {
+        isUser: true,
+        overview
+      }
+    }),
   create: protectedProcedure
     .input(z.object({
       name: z.string(),

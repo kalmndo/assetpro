@@ -4,6 +4,16 @@ import { TRPCError } from "@trpc/server";
 import { STATUS } from "@/lib/status";
 import { ROLE } from "@/lib/role";
 
+// permohanan perbaikan eksternal 
+// disetujui oleh sadat atau di tolak | Permohonan eksternal disetujui
+// minta invoice
+// invoice ada | input invoice
+// persetujuan harga
+// jika setuju lakukan perbaikan
+// jika tolak barang rusak
+// barang di terima di gudang
+// user terima
+
 export const perbaikanEksternalRouter = createTRPCRouter({
   getById: protectedProcedure
     .input(z.object({
@@ -71,7 +81,7 @@ export const perbaikanEksternalRouter = createTRPCRouter({
       const canSendToUser = user?.UserRole.map((v) => v.roleId).some((v) => v === ROLE.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_USER.id) && result.status === STATUS.PERBAIKAN_EKSTERNAL_TERIMA.id
       const canAddComponents = user?.UserRole.map((v) => v.roleId).some((v) => v === ROLE.PERBAIKAN_EKSTERNAL_ADD_COMPONENT.id) && result.status === STATUS.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_VENDOR.id
 
-      const p = result.Perbaikan.User
+      // const p = result.Perbaikan.User
       const b = result.Perbaikan.Aset.MasterBarang
 
       const comps = result.PerbaikanEksternalKomponen.map((v) => {
@@ -115,7 +125,7 @@ export const perbaikanEksternalRouter = createTRPCRouter({
       }
     }),
   getAll: protectedProcedure
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx }) => {
       const result = await ctx.db.perbaikanExternal.findMany({
         orderBy: {
           createdAt: 'desc'
