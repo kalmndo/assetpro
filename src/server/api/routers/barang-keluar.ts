@@ -11,6 +11,7 @@ export const barangKeluarRouter = createTRPCRouter({
       include: {
         FtkbItem: true,
       },
+      orderBy: { createdAt: "desc" },
     });
 
     return result.map((v) => ({
