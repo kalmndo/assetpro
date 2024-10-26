@@ -4,6 +4,8 @@ import checkKetersediaanByBarang from "../shared/check-ketersediaan-by-barang";
 import { STATUS } from "@/lib/status";
 import { TRPCError } from "@trpc/server";
 import { type PrismaClient } from "@prisma/client";
+import PENOMORAN from "@/lib/penomoran";
+import getPenomoran from "@/lib/getPenomoran";
 
 export const barangKeluarRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -126,12 +128,42 @@ export const barangKeluarRouter = createTRPCRouter({
             barangGroupResult,
           );
 
+          let penomoran = await tx.penomoran.findUnique({
+            where: {
+              id: PENOMORAN.KELUAR_BARANG,
+              year: String(new Date().getFullYear())
+            }
+          })
+
+          if (!penomoran) {
+            penomoran = await tx.penomoran.create({
+              data: {
+                id: PENOMORAN.KELUAR_BARANG,
+                code: "FTKB",
+                number: 0,
+                year: String(new Date().getFullYear())
+              }
+            })
+          }
+
           const ftkb = await tx.ftkb.create({
             data: {
-              no: Math.random().toString(),
+              no: getPenomoran(penomoran),
               status: STATUS.SELESAI.id,
             },
           });
+
+          if (ftkb) {
+            await tx.penomoran.update({
+              where: {
+                id: PENOMORAN.KELUAR_BARANG,
+                year: String(new Date().getFullYear())
+              },
+              data: {
+                number: { increment: 1 }
+              }
+            })
+          }
 
           const permintaanBarangIds = tersedia.flatMap(
             (v) => v.permintaanBarangId,

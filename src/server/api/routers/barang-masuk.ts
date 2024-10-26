@@ -1,3 +1,5 @@
+import getPenomoran from "@/lib/getPenomoran";
+import PENOMORAN from "@/lib/penomoran";
 import { STATUS } from "@/lib/status";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { Prisma } from "@prisma/client";
@@ -171,12 +173,44 @@ export const barangMasukRouter = createTRPCRouter({
             },
           });
 
+          let penomoran = await tx.penomoran.findUnique({
+            where: {
+              id: PENOMORAN.MASUK_BARANG,
+              year: String(new Date().getFullYear())
+            }
+          })
+
+          if (!penomoran) {
+            penomoran = await tx.penomoran.create({
+              data: {
+                id: PENOMORAN.MASUK_BARANG,
+                code: "FTTB",
+                number: 0,
+                year: String(new Date().getFullYear())
+              }
+            })
+          }
+
           const fttb = await tx.fttb.create({
             data: {
               poId,
-              no: Math.random().toString(),
+              no: getPenomoran(penomoran),
             },
           });
+
+          if (fttb) {
+            await tx.penomoran.update({
+              where: {
+                id: PENOMORAN.MASUK_BARANG,
+                year: String(new Date().getFullYear())
+              },
+              data: {
+                number: { increment: 1 }
+              }
+            })
+          }
+
+          
 
           const imIds: string[] = [];
 

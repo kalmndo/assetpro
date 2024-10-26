@@ -5,6 +5,8 @@ import { STATUS } from "@/lib/status";
 import isTodayOrAfter from "@/lib/isTodayOrAfter";
 import { type PrismaClient } from "@prisma/client";
 import { type DefaultArgs } from "@prisma/client/runtime/library";
+import PENOMORAN from "@/lib/penomoran";
+import getPenomoran from "@/lib/getPenomoran";
 
 export const evaluasiHargaRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -349,14 +351,44 @@ export const evaluasiHargaRouter = createTRPCRouter({
             );
 
             for (const value of groupedData) {
+              let penomoran = await tx.penomoran.findUnique({
+                where: {
+                  id: PENOMORAN.PURCHASE_ORDER,
+                  year: String(new Date().getFullYear())
+                }
+              })
+    
+              if (!penomoran) {
+                penomoran = await tx.penomoran.create({
+                  data: {
+                    id: PENOMORAN.PURCHASE_ORDER,
+                    code: "PO",
+                    number: 0,
+                    year: String(new Date().getFullYear())
+                  }
+                })
+              }
+
               const po = await tx.pO.create({
                 data: {
                   evaluasiId: id,
-                  no: Math.random().toString(),
+                  no: getPenomoran(penomoran),
                   status: STATUS.MENUNGGU.id,
                   vendorId: value.vendorId,
                 },
               });
+
+              if (po) {
+                await tx.penomoran.update({
+                  where: {
+                    id: PENOMORAN.PURCHASE_ORDER,
+                    year: String(new Date().getFullYear())
+                  },
+                  data: {
+                    number: { increment: 1 }
+                  }
+                })
+              }
 
               for (const val of value.barangs) {
                 for (const { barangSplitId } of pBSPBB.filter(
