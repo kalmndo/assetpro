@@ -14,10 +14,12 @@ export function AsetDialog({
   data,
   open,
   onOpenChange,
+  onQrOpen,
 }: {
   data: string[];
   open: boolean;
   onOpenChange: Dispatch<SetStateAction<boolean>>;
+  onQrOpen: (id: string) => void;
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -36,11 +38,7 @@ export function AsetDialog({
                 <p>{i + 1}.</p>
                 <p>{v}</p>
               </div>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => console.log("")}
-              >
+              <Button variant="outline" size="icon" onClick={() => onQrOpen(v)}>
                 <Printer className="h-4 w-4" />
               </Button>
             </div>
