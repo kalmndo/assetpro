@@ -311,10 +311,10 @@ export const permintaanPembelianRouter = createTRPCRouter({
 						data: {
 							no: getPenomoran(penomoran),
 							status: "pengajuan",
-							pembelianId:id
+							pembelianId: id
 						}
 					})
-					
+
 					if (permPem) {
 						await tx.penomoran.update({
 							where: {
@@ -322,7 +322,7 @@ export const permintaanPembelianRouter = createTRPCRouter({
 								year: String(new Date().getFullYear())
 							},
 							data: {
-								number: {increment: 1}
+								number: { increment: 1 }
 							}
 						})
 					}

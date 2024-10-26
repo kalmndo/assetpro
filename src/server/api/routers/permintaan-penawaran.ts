@@ -5,6 +5,8 @@ import { STATUS } from "@/lib/status";
 import sendWhatsAppMessage from "@/lib/send-whatsapp";
 import { v4 as uuidv4 } from 'uuid'
 import formatPhoneNumber from "@/lib/formatPhoneNumber";
+import PENOMORAN from "@/lib/penomoran";
+import getPenomoran from "@/lib/getPenomoran";
 
 export const permintaanPenawaranRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -81,8 +83,8 @@ export const permintaanPenawaranRouter = createTRPCRouter({
 
       let getVendors
 
-      if (result.status === STATUS.MENUNGGU.id) {
-        getVendors = await ctx.db.vendor.findMany()
+      if (result.status === STATUS.PENGAJUAN.id) {
+        getVendors  = await ctx.db.vendor.findMany()
       } else {
         const res = await ctx.db.permintaanPenawaranVendor.findMany({
           where: { penawaranId: id },
@@ -239,15 +241,43 @@ https://assetpro.site/vendor/pp/${result.id}`
 
             sendWhatsAppMessage(formatPhoneNumber(result.Vendor.nohp), message)
           }
-          await tx.penawaranHarga.create({
+          let penomoran = await tx.penomoran.findUnique({
+						where: {
+							id: PENOMORAN.PENAWARAN_HARGA,
+							year: String(new Date().getFullYear())
+						}
+					})
+
+					if (!penomoran) {
+						penomoran = await tx.penomoran.create({
+							data: {
+								id: PENOMORAN.PENAWARAN_HARGA,
+								code: "FPH",
+								number: 0,
+								year: String(new Date().getFullYear())
+							}
+						})
+					}
+          
+          const permPem = await tx.penawaranHarga.create({
             data: {
-              no: Math.random().toString(),
+              no: getPenomoran(penomoran),
               status: STATUS.MENUNGGU.id,
               penawaranId: penawaranResult.id
             }
           })
 
-
+          if (permPem) {
+						await tx.penomoran.update({
+							where: {
+								id: PENOMORAN.PENAWARAN_HARGA,
+								year: String(new Date().getFullYear())
+							},
+							data: {
+								number: { increment: 1 }
+							}
+						})
+					}
         })
         return {
           ok: true,

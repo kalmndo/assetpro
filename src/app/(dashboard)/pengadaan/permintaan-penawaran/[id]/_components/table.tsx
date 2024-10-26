@@ -51,7 +51,7 @@ export function Table({
         setBarang={setBarang}
       />
       <div className="py-4 flex justify-end">
-        {data.status === STATUS.MENUNGGU.id && <ApproveDialog
+        {data.status === STATUS.PENGAJUAN.id && <ApproveDialog
           id={data.id}
           barang={barang}
         />}
