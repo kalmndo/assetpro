@@ -1092,3 +1092,10 @@ model KartuStokPergerakan {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Penomoran {
+  id String @unique
+  number Int
+  code String
+  year String
+}
