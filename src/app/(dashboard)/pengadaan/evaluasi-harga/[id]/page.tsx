@@ -4,6 +4,7 @@ import Link from "next/link";
 import { api } from "@/trpc/server";
 import { getStatus } from "@/lib/status";
 import { Table } from "./_components/table";
+import Menu from "./_components/menu";
 
 export default async function Page({ params: { id } }: { params: { id: string } }) {
   const data = await api.evaluasiHarga.get({ id })
@@ -35,13 +36,12 @@ export default async function Page({ params: { id } }: { params: { id: string } 
           </h1>
         </div>
         <div className="">
-          {/* <AddDialog data={modalData} /> */}
         </div>
       </div>
       <div className="rounded-sm border">
         <div className="flex justify-between p-4">
           <div style={{ color }} className="font-semibold">{status}</div>
-          <div>Print</div>
+          <Menu id="a" />
         </div>
         <Separator />
         <div className="grid grid-cols-3 gap-4 p-4">

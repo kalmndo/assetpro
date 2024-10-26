@@ -6,6 +6,8 @@ import sendWhatsAppMessage from "@/lib/send-whatsapp";
 import { v4 as uuidv4 } from "uuid";
 import formatPhoneNumber from "@/lib/formatPhoneNumber";
 import isTodayOrAfter from "@/lib/isTodayOrAfter";
+import PENOMORAN from "@/lib/penomoran";
+import getPenomoran from "@/lib/getPenomoran";
 // import isTodayOrAfter from "@/lib/isTodayOrAfter";
 
 export const penawaranHargaRouter = createTRPCRouter({
@@ -339,14 +341,44 @@ https://assetpro.site/vendor/ph/${result.id}`;
               message,
             );
           }
+          let penomoran = await tx.penomoran.findUnique({
+						where: {
+							id: PENOMORAN.EVALUASI_HARGA,
+							year: String(new Date().getFullYear())
+						}
+					})
+
+					if (!penomoran) {
+						penomoran = await tx.penomoran.create({
+							data: {
+								id: PENOMORAN.EVALUASI_HARGA,
+								code: "FEPHB",
+								number: 0,
+								year: String(new Date().getFullYear())
+							}
+						})
+					}
+
           // EVALUASI CREATE
           const evaluasi = await tx.evaluasi.create({
             data: {
-              no: Math.random().toString(),
+              no: getPenomoran(penomoran),
               status: STATUS.PENGAJUAN.id,
               penawaranHargaId: penawaranResult.id,
             },
           });
+
+          if (evaluasi) {
+						await tx.penomoran.update({
+							where: {
+								id: PENOMORAN.EVALUASI_HARGA,
+								year: String(new Date().getFullYear())
+							},
+							data: {
+								number: { increment: 1 }
+							}
+						})
+					}
 
           await tx.evaluasiBarang.createMany({
             data: barang.map((v) => ({
