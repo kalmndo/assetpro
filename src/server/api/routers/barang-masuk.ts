@@ -176,9 +176,9 @@ export const barangMasukRouter = createTRPCRouter({
           let penomoran = await tx.penomoran.findUnique({
             where: {
               id: PENOMORAN.MASUK_BARANG,
-              year: String(new Date().getFullYear())
-            }
-          })
+              year: String(new Date().getFullYear()),
+            },
+          });
 
           if (!penomoran) {
             penomoran = await tx.penomoran.create({
@@ -186,9 +186,9 @@ export const barangMasukRouter = createTRPCRouter({
                 id: PENOMORAN.MASUK_BARANG,
                 code: "FTTB",
                 number: 0,
-                year: String(new Date().getFullYear())
-              }
-            })
+                year: String(new Date().getFullYear()),
+              },
+            });
           }
 
           const fttb = await tx.fttb.create({
@@ -202,15 +202,13 @@ export const barangMasukRouter = createTRPCRouter({
             await tx.penomoran.update({
               where: {
                 id: PENOMORAN.MASUK_BARANG,
-                year: String(new Date().getFullYear())
+                year: String(new Date().getFullYear()),
               },
               data: {
-                number: { increment: 1 }
-              }
-            })
+                number: { increment: 1 },
+              },
+            });
           }
-
-          
 
           const imIds: string[] = [];
 
@@ -287,9 +285,26 @@ export const barangMasukRouter = createTRPCRouter({
 
               for (const val of theImdId) {
                 for (let i = 0; i < val.qty; i++) {
-                  await tx.daftarAset.create({
+                  let penomoran = await tx.penomoran.findUnique({
+                    where: {
+                      id: PENOMORAN.ASET,
+                      year: String(new Date().getFullYear()),
+                    },
+                  });
+
+                  if (!penomoran) {
+                    penomoran = await tx.penomoran.create({
+                      data: {
+                        id: PENOMORAN.ASET,
+                        code: "INV/YAH",
+                        number: 0,
+                        year: String(new Date().getFullYear()),
+                      },
+                    });
+                  }
+                  const aset = await tx.daftarAset.create({
                     data: {
-                      id: Math.random().toString(),
+                      id: getPenomoran(penomoran),
                       barangId: masterBarangId,
                       imId: val.id,
                       fttbItemId: fttbItem.id,
@@ -298,6 +313,18 @@ export const barangMasukRouter = createTRPCRouter({
                       umur: subKat?.umur ?? 10,
                     },
                   });
+
+                  if (aset) {
+                    await tx.penomoran.update({
+                      where: {
+                        id: PENOMORAN.ASET,
+                        year: String(new Date().getFullYear()),
+                      },
+                      data: {
+                        number: { increment: 1 },
+                      },
+                    });
+                  }
                 }
               }
 
