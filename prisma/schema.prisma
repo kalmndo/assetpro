@@ -257,6 +257,7 @@ model PermintaanPenawaranVendor {
   vendorId    String
   penawaranId String
   status      Boolean @default(false)
+  isManual    Boolean @default(false)
 
   Vendor    Vendor              @relation(fields: [vendorId], references: [id])
   Penawaran PermintaanPenawaran @relation(fields: [penawaranId], references: [id])
@@ -322,6 +323,7 @@ model PenawaranHargaVendor {
   vendorId    String
   penawaranId String
   status      Boolean @default(false)
+  isManual    Boolean @default(false)
 
   Vendor          Vendor         @relation(fields: [vendorId], references: [id])
   PenawaraanHarga PenawaranHarga @relation(fields: [penawaranId], references: [id])
@@ -1094,8 +1096,8 @@ model KartuStokPergerakan {
 }
 
 model Penomoran {
-  id String @unique
+  id     String @unique
   number Int
-  code String
-  year String
+  code   String
+  year   String
 }

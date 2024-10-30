@@ -96,8 +96,23 @@ export const penawaranHargaRouter = createTRPCRouter({
 
       let getVendors;
 
-      if (result.status === STATUS.MENUNGGU.id) {
+      const isPengajuan = result.status === STATUS.MENUNGGU.id;
+
+      if (isPengajuan) {
         getVendors = await ctx.db.vendor.findMany();
+      } else {
+        const res = await ctx.db.penawaranHargaVendor.findMany({
+          where: { penawaranId: id },
+          include: {
+            Vendor: true,
+          },
+        });
+
+        getVendors = res.map((v) => ({
+          url: v.id,
+          status: v.status,
+          ...v.Vendor,
+        }));
       }
 
       const barang =
@@ -123,9 +138,6 @@ export const penawaranHargaRouter = createTRPCRouter({
           }),
         );
 
-        const manualVendor = barang.map((v) => {
-        })
-
       return {
         id: result.id,
         no: result.no,
@@ -143,7 +155,8 @@ export const penawaranHargaRouter = createTRPCRouter({
         penawaranDeadline:
           result.PermintaanPenawaran.deadline?.toLocaleDateString(),
         deadline: result.deadline?.toLocaleDateString(),
-        manualVendor
+        // @ts-ignore
+        unsendVendors: isPengajuan ? [] : getVendors.filter((v) => !v.status),
       };
     }),
   send: protectedProcedure
