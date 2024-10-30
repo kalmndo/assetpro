@@ -160,16 +160,9 @@ export const permintaanPenawaranRouter = createTRPCRouter({
         }));
       };
 
-
-
-
-
-
       try {
 
         await ctx.db.$transaction(async (tx) => {
-
-
           const penawaranResult = await tx.permintaanPenawaran.update({
             where: {
               id

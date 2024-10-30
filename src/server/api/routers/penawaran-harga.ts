@@ -123,6 +123,9 @@ export const penawaranHargaRouter = createTRPCRouter({
           }),
         );
 
+        const manualVendor = barang.map((v) => {
+        })
+
       return {
         id: result.id,
         no: result.no,
@@ -140,6 +143,7 @@ export const penawaranHargaRouter = createTRPCRouter({
         penawaranDeadline:
           result.PermintaanPenawaran.deadline?.toLocaleDateString(),
         deadline: result.deadline?.toLocaleDateString(),
+        manualVendor
       };
     }),
   send: protectedProcedure
