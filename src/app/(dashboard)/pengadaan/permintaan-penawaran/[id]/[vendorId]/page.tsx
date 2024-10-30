@@ -1,4 +1,7 @@
 import { Separator } from "@/components/ui/separator";
+import { getStatus } from "@/lib/status";
+import { api } from "@/trpc/server";
+import Content from "./_components/content";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,21 +11,20 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import Link from "next/link";
-import { api } from "@/trpc/server";
-import { getStatus, STATUS } from "@/lib/status";
-import { Table } from "./_components/table";
-import Menu from "./_components/menu";
 
 export default async function Page({
-  params: { id },
+  params: { id, vendorId },
 }: {
-  params: { id: string };
+  params: { id: string; vendorId: string };
 }) {
-  const data = await api.permintaanPenawaran.get({ id });
-  const { color, name: status } = getStatus(data.status);
+  const data = await api.vendor.getPermintaanPenawaran({ id: vendorId });
+
+  const { color, name: status } = getStatus(
+    data.status ? "selesai" : "menunggu",
+  );
 
   return (
-    <div>
+    <div className="">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>Pengadaan</BreadcrumbItem>
@@ -34,14 +36,22 @@ export default async function Page({
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Detail Permintaan Penawaran</BreadcrumbPage>
+            <BreadcrumbLink asChild>
+              <Link href={`/permintaan-penawaran/${id}`}>
+                Detail Permintaan Penawaran
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Input manual</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
       <div className="my-4 flex justify-between">
         <div className="">
           <h1 className="text-2xl font-bold tracking-tight">
-            Form Permintaan Penawaran
+            Input manual penawaran harga
           </h1>
         </div>
         <div className=""></div>
@@ -51,13 +61,14 @@ export default async function Page({
           <div style={{ color }} className="font-semibold">
             {status}
           </div>
-          {status !== STATUS.PENGAJUAN.id && (
-            <Menu vendors={data.unsendVendors} />
-          )}
         </div>
         <Separator />
         <div className="grid grid-cols-3 gap-4 p-4">
-          <div className="col-span-1 space-y-4">
+          <div className="col-span-2 space-y-4">
+            <div className="space-y-2">
+              <p className="text-sm">Dari</p>
+              <p className="font-semibold">Yayasan Alfian Husin</p>
+            </div>
             <div className="space-y-2">
               <p className="text-sm">Nomor</p>
               <p className="font-semibold">{data.no}</p>
@@ -66,34 +77,20 @@ export default async function Page({
               <p className="text-sm">Tanggal</p>
               <p className="font-semibold">{data.tanggal}</p>
             </div>
-            <div className="space-y-2">
-              <p className="text-sm">Permintaan Pembelian</p>
-              <Link
-                href={`/pengadaan/permintaan-pembelian/${data.permintaanPembelian.id}`}
-                className="col-span-2 text-xs font-semibold text-blue-600 hover:underline"
-              >
-                {data.permintaanPembelian.no}
-              </Link>
-            </div>
           </div>
           <div className="col-span-1 space-y-4">
-            {data.deadline && (
-              <div className="space-y-2">
-                <p className="text-sm">
-                  Batas waktu vendor kirim harga penawaran
-                </p>
-                <p className="font-semibold">{data.deadline}</p>
-              </div>
-            )}
+            <div className="space-y-2">
+              <p className="text-sm">Kepada</p>
+              <p className="font-semibold">{data.Vendor.name}</p>
+              <p className="text-sm">{data.Vendor.alamat}</p>
+            </div>
           </div>
         </div>
         <div className="p-4">
-          <Table data={data} />
-          {/* <div className="my-4 flex justify-end">
-            {data.isApprove && <ApproveDialog id={data.id} />}
-          </div> */}
+          <Content data={data} />
         </div>
       </div>
     </div>
   );
 }
+
