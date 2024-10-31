@@ -29,7 +29,9 @@ export default async function Page({
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/permintaan-penawaran">Permintaan Penawaran</Link>
+              <Link href="/pengadaan/permintaan-penawaran">
+                Permintaan Penawaran
+              </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />

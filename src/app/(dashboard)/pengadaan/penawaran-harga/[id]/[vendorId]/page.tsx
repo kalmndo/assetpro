@@ -1,27 +1,66 @@
-import { Separator } from "@/components/ui/separator"
-import { getStatus } from "@/lib/status"
-import { api } from "@/trpc/server"
-import Content from "./_components/content"
+import { Separator } from "@/components/ui/separator";
+import { getStatus } from "@/lib/status";
+import { api } from "@/trpc/server";
+import Content from "./_components/content";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import Link from "next/link";
 
-export default async function Page({ params: { vendorId } }: { params: { vendorId: string } }) {
-  const data = await api.vendor.getPermintaanPenawaran({ id: vendorId })
+export default async function Page({
+  params: { id, vendorId },
+}: {
+  params: { id: string; vendorId: string };
+}) {
+  const data = await api.vendor.getPenawaranHarga({ id: vendorId });
 
-  const { color, name: status } = getStatus(data.status ? 'selesai' : 'menunggu')
+  const { color, name: status } = getStatus(
+    data.status ? "selesai" : "menunggu",
+  );
 
   return (
     <div className="">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>Pengadaan</BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/pengadaan/penawaran-harga">Penawaran Harga</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href={`/pengadaan/penawaran-harga/${id}`}>
+                Detail Penawaran Harga
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Input manual</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
       <div className="my-4 flex justify-between">
         <div className="">
-          <h1 className='text-2xl font-bold tracking-tight'>
+          <h1 className="text-2xl font-bold tracking-tight">
             Input manual penawaran harga
           </h1>
         </div>
-        <div className="">
-        </div>
+        <div className=""></div>
       </div>
       <div className="rounded-sm border">
         <div className="flex justify-between p-4">
-          <div style={{ color }} className="font-semibold">{status}</div>
+          <div style={{ color }} className="font-semibold">
+            {status}
+          </div>
         </div>
         <Separator />
         <div className="grid grid-cols-3 gap-4 p-4">
@@ -52,5 +91,6 @@ export default async function Page({ params: { vendorId } }: { params: { vendorI
         </div>
       </div>
     </div>
-  )
+  );
 }
+

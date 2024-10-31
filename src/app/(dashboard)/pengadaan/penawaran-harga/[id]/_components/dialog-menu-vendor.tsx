@@ -1,43 +1,48 @@
 import SearchSelect from "@/components/search-select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  Form as OriginalForm,
-} from "@/components/ui/form"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Form as OriginalForm } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
+import { type RouterOutputs } from "@/trpc/react";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
-  "barangId": z.string(),
-  "vendorId": z.string(),
-})
+  vendorId: z.string(),
+});
 
 export default function DialogMenuVendor({
+  vendors,
   open,
-  onClose
+  onClose,
 }: {
-  open: boolean,
-  onClose(): void
+  vendors: RouterOutputs["penawaranHarga"]["get"]["unsendVendors"] | undefined;
+  open: boolean;
+  onClose(): void;
 }) {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      barangId: '',
-      vendorId: ''
+      vendorId: "",
     },
-  })
+  });
 
-  const onSubmit = () => {
+  const onSubmit = (values: any) => {
+    const pathname = window.location.pathname;
 
-  }
+    router.push(`${pathname}/${values.vendorId}`);
+  };
 
   return (
-    <Dialog open={open} onOpenChange={onClose} >
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="">
         <DialogHeader>
           <DialogTitle>Input manual vendor</DialogTitle>
@@ -45,30 +50,21 @@ export default function DialogMenuVendor({
         <DialogDescription />
         <div>
           <OriginalForm {...form}>
-            <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="">
-              <div className="mt-2 mb-5">
+            <form
+              noValidate
+              onSubmit={form.handleSubmit(onSubmit)}
+              className=""
+            >
+              <div className="mb-5 mt-2">
                 <SearchSelect
                   data={
-                    //   data ? data.map((v) => ({
-                    //   label: v.no,
-                    //   value: v.id
-                    // })) : []
-                    []
-                  }
-                  form={form}
-                  label="Barang"
-                  name="barangId"
-                  placeholder="Pilih Barang"
-                />
-              </div>
-              <div className="mt-2 mb-5">
-                <SearchSelect
-                  data={
-                    //   data ? data.map((v) => ({
-                    //   label: v.no,
-                    //   value: v.id
-                    // })) : []
-                    []
+                    vendors
+                      ? vendors.map((v) => ({
+                          label: v.name,
+                          // @ts-ignore
+                          value: v.url,
+                        }))
+                      : []
                   }
                   form={form}
                   label="Vendor"
@@ -84,5 +80,6 @@ export default function DialogMenuVendor({
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
+

@@ -31,13 +31,15 @@ export default async function Page({
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/permintaan-penawaran">Permintaan Penawaran</Link>
+              <Link href="/pengadaan/permintaan-penawaran">
+                Permintaan Penawaran
+              </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href={`/permintaan-penawaran/${id}`}>
+              <Link href={`/pengadaan/permintaan-penawaran/${id}`}>
                 Detail Permintaan Penawaran
               </Link>
             </BreadcrumbLink>
@@ -93,4 +95,3 @@ export default async function Page({
     </div>
   );
 }
-

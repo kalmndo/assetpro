@@ -6,33 +6,23 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Info,
-  Menu as MenuIcon,
-  Printer,
-  TrendingDown,
-  UserSearch,
-} from "lucide-react";
+import { Info, Menu as MenuIcon, Printer } from "lucide-react";
 import { useState } from "react";
-import { type RouterOutputs } from "@/trpc/react";
 import DialogMenuVendor from "./dialog-menu-vendor";
-
-const defaultValue = {
-  id: "",
-};
+import { type RouterOutputs } from "@/trpc/react";
 
 export default function Menu({
-  id,
+  vendors,
 }: {
-  id: string;
+  vendors: RouterOutputs["penawaranHarga"]["get"]["unsendVendors"];
 }) {
   const [dialog, setDialog] = useState<{
-    data: typeof defaultValue;
+    data: typeof vendors | undefined;
     open: boolean | string;
-  }>({ data: defaultValue, open: false });
+  }>({ data: undefined, open: false });
 
   const onClose = () => {
-    setDialog({ data: defaultValue, open: false });
+    setDialog({ data: undefined, open: false });
   };
 
   return (
@@ -42,22 +32,23 @@ export default function Menu({
           <MenuIcon />
         </DropdownMenuTrigger>
         <DropdownMenuContent side="bottom" align="end">
-          <DropdownMenuItem
-            onSelect={() => setDialog({ data: { id }, open: "date" })}
-          >
+          <DropdownMenuItem onSelect={() => console.log("")}>
             <Printer size={18} className="mr-2" />
             Ubah tanggal
           </DropdownMenuItem>
           <DropdownMenuItem
-            onSelect={() => setDialog({ data: { id }, open: "manual" })}
+            onSelect={() => setDialog({ data: vendors, open: "manual" })}
           >
             <Info size={18} className="mr-2" />
             Input vendor manual
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <DialogMenuVendor open={dialog.open === 'manual'} onClose={onClose} />
+      <DialogMenuVendor
+        vendors={vendors}
+        open={dialog.open === "manual"}
+        onClose={onClose}
+      />
     </>
   );
 }
-
