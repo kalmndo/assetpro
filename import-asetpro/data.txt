@@ -1,0 +1,169 @@
+1.1.1.01,	Tanah Untuk Bangunan Pendidikan Dasar
+1.1.1.02,	Tanah Untuk Bangunan Pendidikan Menengah
+1.1.1.03,	Tanah Untuk Bangunan Pendidikan Atas
+1.1.1.04,	Tanah Untuk Bangunan Pendidikan Tinggi
+1.1.2.01,	Tanah Untuk Fasilitas Pendidikan Dasar
+1.1.2.02,	Tanah Untuk Fasilitas Pendidikan Menengah
+1.1.2.03,	Tanah Untuk Fasilitas Pendidikan Atas
+1.1.2.04,	Tanah Untuk Fasilitas Pendidikan Tinggi
+1.2.1.01,	Bangunan Utama Pendidikan Dasar
+1.2.1.02,	Bangunan Utama Pendidikan Menengah
+1.2.1.03,	Bangunan Utama Pendidikan Atas
+1.2.1.04,	Bangunan Utama Pendidikan Tinggi
+1.2.2.01,	Bangunan Fasilitas Pendidikan Dasar
+1.2.2.02,	Bangunan Fasilitas Pendidikan Menengah
+1.2.2.03,	Bangunan Fasilitas Pendidikan Atas
+1.2.2.04,	Bangunan Fasilitas Pendidikan Tinggi
+1.3.1.01,	Mesin Genset
+1.3.1.02,	Mesin Pompa Jet Pump
+1.3.1.03,	Mesin Pompa Submersible
+1.3.1.04,	Stabilizer
+1.3.1.05,	UPS (Uninterruptible Power Supply)
+1.3.1.06,	Panel Generator (Genset Panel)
+1.3.1.07, Panel Distribusi (Distribution Panel)
+1.3.2.01,	Mesin Fotocopy
+1.3.2.02,	Mesin Riso
+1.3.2.03,	Printer Server
+1.3.2.04,	Printer Dot Matrix
+1.3.2.05,	Printer Deskjet
+1.3.2.06,	Printer LasetJet
+1.3.2.07,	Printer Scanner
+1.3.2.08,	Scanner
+1.3.3.01,	Komputer
+1.3.3.02,	Personal Komputer (PC)
+1.3.3.03,	Laptop
+1.3.3.04,	Notebook
+1.3.3.05,	PC Server
+1.3.3.06,	Rackmount Server
+1.3.4.01,	Hard Disk Drive (HDD)
+1.3.4.02,	Solid State Drive (SSD)
+1.3.4.03,	Papan Induk (Motherboard)
+1.3.4.04,	Memori (RAM - Random Access Memory)
+1.3.4.05,	Kartu Grafis (GPU - Graphics Processing Unit)
+1.3.4.06,	Casing (Case)
+1.3.4.07,	Power Supply Unit (PSU)
+1.3.4.08,	Firewall
+1.3.4.09,	PC Monitor
+1.3.4.10,	TV Monitor
+1.3.4.11,	Videotron
+1.3.4.12,	CPU
+1.3.5.01,	Router
+1.3.5.02,	Active Hub
+1.3.5.03,	Switch
+1.3.5.04,	Modem
+1.3.5.05,	Access Point
+1.3.5.06,	Firewall
+1.3.5.07,	Gateway
+1.3.5.08,	Bridge
+1.3.5.09,	Repeater
+1.3.5.10,	Network Interface Card (NIC)
+1.3.5.11,	Load Balance
+1.3.5.12,	Proxy Server
+1.3.6.01,	AC Terpisah (Split AC)
+1.3.6.02,	AC Berdiri (Standing AC)
+1.3.6.03,	AC Central (Ceiling AC)
+1.3.6.04,	Kipas Angin (Fan)
+1.3.6.05,	Kipas Angin Kabut  (Misty Fan)
+1.3.6.06,	Pembersih Udara (Air Purifier)
+1.3.7.01,	Kamera CCTV
+1.3.7.02,	DVR 
+1.3.7.03,	Handy Talky (HT)
+1.3.7.04,	Alarm Kebakaran
+1.3.7.05,	APAR
+1.3.7.06,	Mesin Faximile
+1.3.7.07,	Mesin PABX
+1.3.7.08,	Pesawat Telephone
+1.3.7.09,	Handphone
+1.3.8.01,	Speaker Aktif
+1.3.8.02,	Speaker Pasif
+1.3.8.03,	Portabel Speaker
+1.3.8.04,	Microphone Sound System
+1.3.8.05,	Stand Microphone
+1.3.8.06,	Amplifire
+1.3.8.07,	Tape Recorder
+1.3.8.08,	Mixer Audio
+1.3.9.01,	LCD Proyektor
+1.3.9.02,	Screen LCD Proyektor
+1.3.9.03,	Tripod
+1.3.9.04,	Camera Digital
+1.3.9.05,	Camera DSLR
+1.3.9.06,	Handycam
+1.3.9.07,	Gimbal Camera
+1.3.9.08,	Microphone Camera
+1.3.9.09,	Drone
+1.3.9.10,	Telepon
+1.3.10.01,	Cash Box
+1.3.10.02,	Lemari Besi (Brangkas)
+1.3.10.03,	Mesin Penghitung Uang
+1.3.10.04,Penghancur Kertas
+1.3.10.05,	Pemotong Kertas
+1.3.10.06,	Mesin Laminating
+1.3.10.07,	Mesin Penjilidan
+1.3.10.08,	Barcode Scanner
+1.3.10.09,	Jam Dinding
+1.3.11.01,	Vacuum Cleaner
+1.3.11.02,	Dispenser
+1.3.11.03,	Mesin Cuci
+1.3.11.04,	Magic Com
+1.3.11.05,	Setrika
+1.3.11.06,	Microwave
+1.3.11.07,	Kasur
+1.3.11.08,	Lemari Es
+1.3.11.09,	Show case
+1.3.11.10,	Kompor Gas
+1.3.11.11,	Coffe Maker
+1.3.11.12,	Teko Listrik
+1.3.11.13,	Water Jug
+1.3.11.14,	Rak Piring
+1.3.11.15,	Blender
+1.3.11.16,	Rak Sepatu
+1.3.11.17,	Kotak Sampah
+1.3.11.18,	Kulkas
+1.3.11.19,	Rak
+1.3.12.01,	Steger Lipat Aluminium
+1.3.12.02,	Mesin Sugu
+1.3.12.03,	Mesin Bor
+1.3.12.04,	Multitester
+1.3.12.05,	Mesin Amplas
+1.3.12.06,	Tools Set
+1.3.12.07,	Gerinda
+1.3.12.08,	Mesin Chainsaw
+1.3.12.09,	Mesin Circle
+1.3.12.10,	Mesin Profil
+1.3.12.11,	Mesin Pemotong Rumput
+1.3.12.12,	Mesin Fogging
+1.3.12.13,	Mesin Potong Keramik
+1.4.1.01,	Sepeda Motor
+1.4.1.02,	Mobil
+1.4.1.03,	Bus
+1.5.1.01,	Meja Kerja
+1.5.1.02,	Meja Kerja Direksi
+1.5.1.03,	Meja Komputer
+1.5.1.04,	Meja Kantin
+1.5.1.05,	Meja Meeting
+1.5.1.06,	Meja Prasmanan
+1.5.1.07,	Meja Sofa
+1.5.1.08,	Meja Kelas
+1.5.1.09,	Meja Resepsionis
+1.5.2.01,	Kursi Putar
+1.5.2.02,	Kursi Susun
+1.5.2.03,	Kursi Hadap
+1.5.2.04,	Kursi Cafe
+1.5.2.05,	Kursi Tunggu
+1.5.2.06,	Kursi Belajar/Kelas
+1.5.2.07,	Kursi Kantin
+1.5.2.08,	Sofa
+1.5.2.09,	Bangku Taman
+1.5.3.01,	Lemari Kayu
+1.5.3.02,	Filling Cabinet
+1.5.3.03,	Backdrop
+1.5.3.04,	Kaca Cermin
+1.5.3.05,	Lemari Custom Lainnya
+1.5.4.01,	Papan Pengumuman
+1.5.4.02,	Papan Tulis
+1.5.4.03,	Tiang Bendera
+1.5.5.01,	Vertical Blind
+1.5.5.02,	Horizontal Blind
+1.5.5.03,	Roller Blind
+1.5.5.04,	Gordyn
+1.5.5.05,	Bendera
