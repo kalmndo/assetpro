@@ -12,6 +12,7 @@ import {
   Inbox,
   LayoutDashboard,
   Luggage,
+  Minus,
   MonitorCog,
   Package,
   PackageMinus,
@@ -52,6 +53,27 @@ export const sidelinks: SideLink[] = [
     href: "/laporan",
     icon: <ChartColumnDecreasing size={18} />,
     role: ROLE.LAPORAN_VIEW.id,
+    sub: [
+      {
+        title: "Aset",
+        label: "",
+        href: "/laporan",
+        icon: <Minus size={18} />,
+      },
+      {
+        title: "Persediaan",
+        label: "",
+        href: "/laporan",
+        icon: <Minus size={18} />,
+        role: ROLE.GUDANG_MASUK_VIEW.id,
+      },
+      {
+        title: "Pembelian",
+        label: "",
+        href: "/laporan",
+        icon: <Minus size={18} />,
+      },
+    ],
   },
   {
     title: "Daftar Aset",
