@@ -4,9 +4,9 @@ import { DataTableColumnHeader } from '@/components/data-table/column-header'
 import { z } from 'zod'
 
 export const schema = z.object({
-  id: z.string(),
-  no: z.string(),
-  tanggal: z.string(),
+  id: z.string().optional(),
+  no: z.string().optional(),
+  tanggal: z.string().optional(),
 })
 
 export type Schema = z.infer<typeof schema>

@@ -965,6 +965,7 @@ model MasterRuang {
   updatedAt          DateTime             @updatedAt
   Peminjaman         Peminjaman[]
   PeminjamanExternal PeminjamanExternal[]
+  DaftarAset         DaftarAset[]
 }
 
 model MasterNomor {
@@ -1010,18 +1011,22 @@ model Notification {
 }
 
 model DaftarAset {
-  id         String  @unique // No Inventaris
-  barangId   String
-  fttbItemId String
-  penggunaId String?
-  status     String
-  umur       Int
-  imId       String?
+  id             String  @unique // No Inventaris
+  barangId       String
+  fttbItemId     String?
+  penggunaId     String?
+  status         String
+  umur           Int
+  imId           String?
+  ruangId        String?
+  hargaPembelian Int     @default(0)
+  nilaiBuku      Int     @default(0)
 
   MasterBarang MasterBarang      @relation(fields: [barangId], references: [id])
-  FttbItem     FttbItem          @relation(fields: [fttbItemId], references: [id])
+  FttbItem     FttbItem?         @relation(fields: [fttbItemId], references: [id])
   Pengguna     User?             @relation(fields: [penggunaId], references: [id])
   IM           PermintaanBarang? @relation(fields: [imId], references: [id])
+  Ruang        MasterRuang?      @relation(fields: [ruangId], references: [id])
 
   createdAt               DateTime                  @default(now())
   updatedAt               DateTime                  @updatedAt

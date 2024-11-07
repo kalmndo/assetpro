@@ -160,8 +160,8 @@ export const daftarAsetRouter = createTRPCRouter({
       const pj = res.Pengguna
 
       const barang = res.MasterBarang
-      const pembelian = res.FttbItem.PoBarang
-      const hargaPembelian = pembelian.Barang.harga!
+      const pembelian = res.FttbItem?.PoBarang
+      const hargaPembelian = pembelian?.Barang.harga
 
       function monthsDifference(start: Date) {
         const end = new Date(new Date());
@@ -199,7 +199,7 @@ export const daftarAsetRouter = createTRPCRouter({
       // TODO: default umur ekonomi
       const umurEkonomi = res.umur
       const umurEkonomiMonth = 12 * umurEkonomi
-      const residu = hargaPembelian / umurEkonomiMonth
+      const residu = hargaPembelian ?? 0 / umurEkonomiMonth
       const totalPenyusutan = residu * usia
 
       // @ts-ignore
@@ -217,11 +217,11 @@ export const daftarAsetRouter = createTRPCRouter({
       })
 
       // riwayat mutasi, terima barang, keluar barang, perbaikan
-      const fttb = res.FttbItem.Fttb
+      const fttb = res.FttbItem?.Fttb
       const terima = {
-        id: fttb.id,
-        no: fttb.no,
-        tanggal: fttb.createdAt.toLocaleDateString("id-ID")
+        id: fttb?.id,
+        no: fttb?.no,
+        tanggal: fttb?.createdAt.toLocaleDateString("id-ID")
       }
 
       // @ts-ignore
@@ -246,12 +246,12 @@ export const daftarAsetRouter = createTRPCRouter({
         lokasi: IM?.Ruang.name,
         peruntukan: IM?.perihal,
         no: res.id,
-        garansi: pembelian.Barang.garansi,
+        garansi: pembelian?.Barang.garansi,
         card: {
-          harga: `Rp ${pembelian.Barang.harga!.toLocaleString("id-ID")}`,
-          susut: `Rp ${totalPenyusutan.toLocaleString("id-ID")}`,
+          harga: `Rp ${pembelian?.Barang.harga!.toLocaleString("id-ID")}`,
+          susut: `Rp ${totalPenyusutan?.toLocaleString("id-ID")}`,
           biaya: `Rp ${(totalBiayaPerbaikan + totalBiayaExternal).toLocaleString("id-ID")}`,
-          nilai: `Rp ${(usia > 0 ? hargaPembelian - residu : hargaPembelian).toLocaleString("id-ID")}`
+          nilai: `Rp ${(usia > 0 ? hargaPembelian ?? 0 - residu : hargaPembelian ?? 0).toLocaleString("id-ID")}`
         },
         barang: {
           image: barang.image,
@@ -262,10 +262,10 @@ export const daftarAsetRouter = createTRPCRouter({
         info: res.DaftarAsetAdditional,
         // additional barang info
         pembelian: {
-          tgl: pembelian.createdAt.toLocaleDateString(),
-          vendor: pembelian.PO.Vendor.name,
-          noPo: pembelian.PO.no,
-          harga: `Rp ${hargaPembelian.toLocaleString('id-ID')}`
+          tgl: pembelian?.createdAt.toLocaleDateString(),
+          vendor: pembelian?.PO.Vendor.name,
+          noPo: pembelian?.PO.no,
+          harga: `Rp ${hargaPembelian?.toLocaleString('id-ID')}`
         },
         penyusutan: {
           id: '',
@@ -273,7 +273,7 @@ export const daftarAsetRouter = createTRPCRouter({
           usia: usiaString,
           residu: `Rp ${residu.toLocaleString("id-ID")} / bulan`,
           total: `Rp ${totalPenyusutan.toLocaleString("id-ID")}`,
-          nilai: `Rp ${(usia > 0 ? hargaPembelian - residu : hargaPembelian).toLocaleString("id-ID")}`
+          nilai: `Rp ${(usia > 0 ? hargaPembelian ?? 0 - residu : hargaPembelian ?? 0).toLocaleString("id-ID")}`
         },
         pengguna: {
           name: pj?.name,

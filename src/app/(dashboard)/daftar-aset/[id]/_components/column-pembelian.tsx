@@ -5,10 +5,10 @@ import { z } from 'zod'
 
 export const schema = z.object({
   id: z.string(),
-  noPo: z.string(),
-  vendor: z.string(),
+  noPo: z.string().optional(),
+  vendor: z.string().optional(),
   harga: z.string(),
-  tgl: z.string(),
+  tgl: z.string().optional(),
 })
 
 export type Schema = z.infer<typeof schema>

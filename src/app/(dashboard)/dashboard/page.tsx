@@ -18,6 +18,7 @@ import Pengadaan from "./_components/pengadaan";
 
 export default async function Page() {
   const data = await api.user.getDashboard();
+
   return (
     <div>
       <div className="flex justify-between">
