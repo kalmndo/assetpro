@@ -11,6 +11,11 @@ export const daftarAsetRouter = createTRPCRouter({
       },
       include: {
         Pengguna: true,
+        Ruang: {
+          include: {
+            Organisasi:true
+          }
+        },
         MasterBarang: {
           include: {
             Uom: true,
@@ -28,7 +33,7 @@ export const daftarAsetRouter = createTRPCRouter({
       },
     });
 
-    return result.map((v) => ({
+    const data = result.map((v) => ({
       id: v.id,
       no: v.id,
       barang: {
@@ -42,13 +47,44 @@ export const daftarAsetRouter = createTRPCRouter({
       satuan: v.MasterBarang.Uom.name,
       pengguna: v.Pengguna?.name,
       tgl: v.createdAt.toDateString(),
+      tahun: v.createdAt.getFullYear().toString(),
       masaManfaat: v.umur,
-      nilaiSisa: "",
-      susut: "",
-      nilaiBuku: "",
-      lokasi: "",
-      kondisi: "",
-    }));
+      harga:'Rp 0',
+      nilaiSisa: "Rp 0",
+      susut: "Rp 0",
+      nilaiBuku: "Rp 0",
+      lokasi: v.Ruang?.name,
+      org: v.Ruang?.Organisasi.name ?? '',
+      kondisi: "Baik",
+    }))
+
+    const filterPeriod: string[] = [];
+    const filterOrg: string[] = [];
+    const filterKlasifikasi: string[] = [];
+
+    for (const item of data) {
+      if (!filterPeriod.some(existing => existing === item.tahun)) {
+        filterPeriod.push(item.tahun);
+      }
+      if (!filterOrg.some(existing => existing === item.org)) {
+        filterOrg.push(item.org);
+      }
+      if (!filterKlasifikasi.some(existing => existing === item.kategori)) {
+        filterKlasifikasi.push(item.kategori);
+      }
+    }
+
+
+
+    return {
+      data,
+      filter: {
+        filterPeriod,
+        filterOrg,
+        filterKlasifikasi
+      }
+    }
+
   }),
   getSelectUser: protectedProcedure.query(async ({ ctx }) => {
     const penggunaId = ctx.session.user.id;
@@ -215,8 +251,8 @@ export const daftarAsetRouter = createTRPCRouter({
       const residu = hargaPembelian ?? 0 / umurEkonomiMonth;
       const totalPenyusutan = residu * usia;
 
-      // @ts-ignore
       const perbaikan = res.Perbaikan.sort(
+        // @ts-ignore
         (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
       ).map((v) => {
         return {
@@ -241,8 +277,8 @@ export const daftarAsetRouter = createTRPCRouter({
         tanggal: fttb?.createdAt.toLocaleDateString("id-ID"),
       };
 
-      // @ts-ignore
       const keluar = res.FtkbItemPemohonAset.sort(
+        // @ts-ignore
         (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
       ).map((v) => ({
         id: v.id,
@@ -252,8 +288,8 @@ export const daftarAsetRouter = createTRPCRouter({
         tanggal: v.FtkbItemPemohon.IM.createdAt.toLocaleDateString("id-ID"),
       }));
 
-      // @ts-ignore
       const IM = res.FtkbItemPemohonAset.sort(
+        // @ts-ignore
         (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
       )[0]?.FtkbItemPemohon.IM;
 
@@ -334,8 +370,8 @@ export const daftarAsetRouter = createTRPCRouter({
             from: v.from.toLocaleDateString("id-ID"),
             to: v.to.toLocaleDateString("id-ID"),
             status: v.Peminjaman.status,
-            // @ts-ignore
           })),
+          // @ts-ignore
         ].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)),
       };
 

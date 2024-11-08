@@ -1,4 +1,5 @@
 "use client";
+
 import { type ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "@/components/data-table/column-header";
 import { z } from "zod";
@@ -72,24 +73,6 @@ export const columns: ColumnDef<Schema>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "code",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Kode Barang" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <Link
-          href={`daftar-aset/${row.original.id.replace(/\//g, "-")}`}
-          className="flex w-full"
-        >
-          <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-            {row.getValue("code")}
-          </span>
-        </Link>
-      );
-    },
-  },
-  {
     accessorKey: "kategori",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Kategori" />
@@ -108,9 +91,9 @@ export const columns: ColumnDef<Schema>[] = [
     },
   },
   {
-    accessorKey: "satuan",
+    accessorKey: "harga",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Satuan" />
+      <DataTableColumnHeader column={column} title="Harga Perolehan" />
     ),
     cell: ({ row }) => {
       return (
@@ -119,12 +102,102 @@ export const columns: ColumnDef<Schema>[] = [
           className="flex w-full"
         >
           <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-            {row.getValue("satuan")}
+            {row.getValue("harga")}
           </span>
         </Link>
       );
     },
   },
+  {
+    accessorKey: "masaManfaat",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Masa Manfaat" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <Link
+          href={`daftar-aset/${row.original.id.replace(/\//g, "-")}`}
+          className="flex w-full"
+        >
+          <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+            {row.getValue("masaManfaat")} Tahun
+          </span>
+        </Link>
+      );
+    },
+  },
+  {
+    accessorKey: "susut",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Penyusutan" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <Link
+          href={`daftar-aset/${row.original.id.replace(/\//g, "-")}`}
+          className="flex w-full"
+        >
+          <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+            {row.getValue("susut")} 
+          </span>
+        </Link>
+      );
+    },
+  }, 
+  {
+    accessorKey: "nilaiBuku",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Nilai Buku" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <Link
+          href={`daftar-aset/${row.original.id.replace(/\//g, "-")}`}
+          className="flex w-full"
+        >
+          <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+            {row.getValue("nilaiBuku")} 
+          </span>
+        </Link>
+      );
+    },
+  }, 
+  {
+    accessorKey: "lokasi",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="lokasi" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <Link
+          href={`daftar-aset/${row.original.id.replace(/\//g, "-")}`}
+          className="flex w-full"
+        >
+          <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+            {row.getValue("lokasi")} 
+          </span>
+        </Link>
+      );
+    },
+  }, 
+  {
+    accessorKey: "kondisi",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Kondisi" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <Link
+          href={`daftar-aset/${row.original.id.replace(/\//g, "-")}`}
+          className="flex w-full"
+        >
+          <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+            {row.getValue("kondisi")} 
+          </span>
+        </Link>
+      );
+    },
+  }, 
   {
     accessorKey: "pengguna",
     header: ({ column }) => (
@@ -138,6 +211,61 @@ export const columns: ColumnDef<Schema>[] = [
         >
           <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
             {row.getValue("pengguna")}
+          </span>
+        </Link>
+      );
+    },
+  },
+  {
+    accessorKey: "tahun",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Tahun" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <Link
+          href={`daftar-aset/${row.original.id.replace(/\//g, "-")}`}
+          className="flex w-full"
+        >
+          <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+            {row.getValue("tahun")}
+          </span>
+        </Link>
+      );
+    },
+  },
+  {
+    accessorKey: "org",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Unit Usaha" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <Link
+          href={`daftar-aset/${row.original.id.replace(/\//g, "-")}`}
+          className="flex w-full"
+        >
+          <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+            {row.getValue("org")}
+          </span>
+        </Link>
+      );
+    },
+    enableHiding:true
+  },
+  {
+    accessorKey: "nilaiSisa",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Nilai Sisa" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <Link
+          href={`daftar-aset/${row.original.id.replace(/\//g, "-")}`}
+          className="flex w-full"
+        >
+          <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+            {row.getValue("nilaiSisa")} 
           </span>
         </Link>
       );

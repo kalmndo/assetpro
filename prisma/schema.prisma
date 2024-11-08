@@ -781,8 +781,9 @@ model Organisasi {
 
   Department Department[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  MasterRuang MasterRuang[]
 }
 
 model Department {
@@ -958,10 +959,11 @@ model MasterUnit {
 model MasterRuang {
   id    String @id @default(cuid())
   name  String
-  orgId String
+  orgId String 
 
-  PermintaanBarang PermintaanBarang[]
+  Organisasi Organisasi @relation(fields: [orgId], references: [id])
 
+  PermintaanBarang   PermintaanBarang[]
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   Peminjaman         Peminjaman[]

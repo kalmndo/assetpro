@@ -1,44 +1,40 @@
 "use client";
 import { DataTable } from "@/components/data-table";
 import { columns } from "./columns";
+import { RouterOutputs } from "@/trpc/react";
 
-export function Table({ data }: { data: any }) {
+export function Table({ data }: { data: RouterOutputs['daftarAset']['getAll'] }) {
   return (
     <div>
       <DataTable
-        data={data}
+        data={data.data}
         columns={columns}
         filter={{ column: "no", placeholder: "No Internal Memo ..." }}
+        columnVisibilityDefaultState={{ kategori: false, tahun: false, org: false, pengguna:false }}
         facetedFilter={[
           {
-            column: "satuan",
+            column: "tahun",
             title: "Periode",
-            options: [
-              {
-                label: "Pcs",
-                value: "pcs",
-              },
-            ],
+            options: data.filter.filterPeriod.map((v) => ({
+              label: v,
+              value: v
+            }))
           },
           {
-            column: "satuan",
+            column: "org",
             title: "Unit Usaha",
-            options: [
-              {
-                label: "Pcs",
-                value: "pcs",
-              },
-            ],
+            options: data.filter.filterOrg.map((v) => ({
+              label: v,
+              value: v
+            })) 
           },
           {
-            column: "satuan",
+            column: "kategori",
             title: "Klasifikasi",
-            options: [
-              {
-                label: "Pcs",
-                value: "pcs",
-              },
-            ],
+            options: data.filter.filterKlasifikasi.map((v) => ({
+              label: v,
+              value: v
+            })) 
           },
           {
             column: "satuan",
