@@ -43,6 +43,8 @@ export const mRuangRouter = createTRPCRouter({
         await ctx.db.masterRuang.create({
           data: {
             name,
+            // TODO: dam nanti ganti ini dynamic
+            orgId:'1'
           },
         })
         return {

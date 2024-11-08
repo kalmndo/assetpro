@@ -57,7 +57,7 @@ export const sidelinks: SideLink[] = [
       {
         title: "Aset",
         label: "",
-        href: "/laporan",
+        href: "/laporan/aset",
         icon: <Minus size={18} />,
       },
       {

@@ -10,7 +10,7 @@ export function Table({ data }: { data: RouterOutputs['daftarAset']['getAll'] })
         // @ts-ignore
         data={data.data}
         columns={columns}
-        filter={{ column: "no", placeholder: "No Internal Memo ..." }}
+        filter={{ column: "no", placeholder: "Nomor inventaris ..." }}
         columnVisibilityDefaultState={{ kategori: false, tahun: false, org: false, pengguna: false }}
         facetedFilter={[
           {
