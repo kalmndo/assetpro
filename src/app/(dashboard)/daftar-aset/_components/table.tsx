@@ -7,10 +7,11 @@ export function Table({ data }: { data: RouterOutputs['daftarAset']['getAll'] })
   return (
     <div>
       <DataTable
+        // @ts-ignore
         data={data.data}
         columns={columns}
         filter={{ column: "no", placeholder: "No Internal Memo ..." }}
-        columnVisibilityDefaultState={{ kategori: false, tahun: false, org: false, pengguna:false }}
+        columnVisibilityDefaultState={{ kategori: false, tahun: false, org: false, pengguna: false }}
         facetedFilter={[
           {
             column: "tahun",
@@ -26,7 +27,7 @@ export function Table({ data }: { data: RouterOutputs['daftarAset']['getAll'] })
             options: data.filter.filterOrg.map((v) => ({
               label: v,
               value: v
-            })) 
+            }))
           },
           {
             column: "kategori",
@@ -34,7 +35,7 @@ export function Table({ data }: { data: RouterOutputs['daftarAset']['getAll'] })
             options: data.filter.filterKlasifikasi.map((v) => ({
               label: v,
               value: v
-            })) 
+            }))
           },
           {
             column: "satuan",
