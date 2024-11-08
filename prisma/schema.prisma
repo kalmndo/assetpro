@@ -956,8 +956,9 @@ model MasterUnit {
 }
 
 model MasterRuang {
-  id   String @id @default(cuid())
-  name String
+  id    String @id @default(cuid())
+  name  String
+  orgId String
 
   PermintaanBarang PermintaanBarang[]
 
