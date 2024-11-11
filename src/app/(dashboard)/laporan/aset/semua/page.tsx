@@ -1,3 +1,4 @@
+import Content from "./_components/content";
 
 export default function Page() {
   return (
@@ -12,6 +13,7 @@ export default function Page() {
           </p>
         </div>
       </div>
+      <Content />
     </div>
   )
 }
