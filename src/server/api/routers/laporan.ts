@@ -28,7 +28,7 @@ export const laporanRouter = createTRPCRouter({
         })
 
         const kategoriRes = await tx.masterBarangKategori.findMany()
-        let res = kategoriRes.map((v) => ({
+        const res = kategoriRes.map((v) => ({
           name: v.name,
           fullCode: v.fullCode,
           thisYear: 0,
