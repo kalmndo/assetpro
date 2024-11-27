@@ -67,12 +67,6 @@ export const sidelinks: SideLink[] = [
         icon: <Minus size={18} />,
         role: ROLE.GUDANG_MASUK_VIEW.id,
       },
-      {
-        title: "Pembelian",
-        label: "",
-        href: "/laporan",
-        icon: <Minus size={18} />,
-      },
     ],
   },
   {
