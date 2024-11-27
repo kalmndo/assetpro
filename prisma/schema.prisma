@@ -914,7 +914,7 @@ model MasterBarang {
   fullCode         String  @unique
   subSubKategoriId String
   uomId            String
-  deskripsi        String
+  deskripsi        String?
 
   SubSubKategori         MasterBarangSubSubKategori @relation(fields: [subSubKategoriId], references: [id])
   Uom                    MasterUnit                 @relation(fields: [uomId], references: [id])
@@ -959,7 +959,7 @@ model MasterUnit {
 model MasterRuang {
   id    String @id @default(cuid())
   name  String
-  orgId String 
+  orgId String
 
   Organisasi Organisasi @relation(fields: [orgId], references: [id])
 
@@ -1024,6 +1024,7 @@ model DaftarAset {
   ruangId        String?
   hargaPembelian Int     @default(0)
   nilaiBuku      Int     @default(0)
+  desc           String?
 
   MasterBarang MasterBarang      @relation(fields: [barangId], references: [id])
   FttbItem     FttbItem?         @relation(fields: [fttbItemId], references: [id])
@@ -1077,8 +1078,10 @@ model DaftarAsetGroup {
 }
 
 model KartuStok {
-  id  String @unique // MasterBarang
-  qty Int
+  id    String @unique // MasterBarang
+  qty   Int
+  total Int
+  harga Int
 
   MasterBarang MasterBarang @relation(fields: [id], references: [id])
 
