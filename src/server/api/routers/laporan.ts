@@ -189,4 +189,209 @@ export const laporanRouter = createTRPCRouter({
       ];
       return result;
     }),
+  semuaStock: protectedProcedure
+    .input(
+      z.object({
+        from: z.date(),
+        to: z.date(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { from, to } = input;
+
+      const kartuStok = await ctx.db.kartuStok.findMany();
+      const fttb = await ctx.db.fttbItemKartuStock.findMany({
+        where: {
+          FttbItem: {
+            PoBarang: {
+              Barang: {
+                PembelianBarang: {
+                  MasterBarang: {
+                    SubSubKategori: {
+                      SubKategori: { Kategori: { Golongan: { id: "2" } } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        include: {
+          FttbItem: {
+            include: {
+              PoBarang: {
+                include: {
+                  Barang: {
+                    include: {
+                      PembelianBarang: {
+                        include: {
+                          PermintaanPembelian: {
+                            include: {
+                              PBPP: {
+                                include: {
+                                  Permintaan: {
+                                    include: {
+                                      Ruang: true,
+                                      PermintaanBarangBarang: true,
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                          MasterBarang: {
+                            include: {
+                              SubSubKategori: {
+                                include: {
+                                  SubKategori: {
+                                    include: {
+                                      Kategori: {
+                                        include: {
+                                          Golongan: true,
+                                        },
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      const ftkb = await ctx.db.ftkbItemPemohon.findMany({
+        where: {
+          FtkbItem: {
+            Barang: {
+              SubSubKategori: {
+                SubKategori: { Kategori: { Golongan: { id: "2" } } },
+              },
+            },
+          },
+        },
+        include: {
+          IM: {
+            include: {
+              Ruang: true,
+            },
+          },
+          FtkbItem: {
+            include: {
+              Barang: {
+                include: {
+                  SubSubKategori: {
+                    include: {
+                      SubKategori: {
+                        include: {
+                          Kategori: {
+                            include: {
+                              Golongan: true,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      const organisasiDb = await ctx.db.organisasi.findMany();
+      const organisasiArr = organisasiDb.map((v) => ({
+        id: v.id,
+        name: v.name,
+        stockAwal: 0,
+        stockAkhir: 0,
+        totalMasukBefore: 0,
+        totalKeluarBefore: 0,
+        totalMasukAfter: 0,
+        totalKeluarAfter: 0,
+      }));
+
+      const organisasi = organisasiArr.reduce((acc, item) => {
+        // eslint-disable-next-line
+        // @ts-ignore
+        acc[item.id] = item;
+        return acc;
+      }, {});
+
+      const masuk = fttb.flatMap((v) =>
+        v.FttbItem.PoBarang.Barang.PembelianBarang.PermintaanPembelian.PBPP.flatMap(
+          (va) =>
+            va.Permintaan.PermintaanBarangBarang.map((a) => ({
+              barangId: a.barangId,
+              qty: a.qty,
+              orgId: va.Permintaan.Ruang.orgId,
+              createdAt: v.createdAt,
+            })),
+        ),
+      );
+
+      const keluar = ftkb.map((v) => ({
+        barangId: v.FtkbItem.Barang.id,
+        orgId: v.IM.Ruang.orgId,
+        createdAt: v.createdAt,
+        qty: v.qty,
+      }));
+
+      for (const iterator of masuk) {
+        const orgId = iterator.orgId;
+
+        // eslint-disable-next-line
+        // @ts-ignore
+        const v = organisasi[orgId];
+
+        if (iterator.createdAt < from) {
+          v.totalMasukBefore = v.totalMasukBefore + iterator.qty;
+        } else if (iterator.createdAt > from && iterator.createdAt <= to) {
+          v.totalMasukAfter = v.totalMasukAfter + iterator.qty;
+        }
+      }
+
+      for (const iterator of keluar) {
+        const orgId = iterator.orgId;
+
+        // eslint-disable-next-line
+        // @ts-ignore
+        const v = organisasi[orgId];
+
+        if (iterator.createdAt < from) {
+          v.totalKeluarBefore = v.totalKeluarBefore + iterator.qty;
+        } else if (iterator.createdAt > from && iterator.createdAt <= to) {
+          v.totalKeluarAfter = v.totalKeluarAfter + iterator.qty;
+        }
+      }
+
+      for (const [key, value] of Object.entries(organisasi)) {
+        // eslint-disable-next-line
+        // @ts-ignore
+        value.stockAwal = value.totalMasukBefore - value.totalKeluarBefore;
+        // eslint-disable-next-line
+        // @ts-ignore
+        value.stockAkhir = value.totalMasukAfter - value.totalKeluarAfter;
+      }
+
+      const result = Object.values(organisasi) as [
+        {
+          id: string;
+          name: string;
+          stockAwal: number;
+          stockAkhir: number;
+          totalMasukBefore: number;
+          totalKeluarBefore: number;
+          totalMasukAfter: number;
+          totalKeluarAfter: number;
+        },
+      ];
+      return result;
+    }),
 });

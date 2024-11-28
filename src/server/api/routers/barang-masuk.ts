@@ -370,6 +370,9 @@ export const barangMasukRouter = createTRPCRouter({
                 create: {
                   id: masterBarangId,
                   qty,
+                  // TODO: ini dam
+                  harga: 0,
+                  total: 0,
                 },
                 update: {
                   qty: { increment: qty },

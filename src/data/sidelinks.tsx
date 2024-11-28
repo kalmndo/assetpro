@@ -63,7 +63,7 @@ export const sidelinks: SideLink[] = [
       {
         title: "Persediaan",
         label: "",
-        href: "/laporan",
+        href: "/laporan/persediaan",
         icon: <Minus size={18} />,
         role: ROLE.GUDANG_MASUK_VIEW.id,
       },
