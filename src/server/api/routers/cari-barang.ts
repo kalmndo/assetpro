@@ -1,14 +1,11 @@
-import {
-  createTRPCRouter,
-  protectedProcedure,
-} from "@/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { z } from "zod";
 
 export const cariBarangRouter = createTRPCRouter({
   getList: protectedProcedure
     .input(z.object({ kategori: z.string() }))
     .query(async ({ ctx, input }) => {
-      const { kategori } = input
+      const { kategori } = input;
 
       const [result, filterName] = await ctx.db.$transaction([
         ctx.db.masterBarang.findMany({
@@ -21,60 +18,62 @@ export const cariBarangRouter = createTRPCRouter({
                   include: {
                     Kategori: {
                       include: {
-                        Golongan: true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+                        Golongan: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         }),
-        ctx.db.masterBarangSubSubKategori.findFirst({ where: { id: kategori } })
-      ])
-
+        ctx.db.masterBarangSubSubKategori.findFirst({
+          where: { id: kategori },
+        }),
+      ]);
 
       const data = result.map((v) => ({
         id: v.id,
-        image: v.image ?? '',
+        image: v.image ?? "",
         name: v.name,
-        deskripsi: v.deskripsi,
         kode: v.fullCode,
         uom: v.Uom.name,
         uomId: v.uomId,
         subSubKategori: v.SubSubKategori.name,
         subKategori: v.SubSubKategori.SubKategori.name,
         kategori: v.SubSubKategori.SubKategori.Kategori.name,
-        golongan: v.SubSubKategori.SubKategori.Kategori.Golongan.name
-      }))
+        golongan: v.SubSubKategori.SubKategori.Kategori.Golongan.name,
+      }));
 
       return {
         data,
-        filterName: filterName?.name
-      }
-
+        filterName: filterName?.name,
+      };
     }),
-  getAllKategori: protectedProcedure
-    .query(async ({ ctx }) => {
-      const result = await ctx.db.masterBarangGolongan.findMany({
-        include: {
-          MasterBarangKategori: {
-            include: {
-              MasterBarangSubKategori: {
-                include: {
-                  MasterBarangSuSubbKategori: true
-                }
-              }
-            }
-          }
-        }
-      })
+  getAllKategori: protectedProcedure.query(async ({ ctx }) => {
+    const result = await ctx.db.masterBarangGolongan.findMany({
+      include: {
+        MasterBarangKategori: {
+          include: {
+            MasterBarangSubKategori: {
+              include: {
+                MasterBarangSuSubbKategori: true,
+              },
+            },
+          },
+        },
+      },
+    });
 
-      function aset() {
-        return result.filter((v) => v.code === 1).map((v) => ({
+    function aset() {
+      return result
+        .filter((v) => v.code === 1)
+        .map((v) => ({
           id: v.id,
           name: v.name,
-          child: v.MasterBarangKategori.filter((v) => v.code !== 1 && v.code !== 2).map((k) => ({
+          child: v.MasterBarangKategori.filter(
+            (v) => v.code !== 1 && v.code !== 2,
+          ).map((k) => ({
             id: k.id,
             name: k.name,
             child: k.MasterBarangSubKategori.map((sk) => ({
@@ -82,15 +81,17 @@ export const cariBarangRouter = createTRPCRouter({
               name: sk.name,
               child: sk.MasterBarangSuSubbKategori.map((ssk) => ({
                 id: ssk.id,
-                name: ssk.name
-              }))
-            }))
-          }))
-        }))
-      }
+                name: ssk.name,
+              })),
+            })),
+          })),
+        }));
+    }
 
-      function persediaan() {
-        return result.filter((v) => v.code === 2).map((v) => ({
+    function persediaan() {
+      return result
+        .filter((v) => v.code === 2)
+        .map((v) => ({
           id: v.id,
           name: v.name,
           child: v.MasterBarangKategori.map((k) => ({
@@ -101,18 +102,16 @@ export const cariBarangRouter = createTRPCRouter({
               name: sk.name,
               child: sk.MasterBarangSuSubbKategori.map((ssk) => ({
                 id: ssk.id,
-                name: ssk.name
-              }))
-            }))
-          }))
-        }))
-      }
+                name: ssk.name,
+              })),
+            })),
+          })),
+        }));
+    }
 
-
-      return {
-        aset: aset(),
-        persediaan: persediaan()
-      }
-
-    })
+    return {
+      aset: aset(),
+      persediaan: persediaan(),
+    };
+  }),
 });
