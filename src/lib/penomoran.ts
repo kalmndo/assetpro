@@ -1,4 +1,5 @@
 const PENOMORAN = {
+  IM: "internal-memo",
   PERMINTAAN_PEMBELIAN: "permintaan-pembelian",
   PERMINTAAN_PENAWARAN: "permintaan-penawaran",
   PENAWARAN_HARGA: "penawaran-harga",
@@ -11,4 +12,3 @@ const PENOMORAN = {
 };
 
 export default PENOMORAN;
-
