@@ -15,10 +15,11 @@ import { api } from "@/trpc/react";
 import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 
-const tahuns = ["2022", "2023", "2024"];
-
 export default function Content() {
-  const [tahun, setTahun] = useState<undefined | string>(undefined);
+  const [kategoriId, setKategori] = useState<undefined | string>(undefined);
+  const { data: golongans } = api.mbKategori.getAll.useQuery({
+    golonganId: "1",
+  });
   const { data, mutate, isPending } =
     api.laporan.semuaAsetPerlokasi.useMutation({});
 
@@ -29,7 +30,7 @@ export default function Content() {
 
   const onSubmit = () => {
     mutate({
-      kategoriId: "clztlxcof00011vux29oqfpwl",
+      kategoriId,
       from: date.from,
       to: date.to,
     });
@@ -38,14 +39,14 @@ export default function Content() {
   return (
     <div className="py-4">
       <div className="flex items-center gap-4">
-        <Select onValueChange={setTahun}>
+        <Select onValueChange={setKategori}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Tahun" />
+            <SelectValue placeholder="Kategori" />
           </SelectTrigger>
           <SelectContent>
-            {tahuns.map((v) => (
-              <SelectItem key={v} value={v}>
-                {v}
+            {golongans?.map((v) => (
+              <SelectItem key={v.id} value={v.id}>
+                {v.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -57,7 +58,7 @@ export default function Content() {
           }}
           variant="outline"
         />
-        <Button onClick={onSubmit} disabled={isPending || !tahun}>
+        <Button onClick={onSubmit} disabled={isPending || !kategoriId}>
           {isPending ? <LoaderCircle className="animate-spin" /> : "Submit"}
         </Button>
       </div>
