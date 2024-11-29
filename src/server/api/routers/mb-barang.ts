@@ -117,6 +117,9 @@ export const mbBarangRouter = createTRPCRouter({
               data: {
                 qty: 0,
                 id: result.id,
+                // TODO: ganti ini
+                harga:0,
+                total:0
               },
             });
           }

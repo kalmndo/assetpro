@@ -5,12 +5,12 @@ import { z } from "zod";
 
 export const mbKategoriRouter = createTRPCRouter({
   getAll: protectedProcedure
-    .input(z.object({ golonganId: z.string().optional() }))
+    .input(z.object({ golonganId: z.string() }).optional())
     .query(async ({ ctx, input }) => {
-      const { golonganId } = input;
+
       const result = await ctx.db.masterBarangKategori.findMany({
         where: {
-          ...(golonganId && { golonganId }),
+          ...(input?.golonganId && { golonganId: input.golonganId }),
         },
         orderBy: {
           createdAt: "desc",
