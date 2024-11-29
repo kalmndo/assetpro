@@ -89,7 +89,7 @@ model PermintaanBarang {
 }
 
 model PermintaanBarangBarang {
-  id           String @id @default(cuid())
+  id           String  @id @default(cuid())
   permintaanId String
   barangId     String
   status       String
@@ -97,6 +97,7 @@ model PermintaanBarangBarang {
   qtyOrdered   Int
   qtyOut       Int
   uomId        String
+  desc         String?
 
   Permintaan                         PermintaanBarang                     @relation(fields: [permintaanId], references: [id])
   Barang                             MasterBarang                         @relation(fields: [barangId], references: [id])

@@ -148,7 +148,7 @@ export const permintaanBarangRouter = createTRPCRouter({
           barangId: v.Barang.id,
           name: v.Barang.name,
           image: v.Barang.image ?? "",
-          deskripsi: v.Barang.deskripsi,
+          deskripsi: v.desc,
           kode: v.Barang.fullCode,
           jumlah: String(v.qty),
           uom: {
@@ -346,6 +346,7 @@ export const permintaanBarangRouter = createTRPCRouter({
           z.object({
             id: z.string(),
             qty: z.string(),
+            deskripsi: z.string().optional(),
             uomId: z.string(),
             kodeAnggaran: z.array(z.string()),
             golongan: z.number(),
@@ -404,7 +405,7 @@ export const permintaanBarangRouter = createTRPCRouter({
           });
 
           for (const b of barang) {
-            const { id, qty, uomId, kodeAnggaran } = b;
+            const { id, qty, uomId, kodeAnggaran, deskripsi } = b;
 
             const pbbId = await tx.permintaanBarangBarang.create({
               data: {
@@ -415,6 +416,7 @@ export const permintaanBarangRouter = createTRPCRouter({
                 qtyOrdered: 0,
                 qtyOut: 0,
                 uomId,
+                desc: deskripsi,
               },
             });
 
