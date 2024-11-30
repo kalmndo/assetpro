@@ -33,6 +33,7 @@ import { peminjamanEksternalRouter } from "./routers/peminjaman-eksternal";
 import { dashboardRouter } from "./routers/dashboard";
 import { laporanRouter } from "./routers/laporan";
 import { mPeminjamanRuangRouter } from "./routers/m-peminjaman-ruang";
+import { mPeminjamanBarangRouter } from "./routers/m-peminjaman-barang";
 
 /**
  * This is the primary router for your server.
@@ -55,6 +56,7 @@ export const appRouter = createTRPCRouter({
   mRuang: mRuangRouter,
   mEvaluasi: mEvaluasiRouter,
   mPeminjamanRuang: mPeminjamanRuangRouter,
+  mPeminjamanBarang: mPeminjamanBarangRouter,
   kodeAnggaran: kodeAnggaranRouter,
   mUom: mUomRouter,
   cariBarang: cariBarangRouter,
