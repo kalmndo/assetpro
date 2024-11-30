@@ -36,13 +36,12 @@ const renderSubComponent = ({
           <p className="text-sm">{row.original.garansi}</p>
         </div>
       </div>
-      <div>
-        <p className="font-semibold">Harga Sebelumnya</p>
-        <p className="text-sm">
-          {/* @ts-ignore */}
-          Rp {row.original.prevHarga?.toLocaleString("id-ID")}
-        </p>
-      </div>
+      {/* <div> */}
+      {/*   <p className="font-semibold">Harga Sebelumnya</p> */}
+      {/*   <p className="text-sm"> */}
+      {/*     Rp {row.original.prevHarga?.toLocaleString("id-ID")} */}
+      {/*   </p> */}
+      {/* </div> */}
     </div>
   );
 };

@@ -131,9 +131,9 @@ export const barangKeluarRouter = createTRPCRouter({
           let penomoran = await tx.penomoran.findUnique({
             where: {
               id: PENOMORAN.KELUAR_BARANG,
-              year: String(new Date().getFullYear())
-            }
-          })
+              year: String(new Date().getFullYear()),
+            },
+          });
 
           if (!penomoran) {
             penomoran = await tx.penomoran.create({
@@ -141,9 +141,9 @@ export const barangKeluarRouter = createTRPCRouter({
                 id: PENOMORAN.KELUAR_BARANG,
                 code: "FTKB",
                 number: 0,
-                year: String(new Date().getFullYear())
-              }
-            })
+                year: String(new Date().getFullYear()),
+              },
+            });
           }
 
           const ftkb = await tx.ftkb.create({
@@ -157,12 +157,12 @@ export const barangKeluarRouter = createTRPCRouter({
             await tx.penomoran.update({
               where: {
                 id: PENOMORAN.KELUAR_BARANG,
-                year: String(new Date().getFullYear())
+                year: String(new Date().getFullYear()),
               },
               data: {
-                number: { increment: 1 }
-              }
-            })
+                number: { increment: 1 },
+              },
+            });
           }
 
           const permintaanBarangIds = tersedia.flatMap(
@@ -200,7 +200,7 @@ export const barangKeluarRouter = createTRPCRouter({
               data: {
                 barangId: value.id,
                 ftkbId: ftkb.id,
-                qty: value.tersedia,
+                qty: value.permintaan,
               },
             });
 
@@ -214,7 +214,7 @@ export const barangKeluarRouter = createTRPCRouter({
                 data: {
                   ftkbItemId: ftkbItem.id,
                   imId: p.href,
-                  qty: p.noInventaris.length,
+                  qty: value.permintaan,
                 },
               });
 
@@ -307,6 +307,7 @@ export const barangKeluarRouter = createTRPCRouter({
           message: "Berhasil membuat form keluar barang",
         };
       } catch (error) {
+        console.log("error", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Kemunkingan terjadi kesalahan sistem, silahkan coba lagi",

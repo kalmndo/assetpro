@@ -159,7 +159,7 @@ function partitionByGolongan(mergeBarangGroupResult: MergeBarangGroup[]) {
 
   return {
     daftarAset: filterGolongan(1),
-    persediaan: filterGolongan(1),
+    persediaan: filterGolongan(2),
   };
 }
 
@@ -201,6 +201,7 @@ function mapBarang(
     );
     //TODO: find no inv === fttb inv
     // console.log("permintaanBarang", v.MasterBarang)
+    console.log("permintaan", qtyField);
     return {
       id: permintaan.barangId,
       image: v.MasterBarang.image,
@@ -214,7 +215,7 @@ function mapBarang(
       permintaanBarang,
       permintaanBarangId: permintaanBarang.map((v: any) => v.id),
       imQty: permintaan.permintaanBarang.length,
-      noInventaris: v.MasterBarang?.DaftarAset.map((v: any) => v.id),
+      // noInventaris: v.MasterBarang?.DaftarAset.map((v: any) => v.id),
       daftarAset: v.MasterBarang.DaftarAset,
     };
   });
@@ -293,7 +294,7 @@ function calculateToTransfer(
   if (quota > 0) {
     if (quota >= permintaan) {
       toTransfer = permintaan;
-      updatedNoInventaris = noInventarisArr.splice(0, permintaan);
+      // updatedNoInventaris = noInventarisArr.splice(0, permintaan);
     } else {
       toTransfer = quota;
     }

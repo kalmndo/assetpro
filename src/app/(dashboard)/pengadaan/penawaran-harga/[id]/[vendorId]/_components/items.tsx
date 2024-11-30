@@ -60,9 +60,10 @@ export default function Items({
         <p className="font-semibold">
           {barang.qty} {barang.uom}
         </p>
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          {barang.desc}
-        </p>
+        <p
+          className="text-sm leading-relaxed text-muted-foreground"
+          dangerouslySetInnerHTML={{ __html: barang.desc }}
+        />
         <div className="flex flex-col gap-2">
           <div>
             <Label htmlFor="catatan">Catatan</Label>
@@ -213,4 +214,3 @@ export default function Items({
     </div>
   );
 }
-

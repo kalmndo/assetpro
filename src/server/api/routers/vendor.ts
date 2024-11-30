@@ -30,6 +30,11 @@ export const vendorRouter = createTRPCRouter({
             include: {
               PembelianBarang: {
                 include: {
+                  PBSPBB: {
+                    include: {
+                      BarangSplit: { include: { Barang: true } },
+                    },
+                  },
                   MasterBarang: {
                     include: {
                       Uom: true,
@@ -49,22 +54,28 @@ export const vendorRouter = createTRPCRouter({
         });
       }
 
-      const barang = result.PermintaanPenawaranBarangVendor.map((v) => ({
-        id: v.id,
-        name: v.PembelianBarang.MasterBarang.name,
-        image: v.PembelianBarang.MasterBarang.image,
-        kode: v.PembelianBarang.MasterBarang.fullCode,
-        qty: v.PembelianBarang.qty,
-        uom: v.PembelianBarang.MasterBarang.Uom.name,
-        desc: v.PembelianBarang.MasterBarang.deskripsi,
-        harga: v.harga ?? 0,
-        hargaString: String(v.harga ?? 0),
-        totalHarga: v.totalHarga,
-        catatan: v.catatan,
-        garansi: v.garansi,
-        termin: v.termin,
-        delivery: v.delivery,
-      }));
+      const barang = result.PermintaanPenawaranBarangVendor.map((v) => {
+        let desc = v.PembelianBarang.MasterBarang.deskripsi;
+        if (v.PembelianBarang.MasterBarang.fullCode.split(".")[0] === "1") {
+          desc = v.PembelianBarang.PBSPBB[0]!.BarangSplit.Barang.desc;
+        }
+        return {
+          id: v.id,
+          name: v.PembelianBarang.MasterBarang.name,
+          image: v.PembelianBarang.MasterBarang.image,
+          kode: v.PembelianBarang.MasterBarang.fullCode,
+          qty: v.PembelianBarang.qty,
+          uom: v.PembelianBarang.MasterBarang.Uom.name,
+          desc,
+          harga: v.harga ?? 0,
+          hargaString: String(v.harga ?? 0),
+          totalHarga: v.totalHarga,
+          catatan: v.catatan,
+          garansi: v.garansi,
+          termin: v.termin,
+          delivery: v.delivery,
+        };
+      });
 
       return {
         ...result,
@@ -149,6 +160,9 @@ export const vendorRouter = createTRPCRouter({
             include: {
               PembelianBarang: {
                 include: {
+                  PBSPBB: {
+                    include: { BarangSplit: { include: { Barang: true } } },
+                  },
                   PenawaranHargaBarangNego: true,
                   PermintaanPenawaranBarangVendor: {
                     include: {
@@ -184,12 +198,18 @@ export const vendorRouter = createTRPCRouter({
           v.PembelianBarang.PermintaanPenawaranBarangVendor.filter(
             (a) => a.Vendor.Vendor.id === result.vendorId,
           )[0]?.harga;
+
+        let desc = v.PembelianBarang.MasterBarang.deskripsi;
+        if (v.PembelianBarang.MasterBarang.fullCode.split(".")[0] === "1") {
+          desc = v.PembelianBarang.PBSPBB[0]!.BarangSplit.Barang.desc;
+        }
+
         return {
           id: v.id,
           name: v.PembelianBarang.MasterBarang.name,
           image: v.PembelianBarang.MasterBarang.image,
           kode: v.PembelianBarang.MasterBarang.fullCode,
-          desc: v.PembelianBarang.MasterBarang.deskripsi,
+          desc,
           qty: v.PembelianBarang.qty,
           uom: v.PembelianBarang.MasterBarang.Uom.name,
           harga,
