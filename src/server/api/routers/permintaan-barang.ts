@@ -596,6 +596,21 @@ export const permintaanBarangRouter = createTRPCRouter({
                     permintaanBarang: { push: prevBarang!.id },
                   },
                 });
+                const dag = await tx.daftarAsetGroup.findFirst({
+                  where: {
+                    id: prevBarang?.barangId,
+                  },
+                });
+                if (!dag) {
+                  await tx.daftarAsetGroup.create({
+                    data: {
+                      id: prevBarang!.barangId,
+                      idle: 0,
+                      used: 0,
+                      booked: 0,
+                    },
+                  });
+                }
               }
             }
             await tx.permintaanBarangBarangHistory.createMany({
@@ -653,6 +668,22 @@ Menyutujui permintaan barang
                     permintaanBarang: { push: prevBarang!.id },
                   },
                 });
+
+                const dag = await tx.daftarAsetGroup.findFirst({
+                  where: {
+                    id: prevBarang?.barangId,
+                  },
+                });
+                if (!dag) {
+                  await tx.daftarAsetGroup.create({
+                    data: {
+                      id: prevBarang!.barangId,
+                      idle: 0,
+                      used: 0,
+                      booked: 0,
+                    },
+                  });
+                }
               }
             }
 
