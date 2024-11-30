@@ -244,8 +244,8 @@ export const barangKeluarRouter = createTRPCRouter({
                 barangId: value.id,
               },
               data: {
-                qty: { decrement: value.tersedia },
-                ordered: { decrement: value.tersedia },
+                qty: { decrement: value.permintaan },
+                ordered: { decrement: value.permintaan },
                 permintaanBarang: {
                   set: value.permintaanBarangId.filter(
                     (item: string) => !toRemove.includes(item),
@@ -269,7 +269,7 @@ export const barangKeluarRouter = createTRPCRouter({
                   id: value.id,
                 },
                 data: {
-                  qty: { decrement: value.tersedia },
+                  qty: { decrement: value.permintaan },
                 },
               });
 
