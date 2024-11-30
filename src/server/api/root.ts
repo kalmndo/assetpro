@@ -32,6 +32,7 @@ import { peminjamanRouter } from "./routers/peminjaman";
 import { peminjamanEksternalRouter } from "./routers/peminjaman-eksternal";
 import { dashboardRouter } from "./routers/dashboard";
 import { laporanRouter } from "./routers/laporan";
+import { mPeminjamanRuangRouter } from "./routers/m-peminjaman-ruang";
 
 /**
  * This is the primary router for your server.
@@ -53,6 +54,7 @@ export const appRouter = createTRPCRouter({
   mbBarang: mbBarangRouter,
   mRuang: mRuangRouter,
   mEvaluasi: mEvaluasiRouter,
+  mPeminjamanRuang: mPeminjamanRuangRouter,
   kodeAnggaran: kodeAnggaranRouter,
   mUom: mUomRouter,
   cariBarang: cariBarangRouter,
@@ -71,7 +73,7 @@ export const appRouter = createTRPCRouter({
   daftarAset: daftarAsetRouter,
   teknisi: teknisiRouter,
   peminjaman: peminjamanRouter,
-  peminjamanEksternal: peminjamanEksternalRouter
+  peminjamanEksternal: peminjamanEksternalRouter,
 });
 
 // export type definition of API

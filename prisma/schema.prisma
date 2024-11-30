@@ -931,6 +931,7 @@ model MasterBarang {
   FtkbItem                  FtkbItem[]
   Peminjaman                Peminjaman[]
   PeminjamanExternal        PeminjamanExternal[]
+  MasterPeminjamanBarang    MasterPeminjamanBarang[]
 }
 
 model MasterBarangUnit {
@@ -964,12 +965,33 @@ model MasterRuang {
 
   Organisasi Organisasi @relation(fields: [orgId], references: [id])
 
-  PermintaanBarang   PermintaanBarang[]
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  Peminjaman         Peminjaman[]
-  PeminjamanExternal PeminjamanExternal[]
-  DaftarAset         DaftarAset[]
+  PermintaanBarang      PermintaanBarang[]
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  Peminjaman            Peminjaman[]
+  PeminjamanExternal    PeminjamanExternal[]
+  DaftarAset            DaftarAset[]
+  MasterPeminjamanRuang MasterPeminjamanRuang[]
+}
+
+model MasterPeminjamanBarang {
+  id       String @id @default(cuid())
+  barangId String
+
+  MasterBarang MasterBarang @relation(fields: [barangId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MasterPeminjamanRuang {
+  id      String @id @default(cuid())
+  ruangId String
+
+  MasterRuang MasterRuang @relation(fields: [ruangId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model MasterNomor {
