@@ -241,6 +241,7 @@ export const barangMasukRouter = createTRPCRouter({
                 Barang: {
                   qty: theQty,
                   Permintaan: { peruntukan, id },
+                  desc,
                 },
               },
             } of pBSPBB) {
@@ -265,7 +266,7 @@ export const barangMasukRouter = createTRPCRouter({
               }
               if (!imIds.includes(id)) {
                 imIds.push(id);
-                theImdId.push({ id, qty: theQty });
+                theImdId.push({ id, qty: theQty, desc });
               }
             }
             // aset
@@ -311,6 +312,7 @@ export const barangMasukRouter = createTRPCRouter({
                       status: STATUS.ASET_IDLE.id,
                       // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
                       umur: subKat?.umur ?? 10,
+                      desc: val.desc,
                     },
                   });
 
