@@ -1,70 +1,84 @@
+import getPenomoran from "@/lib/getPenomoran";
+import PENOMORAN from "@/lib/penomoran";
 import { ROLE } from "@/lib/role";
 import { STATUS } from "@/lib/status";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-} from "@/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 export const perbaikanRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(z.object({
-      id: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
-      const { id } = input
-      const userId = ctx.session.user.id
+      const { id } = input;
+      const userId = ctx.session.user.id;
 
       const user = await ctx.db.user.findFirst({
         where: {
-          id: userId
+          id: userId,
         },
         include: {
           UserRole: true,
-          Teknisi: true
-        }
-      })
-
+          Teknisi: true,
+        },
+      });
 
       const result = await ctx.db.perbaikan.findFirst({
         where: {
-          id
+          id,
         },
         include: {
           Aset: {
-            include: { MasterBarang: true }
+            include: { MasterBarang: true },
           },
           User: {
-            include: { Department: true, DepartmentUnit: true }
+            include: { Department: true, DepartmentUnit: true },
           },
           Teknisi: {
-            include: { User: true }
+            include: { User: true },
           },
           PerbaikanKomponen: {
-            orderBy: { createdAt: 'desc' },
-            include: { Barang: { include: { Barang: true, Permintaan: true } } }
+            orderBy: { createdAt: "desc" },
+            include: {
+              Barang: { include: { Barang: true, Permintaan: true } },
+            },
           },
-          PerbaikanHistory: true
-        }
-      })
+          PerbaikanHistory: true,
+        },
+      });
 
       if (!result) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Tidak ada form ini"
+          message: "Tidak ada form ini",
         });
       }
 
-      const isCanSelectTeknisi = user?.UserRole.map((v) => v.roleId).some((v) => v === ROLE.SELECT_TEKNISI.id) && result.status === STATUS.ATASAN_SETUJU.id
-      const isAtasanCanApprove = result.User.atasanId === userId && result.status === STATUS.PENGAJUAN.id
-      const isTeknisiCanAccept = userId === result.teknisiId && result.status === STATUS.TEKNISI_DISPOSITION.id
-      const isTeknisiCanDone = userId === result.teknisiId && result.status === STATUS.TEKNISI_FIXING.id
-      const isUserCanAccept = userId === result.userId && result.status === STATUS.TEKNISI_DONE.id
-      const isTeknisiCanDoneFromEks = userId === result.teknisiId && result.status === STATUS.PERBAIKAN_EKSTERNAL_SELESAI.id
+      const isCanSelectTeknisi =
+        user?.UserRole.map((v) => v.roleId).some(
+          (v) => v === ROLE.SELECT_TEKNISI.id,
+        ) && result.status === STATUS.ATASAN_SETUJU.id;
+      const isAtasanCanApprove =
+        result.User.atasanId === userId &&
+        result.status === STATUS.PENGAJUAN.id;
+      const isTeknisiCanAccept =
+        userId === result.teknisiId &&
+        result.status === STATUS.TEKNISI_DISPOSITION.id;
+      const isTeknisiCanDone =
+        userId === result.teknisiId &&
+        result.status === STATUS.TEKNISI_FIXING.id;
+      const isUserCanAccept =
+        userId === result.userId && result.status === STATUS.TEKNISI_DONE.id;
+      const isTeknisiCanDoneFromEks =
+        userId === result.teknisiId &&
+        result.status === STATUS.PERBAIKAN_EKSTERNAL_SELESAI.id;
 
-      const p = result.User
-      const b = result.Aset.MasterBarang
+      const p = result.User;
+      const b = result.Aset.MasterBarang;
 
       const comps = result.PerbaikanKomponen.map((v) => {
         if (v.type === 0) {
@@ -78,8 +92,8 @@ export const perbaikanRouter = createTRPCRouter({
             imId: v.Barang?.Permintaan.id,
             jumlah: v.jumlah,
             biaya: `Rp ${v.biaya.toLocaleString("id-ID")}`,
-            b: v.biaya
-          }
+            b: v.biaya,
+          };
         }
         return {
           id: v.id,
@@ -87,12 +101,11 @@ export const perbaikanRouter = createTRPCRouter({
           name: v.name,
           jumlah: v.jumlah,
           biaya: `Rp ${v.biaya.toLocaleString("id-ID")}`,
-          b: v.biaya
-        }
-      })
+          b: v.biaya,
+        };
+      });
 
-
-      const totalComps = comps.map((v) => v.b).reduce((a, b) => a + b, 0)
+      const totalComps = comps.map((v) => v.b).reduce((a, b) => a + b, 0);
 
       return {
         id: result.id,
@@ -106,7 +119,7 @@ export const perbaikanRouter = createTRPCRouter({
           image: p.image,
           title: p.title,
           department: p.Department.name,
-          departmentUnit: p.DepartmentUnit?.name
+          departmentUnit: p.DepartmentUnit?.name,
         },
         teknisi: result.Teknisi?.User.name,
         catatanTeknisi: result.catatanTeknisi,
@@ -114,8 +127,8 @@ export const perbaikanRouter = createTRPCRouter({
           id: b.id,
           name: b.name,
           image: b.image,
-          deskripsi: b.deskripsi,
-          noInv: result.Aset.id
+          deskripsi: result.Aset.desc,
+          noInv: result.Aset.id,
         },
         isAtasanCanApprove,
         isCanSelectTeknisi,
@@ -123,33 +136,47 @@ export const perbaikanRouter = createTRPCRouter({
         isTeknisiCanDone,
         isUserCanAccept,
         isTeknisiCanDoneFromEks,
-        components: comps.length === 0 ? [] : [...comps, { id: "total", type: "", biaya: `Rp ${totalComps.toLocaleString("id-ID")}`, jumlah: '', name: "" }],
-        riwayat: result.PerbaikanHistory
-      }
+        components:
+          comps.length === 0
+            ? []
+            : [
+                ...comps,
+                {
+                  id: "total",
+                  type: "",
+                  biaya: `Rp ${totalComps.toLocaleString("id-ID")}`,
+                  jumlah: "",
+                  name: "",
+                },
+              ],
+        riwayat: result.PerbaikanHistory,
+      };
     }),
   getImConponents: protectedProcedure
-    .input(z.object({
-      id: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
-      const { id } = input
+      const { id } = input;
 
       const relatedBarangIds = await ctx.db.perbaikanKomponen.findMany({
         where: {
           barangId: {
-            not: null
-          }
+            not: null,
+          },
         },
         select: {
-          barangId: true
-        }
+          barangId: true,
+        },
       });
 
-      const relatedIds = relatedBarangIds.map(item => item.barangId!);
+      const relatedIds = relatedBarangIds.map((item) => item.barangId!);
 
       const result = await ctx.db.imPerbaikan.findMany({
         where: {
-          perbaikanId: id
+          perbaikanId: id,
         },
         include: {
           IM: {
@@ -157,21 +184,21 @@ export const perbaikanRouter = createTRPCRouter({
               PermintaanBarangBarang: {
                 where: {
                   id: {
-                    notIn: relatedIds
+                    notIn: relatedIds,
                   },
                   status: STATUS.SELESAI.id,
                 },
                 include: {
                   PerbaikanKomponen: true,
                   Barang: {
-                    include: { Uom: true }
-                  }
-                }
-              }
-            }
-          }
-        }
-      })
+                    include: { Uom: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
 
       return result.map((v) => ({
         id: v.id,
@@ -184,59 +211,73 @@ export const perbaikanRouter = createTRPCRouter({
           name: v.Barang.name,
           code: v.Barang.fullCode,
           qty: v.qty,
-          uom: v.Barang.Uom.name
-        }))
-      }))
+          uom: v.Barang.Uom.name,
+        })),
+      }));
     }),
   addComponent: protectedProcedure
-    .input(z.object({
-      perbaikanId: z.string(),
-      type: z.string(),
-      name: z.string(),
-      items: z.array(z.string()),
-      biaya: z.string(),
-      jumlah: z.string()
-    }))
+    .input(
+      z.object({
+        perbaikanId: z.string(),
+        type: z.string(),
+        name: z.string(),
+        items: z.array(z.string()),
+        biaya: z.string(),
+        jumlah: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const {
-        perbaikanId,
-        type,
-        name,
-        items,
-        biaya,
-        jumlah
-      } = input
+      const { perbaikanId, type, name, items, biaya, jumlah } = input;
       try {
         await ctx.db.$transaction(async (tx) => {
-
-          if (type === '0') {
+          if (type === "0") {
             const barang = await tx.permintaanBarangBarang.findMany({
               where: {
                 id: {
-                  in: items
-                }
+                  in: items,
+                },
               },
               include: {
-                PermintaanBarangBarangSplit: { include: { PBSPBB: { include: { PembelianBarang: { include: { PenawaranHargaBarangVendor: { select: { totalHarga: true } } } } } } } },
-                Barang: true
-              }
-            })
+                PermintaanBarangBarangSplit: {
+                  include: {
+                    PBSPBB: {
+                      include: {
+                        PembelianBarang: {
+                          include: {
+                            PenawaranHargaBarangVendor: {
+                              select: { totalHarga: true },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                Barang: true,
+              },
+            });
 
             const newBarang = barang.map((v) => {
-              const biaya = v.PermintaanBarangBarangSplit.flatMap((v) => v.PBSPBB.flatMap((v) => v.PembelianBarang.PenawaranHargaBarangVendor.flatMap((v) => v.totalHarga!))).reduce((a, b) => a + b, 0)
+              const biaya = v.PermintaanBarangBarangSplit.flatMap((v) =>
+                v.PBSPBB.flatMap((v) =>
+                  v.PembelianBarang.PenawaranHargaBarangVendor.flatMap(
+                    (v) => v.totalHarga!,
+                  ),
+                ),
+              ).reduce((a, b) => a + b, 0);
 
               return {
                 perbaikanId,
                 barangId: v.id,
                 type: Number(type),
                 biaya,
-                jumlah: Number(v.qty)
-              }
-            })
+                jumlah: Number(v.qty),
+              };
+            });
 
             await tx.perbaikanKomponen.createMany({
-              data: newBarang
-            })
+              data: newBarang,
+            });
           } else {
             await tx.perbaikanKomponen.create({
               data: {
@@ -244,16 +285,15 @@ export const perbaikanRouter = createTRPCRouter({
                 type: Number(type),
                 name,
                 biaya: Number(biaya),
-                jumlah: Number(jumlah)
-              }
-            })
+                jumlah: Number(jumlah),
+              },
+            });
           }
-        })
+        });
         return {
           ok: true,
-          message: "Berhasil menambah komponen perbaikan"
-        }
-
+          message: "Berhasil menambah komponen perbaikan",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -261,14 +301,15 @@ export const perbaikanRouter = createTRPCRouter({
           cause: error,
         });
       }
-
     }),
   getAll: protectedProcedure
-    .input(z.object({
-      isUser: z.boolean()
-    }))
+    .input(
+      z.object({
+        isUser: z.boolean(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
-      const { isUser } = input
+      const { isUser } = input;
 
       let findMany;
 
@@ -276,40 +317,40 @@ export const perbaikanRouter = createTRPCRouter({
         findMany = {
           where: {
             // @ts-ignore
-            userId: ctx.session.user.id
+            userId: ctx.session.user.id,
           },
           orderBy: {
-            createdAt: "desc" as any
+            createdAt: "desc" as any,
           },
           include: {
             Aset: {
               include: {
-                MasterBarang: true
-              }
-            }
-          }
-        }
+                MasterBarang: true,
+              },
+            },
+          },
+        };
       } else {
         findMany = {
           where: {
             // @ts-ignore
-            NOT: { status: STATUS.PENGAJUAN.id }
+            NOT: { status: STATUS.PENGAJUAN.id },
           },
           orderBy: {
-            createdAt: "desc"
+            createdAt: "desc",
           },
           include: {
             Aset: {
               include: {
-                MasterBarang: true
-              }
-            }
-          }
-        }
+                MasterBarang: true,
+              },
+            },
+          },
+        };
       }
 
       // @ts-ignore
-      const result = await ctx.db.perbaikan.findMany(findMany)
+      const result = await ctx.db.perbaikan.findMany(findMany);
 
       return result.map((v) => ({
         id: v.id,
@@ -317,38 +358,67 @@ export const perbaikanRouter = createTRPCRouter({
         barang: v.Aset.MasterBarang.name,
         keluhan: v.keluhan,
         tanggal: v.createdAt.toLocaleDateString(),
-        status: v.status
-      }))
+        status: v.status,
+      }));
     }),
   create: protectedProcedure
-    .input(z.object({
-      asetId: z.string(),
-      keluhan: z.string()
-    }))
+    .input(
+      z.object({
+        asetId: z.string(),
+        keluhan: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const {
-        asetId,
-        keluhan
-      } = input
-      const userId = ctx.session.user.id
+      const { asetId, keluhan } = input;
+      const userId = ctx.session.user.id;
 
       try {
         await ctx.db.$transaction(async (tx) => {
           const user = await tx.user.findFirst({
-            where: { id: userId }
-          })
+            where: { id: userId },
+          });
+
+          let penomoran = await tx.penomoran.findUnique({
+            where: {
+              id: PENOMORAN.IM,
+              year: String(new Date().getFullYear()),
+            },
+          });
+
+          if (!penomoran) {
+            penomoran = await tx.penomoran.create({
+              data: {
+                id: PENOMORAN.IM,
+                code: "IM",
+                number: 0,
+                year: String(new Date().getFullYear()),
+              },
+            });
+          }
 
           const perbaikan = await tx.perbaikan.create({
             data: {
-              no: Math.random().toString(),
+              no: getPenomoran(penomoran),
               userId,
               keluhan,
               asetId,
-              status: STATUS.PENGAJUAN.id
+              status: STATUS.PENGAJUAN.id,
             },
-          })
+          });
 
-          const desc = `<p class="text-sm font-semibold">${user?.name}<span class="font-normal ml-[5px]">Meminta persetujuan permintaan perbaikan ${perbaikan.no}</span></p>`
+          if (perbaikan) {
+            await tx.penomoran.update({
+              where: {
+                id: PENOMORAN.IM,
+                year: String(new Date().getFullYear()),
+              },
+              data: {
+                number: { increment: 1 },
+              },
+            });
+          }
+
+          const desc = `<p class="text-sm font-semibold">${user?.name}<span class="font-normal ml-[5px]">Meminta persetujuan permintaan perbaikan ${perbaikan.no}</span></p>`;
           await tx.notification.create({
             data: {
               fromId: userId,
@@ -357,19 +427,19 @@ export const perbaikanRouter = createTRPCRouter({
               link: `/permintaan/perbaikan/${perbaikan.id}`,
               desc,
               isRead: false,
-            }
-          })
+            },
+          });
           await tx.perbaikanHistory.create({
             data: {
               perbaikanId: perbaikan.id,
-              desc: 'Meminta permohonan perbaikan'
-            }
-          })
-        })
+              desc: "Meminta permohonan perbaikan",
+            },
+          });
+        });
         return {
           ok: true,
-          message: 'Berhasil meminta permohonan perbaikan'
-        }
+          message: "Berhasil meminta permohonan perbaikan",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -379,37 +449,37 @@ export const perbaikanRouter = createTRPCRouter({
       }
     }),
   approve: protectedProcedure
-    .input(z.object({
-      id: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const { id } = input
+      const { id } = input;
       try {
         // ganti status jadi disetujui atasan
         // create history perbaikan
         await ctx.db.$transaction(async (tx) => {
           await tx.perbaikan.update({
             where: {
-              id
+              id,
             },
             data: {
-              status: STATUS.ATASAN_SETUJU.id
-            }
-          })
+              status: STATUS.ATASAN_SETUJU.id,
+            },
+          });
           await tx.perbaikanHistory.create({
             data: {
               perbaikanId: id,
-              desc: 'Atasan menyetujui permintaan perbaikan'
-            }
-          })
-        })
+              desc: "Atasan menyetujui permintaan perbaikan",
+            },
+          });
+        });
 
         return {
           ok: true,
-          message: 'Berhasil menyetujui permintaan perbaikan'
-        }
-
-
+          message: "Berhasil menyetujui permintaan perbaikan",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -419,48 +489,46 @@ export const perbaikanRouter = createTRPCRouter({
       }
     }),
   selectTeknisi: protectedProcedure
-    .input(z.object({
-      id: z.string(),
-      teknisiId: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+        teknisiId: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const {
-        id,
-        teknisiId
-      } = input
+      const { id, teknisiId } = input;
       try {
         await ctx.db.$transaction(async (tx) => {
           const teknisi = await tx.teknisi.findFirst({
             where: { id: teknisiId },
             include: {
-              User: true
-            }
-          })
+              User: true,
+            },
+          });
 
           await tx.perbaikan.update({
             where: {
-              id
+              id,
             },
             data: {
               teknisiId,
-              status: STATUS.TEKNISI_DISPOSITION.id
-            }
-          })
+              status: STATUS.TEKNISI_DISPOSITION.id,
+            },
+          });
 
           await tx.perbaikanHistory.create({
             data: {
               perbaikanId: id,
-              desc: 'Diserahkan ke teknisi',
-              catatan: teknisi?.User.name
-            }
-          })
-        })
+              desc: "Diserahkan ke teknisi",
+              catatan: teknisi?.User.name,
+            },
+          });
+        });
 
         return {
           ok: true,
-          message: "Berhasil menyerahkan ke teknisi"
-        }
-
+          message: "Berhasil menyerahkan ke teknisi",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -468,42 +536,39 @@ export const perbaikanRouter = createTRPCRouter({
           cause: error,
         });
       }
-
     }),
   reject: protectedProcedure
-    .input(z.object({
-      id: z.string(),
-      catatan: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+        catatan: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const {
-        id,
-        catatan
-      } = input
+      const { id, catatan } = input;
       try {
         await ctx.db.$transaction(async (tx) => {
           await tx.perbaikan.update({
             where: {
-              id
+              id,
             },
             data: {
-              status: STATUS.IM_REJECT.id
-            }
-          })
+              status: STATUS.IM_REJECT.id,
+            },
+          });
 
           await tx.perbaikanHistory.create({
             data: {
               perbaikanId: id,
               desc: `Atasan menolak permintaan perbaikan`,
-              catatan
-            }
-          })
-        })
+              catatan,
+            },
+          });
+        });
         return {
           ok: true,
-          message: "Berhasil menolak permintaan perbaikan"
-        }
-
+          message: "Berhasil menolak permintaan perbaikan",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -513,34 +578,35 @@ export const perbaikanRouter = createTRPCRouter({
       }
     }),
   teknisiTerima: protectedProcedure
-    .input(z.object({
-      id: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const { id } = input
+      const { id } = input;
       try {
         await ctx.db.$transaction(async (tx) => {
           await tx.perbaikan.update({
             where: {
-              id
+              id,
             },
             data: {
-              status: STATUS.TEKNISI_FIXING.id
-            }
-          })
+              status: STATUS.TEKNISI_FIXING.id,
+            },
+          });
 
           await tx.perbaikanHistory.create({
             data: {
               perbaikanId: id,
               desc: `Teknisi menenrima barang dan memperbaiki barang`,
-            }
-          })
-        })
+            },
+          });
+        });
         return {
           ok: true,
-          message: 'Berhasil menerima barang'
-        }
-
+          message: "Berhasil menerima barang",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -550,35 +616,37 @@ export const perbaikanRouter = createTRPCRouter({
       }
     }),
   teknisiDone: protectedProcedure
-    .input(z.object({
-      id: z.string(),
-      catatan: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+        catatan: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const { id, catatan } = input
+      const { id, catatan } = input;
       try {
         await ctx.db.$transaction(async (tx) => {
           await tx.perbaikan.update({
             where: {
-              id
+              id,
             },
             data: {
               catatanTeknisi: catatan,
-              status: STATUS.TEKNISI_DONE.id
-            }
-          })
+              status: STATUS.TEKNISI_DONE.id,
+            },
+          });
 
           await tx.perbaikanHistory.create({
             data: {
               perbaikanId: id,
               desc: `Teknisi selesai memperbaiki dan mengirim barang ke user`,
-            }
-          })
-        })
+            },
+          });
+        });
         return {
           ok: true,
-          message: 'Berhasil menyelesaikan perbaikan'
-        }
+          message: "Berhasil menyelesaikan perbaikan",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -590,53 +658,55 @@ export const perbaikanRouter = createTRPCRouter({
 
   // EKSTERNAL
   teknisiUndoneExternal: protectedProcedure
-    .input(z.object({
-      id: z.string(),
-      vendorId: z.string(),
-      catatan: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+        vendorId: z.string(),
+        catatan: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const { id, catatan, vendorId } = input
+      const { id, catatan, vendorId } = input;
       try {
         await ctx.db.$transaction(async (tx) => {
           await tx.perbaikan.update({
             where: {
-              id
+              id,
             },
             data: {
               catatanTeknisi: catatan,
-              status: STATUS.TEKNISI_UNDONE_EXTERNAL.id
-            }
-          })
+              status: STATUS.TEKNISI_UNDONE_EXTERNAL.id,
+            },
+          });
 
           await tx.perbaikanHistory.create({
             data: {
               perbaikanId: id,
               desc: `Barang dikirim ke eksternal untuk perbaikan lebih lanjut`,
-            }
-          })
+            },
+          });
 
           const per = await tx.perbaikanExternal.create({
             data: {
               status: STATUS.PENGAJUAN.id,
               no: Math.random().toString(),
               perbaikanId: id,
-              vendorId
-            }
-          })
+              vendorId,
+            },
+          });
 
           await tx.perbaikanExternalHistory.create({
             data: {
               perbaikanExternalId: per.id,
-              desc: `Permohonan perbaikan eksternal`
-            }
-          })
-        })
+              desc: `Permohonan perbaikan eksternal`,
+            },
+          });
+        });
 
         return {
           ok: true,
-          message: 'Berhasil '
-        }
+          message: "Berhasil ",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -646,25 +716,26 @@ export const perbaikanRouter = createTRPCRouter({
       }
     }),
   userTerima: protectedProcedure
-    .input(z.object({
-      id: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const { id } = input
+      const { id } = input;
       try {
         await ctx.db.$transaction(async (tx) => {
           const res = await tx.perbaikan.update({
             where: {
-              id
+              id,
             },
             data: {
-              status: STATUS.SELESAI.id
+              status: STATUS.SELESAI.id,
             },
             include: {
-              Aset: true
-            }
-          })
-
+              Aset: true,
+            },
+          });
 
           // TODO: Update status jadi used
           // await tx.daftarAset.update({
@@ -676,15 +747,14 @@ export const perbaikanRouter = createTRPCRouter({
           await tx.perbaikanHistory.create({
             data: {
               perbaikanId: id,
-              desc: "Telah di terima oleh user"
-            }
-          })
-        })
+              desc: "Telah di terima oleh user",
+            },
+          });
+        });
         return {
           ok: true,
-          message: 'Berhasil menyelesaikan perbaikan'
-        }
-
+          message: "Berhasil menyelesaikan perbaikan",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

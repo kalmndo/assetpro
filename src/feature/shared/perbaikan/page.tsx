@@ -1,6 +1,13 @@
-"use client"
+"use client";
 import { Separator } from "@/components/ui/separator";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
@@ -23,14 +30,14 @@ export default function Page({
   data,
   teknisi,
   imComponents,
-  vendors
+  vendors,
 }: {
-  data: RouterOutputs['perbaikan']['get'],
-  teknisi: SelectProps[],
-  vendors: SelectProps[],
-  imComponents: RouterOutputs['perbaikan']['getImConponents']
+  data: RouterOutputs["perbaikan"]["get"];
+  teknisi: SelectProps[];
+  vendors: SelectProps[];
+  imComponents: RouterOutputs["perbaikan"]["getImConponents"];
 }) {
-  const { color, name: status } = getStatus(data.status)
+  const { color, name: status } = getStatus(data.status);
 
   return (
     <div>
@@ -49,17 +56,17 @@ export default function Page({
       </Breadcrumb>
       <div className="my-4 flex justify-between">
         <div className="">
-          <h1 className='text-2xl font-bold tracking-tight'>
+          <h1 className="text-2xl font-bold tracking-tight">
             Permintaan perbaikan
           </h1>
         </div>
-        <div className="">
-          {/* <AddDialog data={modalData} /> */}
-        </div>
+        <div className="">{/* <AddDialog data={modalData} /> */}</div>
       </div>
       <div className="rounded-sm border">
         <div className="flex justify-between p-4">
-          <div style={{ color }} className="font-semibold">{status}</div>
+          <div style={{ color }} className="font-semibold">
+            {status}
+          </div>
           <div>Print</div>
         </div>
         <Separator />
@@ -77,44 +84,50 @@ export default function Page({
               <p className="text-sm">Keluhan</p>
               <p className="text-sm">{data.keluhan}</p>
             </div>
-
           </div>
           <div className="space-y-4">
             <p className="text-sm">Pemohon</p>
-            <Avatar className='w-14 h-14'>
-              <AvatarImage src={data.pemohon.image ?? ''} alt="@shadcn" />
+            <Avatar className="h-14 w-14">
+              <AvatarImage src={data.pemohon.image ?? ""} alt="@shadcn" />
               <AvatarFallback>{getInitials(data.pemohon.name)}</AvatarFallback>
             </Avatar>
             <p className="font-semibold">{data.pemohon.name}</p>
             <div className="text-sm">
               <p>{data.pemohon.title}</p>
-              <p>{data.pemohon.department} - {data.pemohon.departmentUnit}</p>
+              <p>
+                {data.pemohon.department} - {data.pemohon.departmentUnit}
+              </p>
             </div>
           </div>
         </div>
         <div className="p-4">
-          <div className="flex flex-col md:flex-row items-start gap-6 p-6 rounded-lg border mb-5">
-            <div className="flex-shrink-0 rounded-lg overflow-hidden w-full md:w-[200px] aspect-square">
+          <div className="mb-5 flex flex-col items-start gap-6 rounded-lg border p-6 md:flex-row">
+            <div className="aspect-square w-full flex-shrink-0 overflow-hidden rounded-lg md:w-[200px]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={!data.barang.image ? "https://generated.vusercontent.net/placeholder.svg" : data.barang.image}
+                src={
+                  !data.barang.image
+                    ? "https://generated.vusercontent.net/placeholder.svg"
+                    : data.barang.image
+                }
                 alt={data.barang.name}
                 width={200}
                 height={200}
-                className="object-cover w-full h-full"
+                className="h-full w-full object-cover"
               />
             </div>
-            <div className="flex-1 grid gap-2">
+            <div className="grid flex-1 gap-2">
               <div className="flex items-center gap-4">
                 <h3 className="text-xl font-semibold">{data.barang.name}</h3>
               </div>
               <p>No Inventaris: {data.barang.noInv}</p>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                {data.barang.deskripsi}
-              </p>
+              <p
+                className="text-sm leading-relaxed text-muted-foreground"
+                dangerouslySetInnerHTML={{ __html: data.barang.deskripsi }}
+              />
             </div>
           </div>
-          {data.teknisi &&
+          {data.teknisi && (
             <>
               <div className="flex justify-between">
                 <div className="space-y-2">
@@ -122,74 +135,82 @@ export default function Page({
                   <p className="font-semibold">{data.teknisi}</p>
                 </div>
               </div>
-              <div className="flex justify-between my-4">
+              <div className="my-4 flex justify-between">
                 <div className="space-y-2">
                   <p className="text-sm">Catatan Teknisi</p>
                   <p className="text-sm">{data.catatanTeknisi}</p>
                 </div>
               </div>
             </>
-          }
+          )}
           <div className="my-4">
-            <div className="flex justify-between my-2 items-center">
-              <p className="font-semibold text-lg">Komponen perbaikan</p>
-              {data.isTeknisiCanDone &&
-                <TambahKomponenDialog id={data.id} imComponents={imComponents} />
-              }
+            <div className="my-2 flex items-center justify-between">
+              <p className="text-lg font-semibold">Komponen perbaikan</p>
+              {data.isTeknisiCanDone && (
+                <TambahKomponenDialog
+                  id={data.id}
+                  imComponents={imComponents}
+                />
+              )}
             </div>
             <TableKomponen data={data.components} />
           </div>
-          {data.isAtasanCanApprove &&
+          {data.isAtasanCanApprove && (
             <div className="flex justify-end space-x-4">
               <RejectDialog id={data.id} />
               <ApproveDialog id={data.id} />
             </div>
-          }
-          {data.isCanSelectTeknisi &&
+          )}
+          {data.isCanSelectTeknisi && (
             <div className="flex justify-end space-x-4">
               <SelectTeknisiDialog id={data.id} teknisis={teknisi} />
             </div>
-          }
-          {data.isTeknisiCanAccept &&
+          )}
+          {data.isTeknisiCanAccept && (
             <div className="flex justify-end space-x-4">
               <TeknisiTerimaDialog id={data.id} />
             </div>
-          }
-          {data.isUserCanAccept &&
+          )}
+          {data.isUserCanAccept && (
             <div className="flex justify-end space-x-4">
               <UserTerimaDialog id={data.id} />
             </div>
-          }
-          {data.isTeknisiCanDone &&
+          )}
+          {data.isTeknisiCanDone && (
             <div className="flex justify-end space-x-4">
               <TeknisiUndoneDialog id={data.id} vendors={vendors} />
               <TeknisiDoneDialog id={data.id} />
             </div>
-          }
-          {
-            data.isTeknisiCanDoneFromEks &&
+          )}
+          {data.isTeknisiCanDoneFromEks && (
             <div className="flex justify-end space-x-4">
               <TeknisiDoneDialog id={data.id} />
             </div>
-          }
+          )}
         </div>
         <div className="p-4">
-          <p className="font-semibold text-lg">Riwayat</p>
-          <div className="border rounded-lg p-4">
+          <p className="text-lg font-semibold">Riwayat</p>
+          <div className="rounded-lg border p-4">
             <ScrollArea className="h-[400px]">
-              <div className="w-full max-w-4xl mx-auto ml-4">
+              <div className="mx-auto ml-4 w-full max-w-4xl">
                 <div className="relative pl-6 after:absolute after:inset-y-0 after:left-0 after:w-px after:bg-muted-foreground/20">
                   <div className="grid gap-8">
                     {data.riwayat.map((v: any, i: number) => {
-                      const { day, hours, minutes, monthName } = formatDate(v.createdAt)
+                      const { day, hours, minutes, monthName } = formatDate(
+                        v.createdAt,
+                      );
                       return (
-                        <div key={i} className="grid gap-2 text-sm relative">
-                          <div className="aspect-square w-3 bg-primary rounded-full absolute left-0 translate-x-[-29.5px] z-10 top-1"></div>
-                          <div className="font-medium">{day}, {monthName} {hours}:{minutes} WIB</div>
+                        <div key={i} className="relative grid gap-2 text-sm">
+                          <div className="absolute left-0 top-1 z-10 aspect-square w-3 translate-x-[-29.5px] rounded-full bg-primary"></div>
+                          <div className="font-medium">
+                            {day}, {monthName} {hours}:{minutes} WIB
+                          </div>
                           <div className="font-semibold">{v.desc}</div>
-                          <div className="text-sm text-blue-700">{v.formNo}</div>
+                          <div className="text-sm text-blue-700">
+                            {v.formNo}
+                          </div>
                         </div>
-                      )
+                      );
                     })}
                   </div>
                 </div>
@@ -199,5 +220,6 @@ export default function Page({
         </div>
       </div>
     </div>
-  )
+  );
 }
+

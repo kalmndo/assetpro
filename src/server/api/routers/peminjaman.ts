@@ -1,3 +1,4 @@
+import getPenomoran from "@/lib/getPenomoran";
 import PENOMORAN from "@/lib/penomoran";
 import { ROLE } from "@/lib/role";
 import { STATUS } from "@/lib/status";
@@ -303,7 +304,7 @@ export const peminjamanRouter = createTRPCRouter({
 
           const peminjaman = await tx.peminjaman.create({
             data: {
-              no: Math.random().toString(),
+              no: getPenomoran(penomoran),
               type,
               ...(type === 0
                 ? { ruangId }
