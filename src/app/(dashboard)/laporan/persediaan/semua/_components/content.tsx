@@ -20,7 +20,10 @@ export default function Content() {
     mutate({
       // eslint-disable-next-line
       // @ts-ignore
-      from: date.from, to: date.to,
+      from: date.from,
+      // eslint-disable-next-line
+      // @ts-ignore
+      to: date.to,
     });
   };
 
@@ -69,23 +72,23 @@ export default function Content() {
               },
             },
             {
-              id: "totalMasukAfter",
+              id: "masuk",
               header: "Barang Masuk",
               cell: ({ row }) => {
                 return (
                   <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-                    Rp {row.original.totalMasukAfter.toLocaleString("id-ID")}
+                    Rp {row.original.masuk.toLocaleString("id-ID")}
                   </span>
                 );
               },
             },
             {
-              id: "totalKeluarAfter",
+              id: "keluar",
               header: "Barang Keluar",
               cell: ({ row }) => {
                 return (
                   <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-                    {row.original.totalKeluarAfter}
+                    Rp {row.original.keluar.toLocaleString("id-ID")}
                   </span>
                 );
               },

@@ -6,10 +6,10 @@ export default function Page() {
       <div className="mb flex justify-between">
         <div className="">
           <h1 className="text-2xl font-bold tracking-tight">
-            Laporan semua aset perlokasi
+            Laporan semua stock perlokasi
           </h1>
           <p className="text-muted-foreground">
-            Kelola laporan semua perlokasi
+            Kelola laporan stock perlokasi
           </p>
         </div>
       </div>
