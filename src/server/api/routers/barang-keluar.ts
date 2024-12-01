@@ -251,6 +251,7 @@ export const barangKeluarRouter = createTRPCRouter({
               },
               data: {
                 qty: { decrement: value.permintaan },
+                // TODO: Kalau barang tidak melakukan pembelian, jangan di decrement
                 ordered: { decrement: value.permintaan },
                 permintaanBarang: {
                   set: value.permintaanBarangId.filter(
