@@ -1,3 +1,4 @@
+import PENOMORAN from "@/lib/penomoran";
 import { ROLE } from "@/lib/role";
 import { STATUS } from "@/lib/status";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
@@ -122,8 +123,14 @@ export const peminjamanRouter = createTRPCRouter({
         jumlah: res.jumlah,
         peminjam,
         peruntukan: res.peruntukan,
-        from: res.tglPinjam.toLocaleDateString("id-ID", { dateStyle: "full" }),
-        to: res.tglKembali.toLocaleDateString("id-ID", { dateStyle: "full" }),
+        from: res.tglPinjam.toLocaleString("id-ID", {
+          dateStyle: "full",
+          timeStyle: "short",
+        }),
+        to: res.tglKembali.toLocaleString("id-ID", {
+          dateStyle: "full",
+          timeStyle: "short",
+        }),
         status: res.status,
         tanggal: res.createdAt.toLocaleDateString("id-ID"),
         riwayat: res.PeminjamanHistory,
@@ -139,6 +146,9 @@ export const peminjamanRouter = createTRPCRouter({
     }),
   getAll: protectedProcedure.query(async ({ ctx }) => {
     const result = await ctx.db.peminjaman.findMany({
+      where: {
+        peminjamId: ctx.session.user.id,
+      },
       orderBy: {
         createdAt: "desc",
       },
@@ -148,14 +158,22 @@ export const peminjamanRouter = createTRPCRouter({
       },
     });
 
-    const barangs = await ctx.db.masterBarang.findMany();
-    const ruangs = await ctx.db.masterRuang.findMany({
+    const barangs = await ctx.db.masterPeminjamanBarang.findMany({
       include: {
-        Peminjaman: true,
-        PeminjamanExternal: true,
+        MasterBarang: true,
       },
     });
-    const res = result.map((v) => {
+    const ruangs = await ctx.db.masterPeminjamanRuang.findMany({
+      include: {
+        MasterRuang: {
+          include: {
+            Peminjaman: true,
+            PeminjamanExternal: true,
+          },
+        },
+      },
+    });
+    const res = result?.map((v) => {
       const nama = v.barangId ? v.Barang?.name : v.Ruang?.name;
       return {
         id: v.id,
@@ -173,22 +191,22 @@ export const peminjamanRouter = createTRPCRouter({
       value: res,
       data: {
         barangs: barangs.map((v) => ({
-          label: v.name,
-          value: v.id,
+          label: v.MasterBarang.name,
+          value: v.MasterBarang.id,
         })),
         ruangs: ruangs.map((v) => {
-          const p = v.Peminjaman.map((v) => ({
+          const p = v.MasterRuang.Peminjaman.map((v) => ({
             from: v.tglPinjam,
             to: v.tglKembali,
           }));
-          const px = v.PeminjamanExternal.map((v) => ({
+          const px = v.MasterRuang.PeminjamanExternal.map((v) => ({
             from: v.tglPinjam,
             to: v.tglKembali,
           }));
           const booked = [...p, ...px];
           return {
-            label: v.name,
-            value: v.id,
+            label: v.MasterRuang.name,
+            value: v.MasterRuang.id,
             booked,
           };
         }),
@@ -231,10 +249,10 @@ export const peminjamanRouter = createTRPCRouter({
         ruangId: z.string(),
         peruntukan: z.string(),
         jumlah: z.string(),
-        date: z.object({
-          from: z.date(),
-          to: z.date(),
-        }),
+        tglPinjam: z.date(),
+        jamPinjam: z.string(),
+        tglKembali: z.date(),
+        jamKembali: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -244,14 +262,44 @@ export const peminjamanRouter = createTRPCRouter({
         ruangId,
         peruntukan,
         jumlah,
-        date: { from, to },
+        tglPinjam: pin,
+        jamPinjam,
+        tglKembali: kem,
+        jamKembali,
       } = input;
+
+      const [jp, mp] = jamPinjam.split(":").map(Number);
+      const [jk, mk] = jamKembali.split(":").map(Number);
+
+      const tglPinjam = new Date(pin);
+      const tglKembali = new Date(kem);
+
+      tglPinjam.setHours(jp!, mp, 0, 0);
+      tglKembali.setHours(jk!, mk, 0, 0);
 
       try {
         await ctx.db.$transaction(async (tx) => {
           const userId = ctx.session.user.id;
           const user = await tx.user.findFirst({ where: { id: userId } });
           const type = Number(typeString);
+
+          let penomoran = await tx.penomoran.findUnique({
+            where: {
+              id: PENOMORAN.IM,
+              year: String(new Date().getFullYear()),
+            },
+          });
+
+          if (!penomoran) {
+            penomoran = await tx.penomoran.create({
+              data: {
+                id: PENOMORAN.IM,
+                code: "IM",
+                number: 0,
+                year: String(new Date().getFullYear()),
+              },
+            });
+          }
 
           const peminjaman = await tx.peminjaman.create({
             data: {
@@ -261,12 +309,24 @@ export const peminjamanRouter = createTRPCRouter({
                 ? { ruangId }
                 : { barangId, jumlah: Number(jumlah) }),
               peruntukan,
-              tglPinjam: from,
-              tglKembali: to,
+              tglPinjam,
+              tglKembali,
               status: STATUS.PENGAJUAN.id,
               peminjamId: ctx.session.user.id,
             },
           });
+
+          if (peminjaman) {
+            await tx.penomoran.update({
+              where: {
+                id: PENOMORAN.IM,
+                year: String(new Date().getFullYear()),
+              },
+              data: {
+                number: { increment: 1 },
+              },
+            });
+          }
           const desc = `<p class="text-sm font-semibold">${user?.name}<span class="font-normal ml-[5px]">Meminta persetujuan permintaan peminjaman ${peminjaman.no}</span></p>`;
           await tx.notification.create({
             data: {
