@@ -596,20 +596,23 @@ export const permintaanBarangRouter = createTRPCRouter({
                     permintaanBarang: { push: prevBarang!.id },
                   },
                 });
-                const dag = await tx.daftarAsetGroup.findFirst({
-                  where: {
-                    id: prevBarang?.barangId,
-                  },
-                });
-                if (!dag) {
-                  await tx.daftarAsetGroup.create({
-                    data: {
-                      id: prevBarang!.barangId,
-                      idle: 0,
-                      used: 0,
-                      booked: 0,
+
+                if (Number(prevBarang!.Barang.fullCode.split(".")[0]) === 1) {
+                  const dag = await tx.daftarAsetGroup.findFirst({
+                    where: {
+                      id: prevBarang?.barangId,
                     },
                   });
+                  if (!dag) {
+                    await tx.daftarAsetGroup.create({
+                      data: {
+                        id: prevBarang!.barangId,
+                        idle: 0,
+                        used: 0,
+                        booked: 0,
+                      },
+                    });
+                  }
                 }
               }
             }
@@ -669,20 +672,22 @@ Menyutujui permintaan barang
                   },
                 });
 
-                const dag = await tx.daftarAsetGroup.findFirst({
-                  where: {
-                    id: prevBarang?.barangId,
-                  },
-                });
-                if (!dag) {
-                  await tx.daftarAsetGroup.create({
-                    data: {
-                      id: prevBarang!.barangId,
-                      idle: 0,
-                      used: 0,
-                      booked: 0,
+                if (Number(prevBarang!.Barang.fullCode.split(".")[0]) === 1) {
+                  const dag = await tx.daftarAsetGroup.findFirst({
+                    where: {
+                      id: prevBarang?.barangId,
                     },
                   });
+                  if (!dag) {
+                    await tx.daftarAsetGroup.create({
+                      data: {
+                        id: prevBarang!.barangId,
+                        idle: 0,
+                        used: 0,
+                        booked: 0,
+                      },
+                    });
+                  }
                 }
               }
             }

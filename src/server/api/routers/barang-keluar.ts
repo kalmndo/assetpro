@@ -207,6 +207,8 @@ export const barangKeluarRouter = createTRPCRouter({
             const toRemove: string[] = [];
 
             for (const p of value.permintaanBarang) {
+              //eslint-disable-next-line
+              //@ts-ignore
               if (p.permintaan === p.toTransfer) {
                 toRemove.push(p.id);
               }
@@ -220,12 +222,16 @@ export const barangKeluarRouter = createTRPCRouter({
 
               if (value.golongan === "Aset") {
                 await tx.ftkbItemPemohonAset.createMany({
+                  //eslint-disable-next-line
+                  //@ts-ignore
                   data: p.noInventaris.map((v: any) => ({
                     ftkbItemPemohonId: ftkbItemPemohon.id,
                     daftarAsetId: v,
                   })),
                 });
 
+                //eslint-disable-next-line
+                //@ts-ignore
                 for (const noInv of p.noInventaris) {
                   await tx.daftarAset.update({
                     where: {
@@ -264,14 +270,70 @@ export const barangKeluarRouter = createTRPCRouter({
                 },
               });
             } else {
-              await tx.kartuStok.update({
+              const stock = await tx.laporanStock.findFirst({
                 where: {
-                  id: value.id,
+                  stockId: value.id,
                 },
-                data: {
-                  qty: { decrement: value.permintaan },
+                orderBy: {
+                  date: "desc",
                 },
               });
+              for (const hmm of value.permintaanBarang) {
+                const st = await tx.kartuStok.findFirst({
+                  where: {
+                    id: value.id,
+                  },
+                });
+                const asdf = await tx.permintaanBarang.findFirst({
+                  where: {
+                    id: hmm.href,
+                  },
+                  include: {
+                    Ruang: true,
+                  },
+                });
+
+                const orgId = asdf!.Ruang.orgId;
+
+                const qty = hmm.permintaan;
+
+                const outPrice = stock ? stock.stockPrice : st!.harga;
+                const outTotal = outPrice.mul(qty).toNumber();
+
+                const stockQty = stock?.stockQty
+                  ? stock.stockQty - qty
+                  : st!.qty - qty;
+
+                const stockTotal = stock?.stockTotal
+                  ? stock.stockTotal.minus(outTotal).toNumber()
+                  : st!.total.minus(outTotal).toNumber();
+
+                const stockPrice = stockTotal / stockQty;
+
+                await tx.laporanStock.create({
+                  data: {
+                    orgId,
+                    stockId: value.id,
+                    outQty: qty,
+                    outPrice,
+                    outTotal,
+                    stockQty,
+                    stockPrice,
+                    stockTotal,
+                  },
+                });
+
+                await tx.kartuStok.update({
+                  where: {
+                    id: value.id,
+                  },
+                  data: {
+                    qty: stockQty,
+                    harga: stockPrice,
+                    total: stockTotal,
+                  },
+                });
+              }
 
               const ksp = await tx.kartuStokPergerakan.findFirst({
                 where: {
