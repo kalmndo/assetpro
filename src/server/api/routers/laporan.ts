@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "@/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import monthsSince from "@/lib/month-since";
 
@@ -228,14 +224,15 @@ export const laporanRouter = createTRPCRouter({
       });
 
       let index = 0;
-      const last = laporanStock.length - 1;
 
       for (const value of laporanStock) {
         // eslint-disable-next-line
         // @ts-ignore
         const v = organisasi[value.orgId];
+        // TODO: Gak bisa, ini harus index awal dari value.orgId bukan first dari seluruh
         if (index === 0) {
           v.stockAwal = value.stockTotal.toNumber();
+          index = index + 1;
         }
         if (value.inTotal) {
           v.masuk = v.masuk + value.inTotal.toNumber();
@@ -243,10 +240,8 @@ export const laporanRouter = createTRPCRouter({
         if (value.outTotal) {
           v.keluar = v.keluar + value.outTotal.toNumber();
         }
-        if (index === last) {
-          v.stockAkhir = value.stockTotal.toNumber();
-        }
-        index = index + 1;
+
+        v.stockAkhir = value.stockTotal.toNumber();
       }
 
       const result = Object.values(organisasi) as [
@@ -259,6 +254,90 @@ export const laporanRouter = createTRPCRouter({
           keluar: number;
         },
       ];
+      return result;
+    }),
+  stockByOrg: protectedProcedure
+    .input(
+      z.object({
+        orgId: z.string(),
+        from: z.date(),
+        to: z.date(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { from, to, orgId } = input;
+
+      const laporanStock = await ctx.db.laporanStock.findMany({
+        where: {
+          date: {
+            gte: from,
+            lte: to,
+          },
+          orgId,
+        },
+        orderBy: {
+          date: "asc",
+        },
+        include: {
+          KartuStok: {
+            include: {
+              MasterBarang: {
+                include: { Uom: true },
+              },
+            },
+          },
+        },
+      });
+
+      const res = {};
+
+      for (const value of laporanStock) {
+        const barang = value.KartuStok.MasterBarang;
+        // eslint-disable-next-line
+        // @ts-ignore
+        if (!res[value.stockId]) {
+          // eslint-disable-next-line
+          // @ts-ignore
+          res[value.stockId] = {
+            id: barang.id,
+            code: barang.fullCode,
+            name: barang.name,
+            uom: barang.Uom.name,
+            awal: value.stockTotal.toNumber(),
+            masuk: value.inTotal?.toNumber() ?? 0,
+            keluar: value.outTotal?.toNumber() ?? 0,
+            akhir: value.stockTotal.toNumber(),
+          };
+        } else {
+          if (value.inTotal) {
+            // eslint-disable-next-line
+            // @ts-ignore
+            res[value.stockId].masuk += value.inTotal.toNumber();
+          }
+          if (value.outTotal) {
+            // eslint-disable-next-line
+            // @ts-ignore
+            res[value.stockId].keluar += value.outTotal.toNumber();
+          }
+          // eslint-disable-next-line
+          // @ts-ignore
+          res[value.stockId].akhir = value.stockTotal.toNumber();
+        }
+      }
+
+      const result = Object.values(res) as [
+        {
+          id: string;
+          code: string;
+          name: string;
+          uom: string;
+          awal: number;
+          akhir: number;
+          masuk: number;
+          keluar: number;
+        },
+      ];
+      console.log("result", result);
       return result;
     }),
 });
