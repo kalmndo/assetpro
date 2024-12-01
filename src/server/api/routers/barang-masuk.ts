@@ -349,7 +349,6 @@ export const barangMasukRouter = createTRPCRouter({
               });
             } else {
               // kartu stok
-              // if kartu stock empty create else update
 
               const result = await tx.fttbItem.create({
                 data: {
@@ -365,19 +364,63 @@ export const barangMasukRouter = createTRPCRouter({
                 },
               });
 
+              const stock = await tx.laporanStock.findFirst({
+                where: {
+                  stockId: masterBarangId,
+                },
+                orderBy: {
+                  date: "desc",
+                },
+              });
+
+              const inPrice = value.Barang.harga!;
+              const inTotal = qty * value.Barang.harga!;
+
+              const stockQty = stock?.stockQty ? stock.stockQty + qty : qty;
+              const stockTotal = stock?.stockTotal
+                ? stock.stockTotal.plus(inTotal).toNumber()
+                : inTotal;
+              const stockPrice = stockTotal / stockQty;
+
+              const edan = await tx.permintaanPembelian.findFirst({
+                where: {
+                  id: value.Barang.PembelianBarang.formId,
+                },
+                include: {
+                  PBPP: {
+                    include: { Permintaan: { include: { Ruang: true } } },
+                  },
+                },
+              });
+              const orgId = edan!.PBPP[0]!.Permintaan.Ruang.orgId;
+
+              await tx.laporanStock.create({
+                data: {
+                  orgId,
+                  stockId: masterBarangId,
+                  inQty: qty,
+                  inPrice,
+                  inTotal,
+                  stockQty,
+                  stockPrice,
+                  stockTotal,
+                },
+              });
+
               await tx.kartuStok.upsert({
                 where: {
                   id: masterBarangId,
                 },
                 create: {
                   id: masterBarangId,
-                  qty,
-                  // TODO: ini dam
-                  harga: 0,
-                  total: 0,
+                  qty: stockQty,
+                  harga: stockPrice,
+                  total: stockTotal,
                 },
                 update: {
-                  qty: { increment: qty },
+                  qty: stockQty,
+                  harga: stockPrice,
+                  total: stockTotal,
                 },
               });
 

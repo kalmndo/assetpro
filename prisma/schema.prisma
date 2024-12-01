@@ -782,9 +782,10 @@ model Organisasi {
 
   Department Department[]
 
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  MasterRuang MasterRuang[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  MasterRuang  MasterRuang[]
+  LaporanStock LaporanStock[]
 }
 
 model Department {
@@ -1101,10 +1102,10 @@ model DaftarAsetGroup {
 }
 
 model KartuStok {
-  id    String @unique // MasterBarang
+  id    String  @unique // MasterBarang
   qty   Int
-  total Int
-  harga Int
+  total Decimal @db.Decimal(18, 2)
+  harga Decimal @db.Decimal(18, 2)
 
   MasterBarang MasterBarang @relation(fields: [id], references: [id])
 
@@ -1113,6 +1114,7 @@ model KartuStok {
 
   FttbItemKartuStock  FttbItemKartuStock[]
   KartuStokPergerakan KartuStokPergerakan[]
+  LaporanStock        LaporanStock[]
 }
 
 model KartuStokPergerakan {
@@ -1127,6 +1129,26 @@ model KartuStokPergerakan {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model LaporanStock {
+  id         String   @id @default(cuid())
+  orgId      String
+  stockId    String
+  inQty      Int?
+  inPrice    Decimal? @db.Decimal(18, 2)
+  inTotal    Decimal? @db.Decimal(18, 2)
+  outQty     Int?
+  outPrice   Decimal? @db.Decimal(18, 2)
+  outTotal   Decimal? @db.Decimal(18, 2)
+  stockQty   Int
+  stockPrice Decimal  @db.Decimal(18, 2)
+  stockTotal Decimal  @db.Decimal(18, 2)
+
+  Organisasi Organisasi @relation(fields: [orgId], references: [id])
+  KartuStok  KartuStok  @relation(fields: [stockId], references: [id])
+
+  date DateTime @default(now())
 }
 
 model Penomoran {
