@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { type UseFormReturn } from "react-hook-form";
 import {
   Command,
@@ -7,43 +7,43 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 
 type Data = {
-  label: string
-  value: string
+  label: string;
+  value: string;
   [key: string]: string | number;
-}
+};
 
 type TextInputProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: UseFormReturn<any>;
   name: string;
-  label: string;
+  label?: string;
   placeholder: string;
-  className?: string
-  data?: Data[]
-  disabled?: boolean
+  className?: string;
+  data?: Data[];
+  disabled?: boolean;
 };
 
 const SearchSelect = (props: TextInputProps) => {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   return (
     <FormField
@@ -51,7 +51,7 @@ const SearchSelect = (props: TextInputProps) => {
       name={props.name}
       render={({ field }) => (
         <FormItem className="flex flex-col ">
-          <FormLabel className="my-1">{props.label}</FormLabel>
+          {props.label && <FormLabel className="my-1">{props.label}</FormLabel>}
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <FormControl>
@@ -62,13 +62,12 @@ const SearchSelect = (props: TextInputProps) => {
                   disabled={props.disabled ?? false}
                   className={cn(
                     "justify-between",
-                    !field.value && "text-muted-foreground"
+                    !field.value && "text-muted-foreground",
                   )}
                 >
                   {field.value
-                    ? props.data?.find(
-                      (data) => data?.value === field?.value
-                    )?.label
+                    ? props.data?.find((data) => data?.value === field?.value)
+                        ?.label
                     : props.placeholder}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -85,8 +84,8 @@ const SearchSelect = (props: TextInputProps) => {
                         value={data.label}
                         key={data.value}
                         onSelect={() => {
-                          props.form.setValue(props.name, data.value)
-                          setOpen(false)
+                          props.form.setValue(props.name, data.value);
+                          setOpen(false);
                         }}
                       >
                         <Check
@@ -94,7 +93,7 @@ const SearchSelect = (props: TextInputProps) => {
                             "mr-2 h-4 w-4",
                             data.value === field.value
                               ? "opacity-100"
-                              : "opacity-0"
+                              : "opacity-0",
                           )}
                         />
                         {data.label}
@@ -109,7 +108,8 @@ const SearchSelect = (props: TextInputProps) => {
         </FormItem>
       )}
     />
-  )
-}
+  );
+};
 
-export default SearchSelect
+export default SearchSelect;
+

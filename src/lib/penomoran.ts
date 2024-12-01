@@ -9,6 +9,9 @@ const PENOMORAN = {
   KELUAR_BARANG: "keluar-barang",
   MASUK_BARANG: "masuk-barang",
   ASET: "aset",
+
+  PEMINJAMAN_EKSTERNAL: "peminjaman-eksternal",
+  PEMINJAMAN: "peminjaman",
 };
 
 export default PENOMORAN;

@@ -1,36 +1,33 @@
 import { ROLE } from "@/lib/role";
 import { STATUS } from "@/lib/status";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-} from "@/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { type Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 export const peminjamanRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(z.object({
-      id: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
-      const {
-        id
-      } = input
-      const userId = ctx.session.user.id
+      const { id } = input;
+      const userId = ctx.session.user.id;
       const user = await ctx.db.user.findFirst({
         where: {
-          id: userId
+          id: userId,
         },
         include: {
-          UserRole: true
-        }
-      })
-      const userRoles = user?.UserRole.map((v) => v.roleId)
+          UserRole: true,
+        },
+      });
+      const userRoles = user?.UserRole.map((v) => v.roleId);
 
       const res = await ctx.db.peminjaman.findFirst({
         where: {
-          id
+          id,
         },
         include: {
           Barang: true,
@@ -38,39 +35,50 @@ export const peminjamanRouter = createTRPCRouter({
           Peminjam: {
             include: {
               Department: true,
-              DepartmentUnit: true
-            }
+              DepartmentUnit: true,
+            },
           },
           PeminjamanHistory: true,
           PeminjamanAsetInternal: {
             include: {
               Aset: {
                 include: {
-                  Pengguna: true
-                }
-              }
-            }
-          }
+                  Pengguna: true,
+                },
+              },
+            },
+          },
         },
-      })
+      });
 
       if (!res) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Tidak ada form ini"
-        })
+          message: "Tidak ada form ini",
+        });
       }
-      const status = res.status
+      const status = res.status;
 
-      const isAtasanCanApprove = userId === res.Peminjam.atasanId && status === STATUS.PENGAJUAN.id
-      const isCanApprove = userRoles?.includes(ROLE.PEMINJAMAN_INTERNAL_APPROVE.id) && status === STATUS.ATASAN_SETUJU.id
-      const isCanSendToUser = userRoles?.includes(ROLE.PEMINJAMAN_INTERNAL_SEND_TO_USER.id) && status === STATUS.IM_APPROVE.id
-      const isUserCanReceive = userId === res.peminjamId && status === STATUS.DISERAHKAN_KE_USER.id
-      const isUserCanReturn = userId === res.peminjamId && status === STATUS.DIGUNAKAN.id
-      const isMalCanReceive = userRoles?.includes(ROLE.PEMINJAMAN_INTERNAL_RECEIVE_FROM_USER.id) && status === STATUS.RETURNING.id
+      const isAtasanCanApprove =
+        userId === res.Peminjam.atasanId && status === STATUS.PENGAJUAN.id;
+      const isCanApprove =
+        userRoles?.includes(ROLE.PEMINJAMAN_INTERNAL_APPROVE.id) &&
+        status === STATUS.ATASAN_SETUJU.id;
+      const isCanSendToUser =
+        userRoles?.includes(ROLE.PEMINJAMAN_INTERNAL_SEND_TO_USER.id) &&
+        status === STATUS.IM_APPROVE.id;
+      const isUserCanReceive =
+        userId === res.peminjamId && status === STATUS.DISERAHKAN_KE_USER.id;
+      const isUserCanReturn =
+        userId === res.peminjamId && status === STATUS.DIGUNAKAN.id;
+      const isMalCanReceive =
+        userRoles?.includes(ROLE.PEMINJAMAN_INTERNAL_RECEIVE_FROM_USER.id) &&
+        status === STATUS.RETURNING.id;
 
-      const peminjam = res.Peminjam
-      let listAvailableAsets: Prisma.DaftarAsetGetPayload<{ include: { Pengguna: true } }>[] = []
+      const peminjam = res.Peminjam;
+      let listAvailableAsets: Prisma.DaftarAsetGetPayload<{
+        include: { Pengguna: true; Ruang: true };
+      }>[] = [];
 
       if (res.type) {
         const aset = await ctx.db.daftarAset.findMany({
@@ -83,8 +91,8 @@ export const peminjamanRouter = createTRPCRouter({
                 },
                 to: {
                   gte: res.tglPinjam,
-                }
-              }
+                },
+              },
             },
             PeminjamanAsetEksternal: {
               none: {
@@ -93,16 +101,17 @@ export const peminjamanRouter = createTRPCRouter({
                 },
                 to: {
                   gte: res.tglPinjam,
-                }
-              }
-            }
+                },
+              },
+            },
           },
           include: {
-            Pengguna: true
-          }
-        })
+            Pengguna: true,
+            Ruang: true,
+          },
+        });
 
-        listAvailableAsets = aset
+        listAvailableAsets = aset;
       }
 
       return {
@@ -113,8 +122,8 @@ export const peminjamanRouter = createTRPCRouter({
         jumlah: res.jumlah,
         peminjam,
         peruntukan: res.peruntukan,
-        from: res.tglPinjam.toLocaleDateString("id-ID", { dateStyle: 'full' }),
-        to: res.tglKembali.toLocaleDateString('id-ID', { dateStyle: "full" }),
+        from: res.tglPinjam.toLocaleDateString("id-ID", { dateStyle: "full" }),
+        to: res.tglKembali.toLocaleDateString("id-ID", { dateStyle: "full" }),
         status: res.status,
         tanggal: res.createdAt.toLocaleDateString("id-ID"),
         riwayat: res.PeminjamanHistory,
@@ -125,103 +134,109 @@ export const peminjamanRouter = createTRPCRouter({
         isUserCanReturn,
         isMalCanReceive,
         listAvailableAsets,
-        asets: res.PeminjamanAsetInternal
-      }
+        asets: res.PeminjamanAsetInternal,
+      };
     }),
-  getAll: protectedProcedure
-    .query(async ({ ctx }) => {
-      const result = await ctx.db.peminjaman.findMany({
-        orderBy: {
-          createdAt: "desc"
-        },
-        include: {
-          Barang: true,
-          Ruang: true
-        }
-      })
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    const result = await ctx.db.peminjaman.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        Barang: true,
+        Ruang: true,
+      },
+    });
 
-      const barangs = await ctx.db.masterBarang.findMany()
-      const ruangs = await ctx.db.masterRuang.findMany({
-        include: {
-          Peminjaman: true,
-          PeminjamanExternal: true
-        }
-      })
-      const res = result.map((v) => {
-        const nama = v.barangId ? v.Barang?.name : v.Ruang?.name
-        return ({
-          id: v.id,
-          no: v.no,
-          type: v.type === 0 ? "Ruang" : "Barang",
-          nama,
-          peruntukan: v.peruntukan,
-          status: v.status,
-          tanggal: v.createdAt.toLocaleDateString("id-ID"),
-          jadwalPinjam: `${v.tglPinjam.toLocaleDateString("id-ID")} - ${v.tglKembali.toLocaleDateString("id-ID")}`
-        })
-      })
-
+    const barangs = await ctx.db.masterBarang.findMany();
+    const ruangs = await ctx.db.masterRuang.findMany({
+      include: {
+        Peminjaman: true,
+        PeminjamanExternal: true,
+      },
+    });
+    const res = result.map((v) => {
+      const nama = v.barangId ? v.Barang?.name : v.Ruang?.name;
       return {
-        value: res,
-        data: {
-          barangs: barangs.map((v) => ({
-            label: v.name,
-            value: v.id
-          })),
-          ruangs: ruangs.map((v) => {
-            const p = v.Peminjaman.map((v) => ({ from: v.tglPinjam, to: v.tglKembali }))
-            const px = v.PeminjamanExternal.map((v) => ({ from: v.tglPinjam, to: v.tglKembali }))
-            const booked = [...p, ...px]
-            return ({
-              label: v.name,
-              value: v.id,
-              booked
-            })
-          })
-        }
-      }
-    }),
-  mGetAll: protectedProcedure
-    .query(async ({ ctx }) => {
-      const result = await ctx.db.peminjaman.findMany({
-        where: {
-          NOT: { status: STATUS.PENGAJUAN.id }
-        },
-        orderBy: {
-          createdAt: "desc"
-        },
-        include: {
-          Barang: true,
-          Ruang: true
-        }
-      })
+        id: v.id,
+        no: v.no,
+        type: v.type === 0 ? "Ruang" : "Barang",
+        nama,
+        peruntukan: v.peruntukan,
+        status: v.status,
+        tanggal: v.createdAt.toLocaleDateString("id-ID"),
+        jadwalPinjam: `${v.tglPinjam.toLocaleDateString("id-ID")} - ${v.tglKembali.toLocaleDateString("id-ID")}`,
+      };
+    });
 
-      return result.map((v) => {
-        const nama = v.barangId ? v.Barang?.name : v.Ruang?.name
-        return ({
-          id: v.id,
-          no: v.no,
-          type: v.type === 0 ? "Ruang" : "Barang",
-          nama,
-          peruntukan: v.peruntukan,
-          status: v.status,
-          tanggal: v.createdAt.toLocaleDateString("id-ID"),
-          jadwalPinjam: `${v.tglPinjam.toLocaleDateString("id-ID")} - ${v.tglKembali.toLocaleDateString("id-ID")}`
-        })
-      })
-    }),
+    return {
+      value: res,
+      data: {
+        barangs: barangs.map((v) => ({
+          label: v.name,
+          value: v.id,
+        })),
+        ruangs: ruangs.map((v) => {
+          const p = v.Peminjaman.map((v) => ({
+            from: v.tglPinjam,
+            to: v.tglKembali,
+          }));
+          const px = v.PeminjamanExternal.map((v) => ({
+            from: v.tglPinjam,
+            to: v.tglKembali,
+          }));
+          const booked = [...p, ...px];
+          return {
+            label: v.name,
+            value: v.id,
+            booked,
+          };
+        }),
+      },
+    };
+  }),
+  mGetAll: protectedProcedure.query(async ({ ctx }) => {
+    const result = await ctx.db.peminjaman.findMany({
+      where: {
+        NOT: { status: STATUS.PENGAJUAN.id },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        Barang: true,
+        Ruang: true,
+      },
+    });
+
+    return result.map((v) => {
+      const nama = v.barangId ? v.Barang?.name : v.Ruang?.name;
+      return {
+        id: v.id,
+        no: v.no,
+        type: v.type === 0 ? "Ruang" : "Barang",
+        nama,
+        peruntukan: v.peruntukan,
+        status: v.status,
+        tanggal: v.createdAt.toLocaleDateString("id-ID"),
+        jadwalPinjam: `${v.tglPinjam.toLocaleDateString("id-ID")} - ${v.tglKembali.toLocaleDateString("id-ID")}`,
+      };
+    });
+  }),
   create: protectedProcedure
-    .input(z.object({
-      type: z.string(),
-      barangId: z.string(),
-      ruangId: z.string(),
-      peruntukan: z.string(),
-      jumlah: z.string(),
-      date: z.object({
-        from: z.date(),
-        to: z.date()
-      })
-    }))
+    .input(
+      z.object({
+        type: z.string(),
+        barangId: z.string(),
+        ruangId: z.string(),
+        peruntukan: z.string(),
+        jumlah: z.string(),
+        date: z.object({
+          from: z.date(),
+          to: z.date(),
+        }),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const {
         type: typeString,
@@ -229,28 +244,30 @@ export const peminjamanRouter = createTRPCRouter({
         ruangId,
         peruntukan,
         jumlah,
-        date: { from, to }
-      } = input
+        date: { from, to },
+      } = input;
 
       try {
         await ctx.db.$transaction(async (tx) => {
-          const userId = ctx.session.user.id
-          const user = await tx.user.findFirst({ where: { id: userId } })
-          const type = Number(typeString)
+          const userId = ctx.session.user.id;
+          const user = await tx.user.findFirst({ where: { id: userId } });
+          const type = Number(typeString);
 
           const peminjaman = await tx.peminjaman.create({
             data: {
               no: Math.random().toString(),
               type,
-              ...(type === 0 ? { ruangId } : { barangId, jumlah: Number(jumlah) }),
+              ...(type === 0
+                ? { ruangId }
+                : { barangId, jumlah: Number(jumlah) }),
               peruntukan,
               tglPinjam: from,
               tglKembali: to,
               status: STATUS.PENGAJUAN.id,
-              peminjamId: ctx.session.user.id
+              peminjamId: ctx.session.user.id,
             },
-          })
-          const desc = `<p class="text-sm font-semibold">${user?.name}<span class="font-normal ml-[5px]">Meminta persetujuan permintaan peminjaman ${peminjaman.no}</span></p>`
+          });
+          const desc = `<p class="text-sm font-semibold">${user?.name}<span class="font-normal ml-[5px]">Meminta persetujuan permintaan peminjaman ${peminjaman.no}</span></p>`;
           await tx.notification.create({
             data: {
               fromId: userId,
@@ -259,19 +276,19 @@ export const peminjamanRouter = createTRPCRouter({
               link: `/permintaan/peminjaman/${peminjaman.id}`,
               desc,
               isRead: false,
-            }
-          })
+            },
+          });
           await tx.peminjamanHistory.create({
             data: {
               peminjamanId: peminjaman.id,
               desc: "Permohonan peminjaman",
-            }
-          })
-        })
+            },
+          });
+        });
         return {
           ok: true,
-          message: 'Berhasil membuat permintan peminjaman'
-        }
+          message: "Berhasil membuat permintan peminjaman",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -281,36 +298,36 @@ export const peminjamanRouter = createTRPCRouter({
       }
     }),
   atasanApprove: protectedProcedure
-    .input(z.object({
-      id: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const {
-        id
-      } = input
+      const { id } = input;
 
       try {
         await ctx.db.$transaction(async (tx) => {
           await tx.peminjaman.update({
             where: {
-              id
+              id,
             },
             data: {
-              status: STATUS.ATASAN_SETUJU.id
-            }
-          })
+              status: STATUS.ATASAN_SETUJU.id,
+            },
+          });
 
           await tx.peminjamanHistory.create({
             data: {
               desc: "Atasan Menyetujui",
-              peminjamanId: id
-            }
-          })
-        })
+              peminjamanId: id,
+            },
+          });
+        });
         return {
           ok: true,
-          message: 'Berhasil menyetujui permintan peminjaman'
-        }
+          message: "Berhasil menyetujui permintan peminjaman",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -320,39 +337,38 @@ export const peminjamanRouter = createTRPCRouter({
       }
     }),
   atasanReject: protectedProcedure
-    .input(z.object({
-      id: z.string(),
-      catatan: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+        catatan: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const {
-        id,
-        catatan
-      } = input
+      const { id, catatan } = input;
 
       try {
         await ctx.db.$transaction(async (tx) => {
           await tx.peminjaman.update({
             where: {
-              id
+              id,
             },
             data: {
-              status: STATUS.ATASAN_SETUJU.id
-            }
-          })
+              status: STATUS.ATASAN_SETUJU.id,
+            },
+          });
 
           await tx.peminjamanHistory.create({
             data: {
               desc: "Atasan menolak permintaan",
               catatan,
-              peminjamanId: id
-            }
-          })
-        })
+              peminjamanId: id,
+            },
+          });
+        });
         return {
           ok: true,
-          message: 'Berhasil menolak permintan peminjaman'
-        }
+          message: "Berhasil menolak permintan peminjaman",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -362,36 +378,36 @@ export const peminjamanRouter = createTRPCRouter({
       }
     }),
   approve: protectedProcedure
-    .input(z.object({
-      id: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const {
-        id
-      } = input
+      const { id } = input;
 
       try {
         await ctx.db.$transaction(async (tx) => {
           await tx.peminjaman.update({
             where: {
-              id
+              id,
             },
             data: {
-              status: STATUS.IM_APPROVE.id
-            }
-          })
+              status: STATUS.IM_APPROVE.id,
+            },
+          });
 
           await tx.peminjamanHistory.create({
             data: {
               desc: "Permohonan disetujui",
-              peminjamanId: id
-            }
-          })
-        })
+              peminjamanId: id,
+            },
+          });
+        });
         return {
           ok: true,
-          message: 'Berhasil menyetujui permintan peminjaman'
-        }
+          message: "Berhasil menyetujui permintan peminjaman",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -401,47 +417,46 @@ export const peminjamanRouter = createTRPCRouter({
       }
     }),
   approveAset: protectedProcedure
-    .input(z.object({
-      id: z.string(),
-      asetIds: z.array(z.string())
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+        asetIds: z.array(z.string()),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const {
-        id,
-        asetIds
-      } = input
+      const { id, asetIds } = input;
 
       try {
         await ctx.db.$transaction(async (tx) => {
           const result = await tx.peminjaman.update({
             where: {
-              id
+              id,
             },
             data: {
-              status: STATUS.IM_APPROVE.id
-            }
-          })
+              status: STATUS.IM_APPROVE.id,
+            },
+          });
 
           await tx.peminjamanAsetInternal.createMany({
             data: asetIds.map((v) => ({
               asetId: v,
               from: result.tglPinjam,
               to: result.tglKembali,
-              peminjamanId: id
-            }))
-          })
+              peminjamanId: id,
+            })),
+          });
 
           await tx.peminjamanHistory.create({
             data: {
               desc: "Permohonan disetujui",
-              peminjamanId: id
-            }
-          })
-        })
+              peminjamanId: id,
+            },
+          });
+        });
         return {
           ok: true,
-          message: 'Berhasil menyetujui permintan peminjaman'
-        }
+          message: "Berhasil menyetujui permintan peminjaman",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -451,39 +466,38 @@ export const peminjamanRouter = createTRPCRouter({
       }
     }),
   reject: protectedProcedure
-    .input(z.object({
-      id: z.string(),
-      catatan: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+        catatan: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const {
-        id,
-        catatan
-      } = input
+      const { id, catatan } = input;
 
       try {
         await ctx.db.$transaction(async (tx) => {
           await tx.peminjaman.update({
             where: {
-              id
+              id,
             },
             data: {
-              status: STATUS.ATASAN_SETUJU.id
-            }
-          })
+              status: STATUS.ATASAN_SETUJU.id,
+            },
+          });
 
           await tx.peminjamanHistory.create({
             data: {
               desc: "Permohonan ditolak",
               catatan,
-              peminjamanId: id
-            }
-          })
-        })
+              peminjamanId: id,
+            },
+          });
+        });
         return {
           ok: true,
-          message: 'Berhasil menolak permintan peminjaman'
-        }
+          message: "Berhasil menolak permintan peminjaman",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -493,37 +507,36 @@ export const peminjamanRouter = createTRPCRouter({
       }
     }),
   sendToUser: protectedProcedure
-    .input(z.object({
-      id: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const {
-        id
-      } = input
+      const { id } = input;
 
       try {
         await ctx.db.$transaction(async (tx) => {
-
           await tx.peminjaman.update({
             where: {
-              id
+              id,
             },
             data: {
-              status: STATUS.DISERAHKAN_KE_USER.id
-            }
-          })
+              status: STATUS.DISERAHKAN_KE_USER.id,
+            },
+          });
 
           await tx.peminjamanHistory.create({
             data: {
               desc: "Menyerahkan ke pemohon",
-              peminjamanId: id
-            }
-          })
-        })
+              peminjamanId: id,
+            },
+          });
+        });
         return {
           ok: true,
-          message: 'Berhasil menyerahkan ke pemohon'
-        }
+          message: "Berhasil menyerahkan ke pemohon",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -533,37 +546,36 @@ export const peminjamanRouter = createTRPCRouter({
       }
     }),
   userReceive: protectedProcedure
-    .input(z.object({
-      id: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const {
-        id
-      } = input
+      const { id } = input;
 
       try {
         await ctx.db.$transaction(async (tx) => {
-
           await tx.peminjaman.update({
             where: {
-              id
+              id,
             },
             data: {
-              status: STATUS.DIGUNAKAN.id
-            }
-          })
+              status: STATUS.DIGUNAKAN.id,
+            },
+          });
 
           await tx.peminjamanHistory.create({
             data: {
               desc: "Pemohon menerima",
-              peminjamanId: id
-            }
-          })
-        })
+              peminjamanId: id,
+            },
+          });
+        });
         return {
           ok: true,
-          message: 'Berhasil menerima'
-        }
+          message: "Berhasil menerima",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -573,37 +585,36 @@ export const peminjamanRouter = createTRPCRouter({
       }
     }),
   userReturn: protectedProcedure
-    .input(z.object({
-      id: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const {
-        id
-      } = input
+      const { id } = input;
 
       try {
         await ctx.db.$transaction(async (tx) => {
-
           await tx.peminjaman.update({
             where: {
-              id
+              id,
             },
             data: {
-              status: STATUS.RETURNING.id
-            }
-          })
+              status: STATUS.RETURNING.id,
+            },
+          });
 
           await tx.peminjamanHistory.create({
             data: {
               desc: "Pemohon mengembalikan",
-              peminjamanId: id
-            }
-          })
-        })
+              peminjamanId: id,
+            },
+          });
+        });
         return {
           ok: true,
-          message: 'Berhasil membuat pengembalian'
-        }
+          message: "Berhasil membuat pengembalian",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -613,36 +624,36 @@ export const peminjamanRouter = createTRPCRouter({
       }
     }),
   done: protectedProcedure
-    .input(z.object({
-      id: z.string()
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const {
-        id
-      } = input
+      const { id } = input;
 
       try {
         await ctx.db.$transaction(async (tx) => {
           await tx.peminjaman.update({
             where: {
-              id
+              id,
             },
             data: {
-              status: STATUS.SELESAI.id
-            }
-          })
+              status: STATUS.SELESAI.id,
+            },
+          });
 
           await tx.peminjamanHistory.create({
             data: {
               desc: "Barang telah di terima kembali",
-              peminjamanId: id
-            }
-          })
-        })
+              peminjamanId: id,
+            },
+          });
+        });
         return {
           ok: true,
-          message: 'Terima'
-        }
+          message: "Terima",
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
