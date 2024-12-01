@@ -404,6 +404,18 @@ export const permintaanBarangRouter = createTRPCRouter({
             },
           });
 
+          if (pb) {
+            await tx.penomoran.update({
+              where: {
+                id: PENOMORAN.IM,
+                year: String(new Date().getFullYear()),
+              },
+              data: {
+                number: { increment: 1 },
+              },
+            });
+          }
+
           for (const b of barang) {
             const { id, qty, uomId, kodeAnggaran, deskripsi } = b;
 
