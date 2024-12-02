@@ -1,5 +1,6 @@
-import { Color as TiptapColor } from '@tiptap/extension-color'
-import { Plugin } from '@tiptap/pm/state'
+/* eslint-disable */
+import { Color as TiptapColor } from "@tiptap/extension-color";
+import { Plugin } from "@tiptap/pm/state";
 
 export const Color = TiptapColor.extend({
   addProseMirrorPlugins() {
@@ -8,13 +9,13 @@ export const Color = TiptapColor.extend({
       new Plugin({
         props: {
           handleKeyDown: (_, event) => {
-            if (event.key === 'Enter') {
-              this.editor.commands.unsetColor()
+            if (event.key === "Enter") {
+              this.editor.commands.unsetColor();
             }
-            return false
-          }
-        }
-      })
-    ]
-  }
-})
+            return false;
+          },
+        },
+      }),
+    ];
+  },
+});

@@ -123,7 +123,9 @@ export default function Page({
               <p>No Inventaris: {data.barang.noInv}</p>
               <p
                 className="text-sm leading-relaxed text-muted-foreground"
-                dangerouslySetInnerHTML={{ __html: data.barang.deskripsi }}
+                dangerouslySetInnerHTML={{
+                  __html: data.barang.deskripsi ?? "",
+                }}
               />
             </div>
           </div>
@@ -222,4 +224,3 @@ export default function Page({
     </div>
   );
 }
-
