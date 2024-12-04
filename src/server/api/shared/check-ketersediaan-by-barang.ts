@@ -43,7 +43,8 @@ export default async function checkKetersediaanByBarang(
     // @ts-ignore
     ...tersediaStock(kartuStok, persediaan),
   ];
-  console.log("tersedia", JSON.stringify(tersedia, null, 2));
+
+  console.log("tersedia", tersedia);
 
   const takTersedia = [
     // @ts-ignore
@@ -79,9 +80,34 @@ function tersediaAset(
   // tapi imId nya used
   return barang.map((v) => {
     const permintaan = golonganData.find((a) => a.barangId === v.id)!;
-    const permintaanBarang = permintaan?.permintaanBarang.map((item: any) =>
-      mapPermintaanBarang(item, v.MasterBarang),
-    );
+    const permintaanBarang = [];
+    // eslint-disable-next-line
+    // @ts-ignore
+    let quota = v.qty;
+
+    for (const item of permintaan.permintaanBarang) {
+      const qtyMinOut = item.qty - item.qtyOut;
+      const toTransfer = qtyMinOut > 0 ? qtyMinOut : quota;
+      permintaanBarang.push({
+        id: item.id,
+        pemohonId: item.Permintaan.Pemohon.id,
+        name: item.Permintaan.Pemohon.name,
+        im: item.Permintaan.no,
+        href: item.Permintaan.id,
+        barangId: v.MasterBarang.id,
+        qty: `${item.qty} ${v.MasterBarang.Uom.name}`,
+        permintaan: item.qty,
+        qtyOrdered: item.qtyOrdered,
+        qtyOut: item.qtyOut,
+        toTransfer,
+        imStatus: item.Permintaan.status,
+        status: item.status,
+        createdAt: item.createdAt,
+      });
+      if (quota !== 0) {
+        quota = quota - toTransfer;
+      }
+    }
     const daftarAset = v.MasterBarang.DaftarAset;
 
     const filteredAset = daftarAset.filter(

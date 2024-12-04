@@ -205,8 +205,10 @@ export const barangKeluarRouter = createTRPCRouter({
             });
 
             const toRemove: string[] = [];
+            let totalToTransfer = 0;
 
             for (const p of value.permintaanBarang) {
+              totalToTransfer = totalToTransfer + p.toTransfer;
               //eslint-disable-next-line
               //@ts-ignore
               if (p.permintaan === p.toTransfer) {
@@ -217,6 +219,15 @@ export const barangKeluarRouter = createTRPCRouter({
                   ftkbItemId: ftkbItem.id,
                   imId: p.href,
                   qty: value.permintaan,
+                },
+              });
+
+              await tx.permintaanBarangBarang.update({
+                where: {
+                  id: p.id,
+                },
+                data: {
+                  qtyOut: p.toTransfer,
                 },
               });
 
@@ -251,8 +262,7 @@ export const barangKeluarRouter = createTRPCRouter({
               },
               data: {
                 qty: { decrement: value.permintaan },
-                // TODO: Kalau barang tidak melakukan pembelian, jangan di decrement
-                ordered: { decrement: value.permintaan },
+                ordered: { decrement: totalToTransfer },
                 permintaanBarang: {
                   set: value.permintaanBarangId.filter(
                     (item: string) => !toRemove.includes(item),
@@ -309,7 +319,7 @@ export const barangKeluarRouter = createTRPCRouter({
                   ? stock.stockTotal.minus(outTotal).toNumber()
                   : st!.total.minus(outTotal).toNumber();
 
-                const stockPrice = stockTotal / stockQty;
+                const stockPrice = stockQty > 0 ? stockTotal / stockQty : 0;
 
                 await tx.laporanStock.create({
                   data: {
