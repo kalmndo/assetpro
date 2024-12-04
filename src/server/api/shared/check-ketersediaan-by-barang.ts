@@ -44,8 +44,6 @@ export default async function checkKetersediaanByBarang(
     ...tersediaStock(kartuStok, persediaan),
   ];
 
-  console.log("tersedia", tersedia);
-
   const takTersedia = [
     // @ts-ignore
     ...mapBarangTakTersedia(daftarAsetGroup, daftarAset, "idle"),
@@ -54,7 +52,7 @@ export default async function checkKetersediaanByBarang(
   ];
 
   return {
-    tersedia,
+    tersedia: tersedia.filter((v) => v.permintaan > 0),
     takTersedia,
   };
 }
