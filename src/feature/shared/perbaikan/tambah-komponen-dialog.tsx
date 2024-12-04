@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
   Dialog,
   DialogContent,
@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
@@ -18,14 +18,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import { z } from "zod";
 import { useEffect, useState } from "react";
 import { api, type RouterOutputs } from "@/trpc/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CurrencyInput } from "@/components/currency-input";
 import SearchSelect from "@/components/search-select";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -33,15 +39,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
 
 const formSchema = z.object({
-  "type": z.string().min(1).max(255),
-  "name": z.string().min(1).max(255),
-  "imId": z.string().min(1).max(255),
-  "items": z.array(z.string()).refine((value) => value.some((item) => item), {
+  type: z.string().min(1).max(255),
+  name: z.string().min(1).max(255),
+  imId: z.string().min(1).max(255),
+  items: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: "Wajib pilih minimal 1 barang.",
   }),
-  "biaya": z.string().min(1).max(255),
-  "jumlah": z.string().min(1).max(255),
-})
+  biaya: z.string().min(1).max(255),
+  jumlah: z.string().min(1).max(255),
+});
 // barang
 // pilih barang yang menuju ke im ini
 
@@ -52,46 +58,46 @@ const formSchema = z.object({
 const TheForm = ({
   isPending,
   onSubmit,
-  imComponents
+  imComponents,
 }: {
-  isPending: boolean,
-  onSubmit(value: any): void,
-  imComponents: RouterOutputs['perbaikan']['getImConponents']
+  isPending: boolean;
+  onSubmit(value: any): void;
+  imComponents: RouterOutputs["perbaikan"]["getImConponents"];
 }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: '0',
-      name: '',
-      imId: '',
+      type: "0",
+      name: "",
+      imId: "",
       items: [],
-      biaya: '',
-      jumlah: ''
+      biaya: "",
+      jumlah: "",
     },
-  })
+  });
 
-  const formType = form.watch('type');
-  const setValue = form.setValue
+  const formType = form.watch("type");
+  const setValue = form.setValue;
 
   useEffect(() => {
-    if (formType === '0') {
-      setValue("imId", '')
-      setValue("items", [])
-      setValue("name", '1')
-      setValue("biaya", '1')
-      setValue("jumlah", '1')
-    } else if (formType === '1') {
-      setValue("imId", '1')
-      setValue("items", ['1'])
-      setValue("name", '')
-      setValue("biaya", '')
-      setValue("jumlah", '')
+    if (formType === "0") {
+      setValue("imId", "");
+      setValue("items", []);
+      setValue("name", "1");
+      setValue("biaya", "1");
+      setValue("jumlah", "1");
+    } else if (formType === "1") {
+      setValue("imId", "1");
+      setValue("items", ["1"]);
+      setValue("name", "");
+      setValue("biaya", "");
+      setValue("jumlah", "");
     }
-  }, [formType, setValue])
+  }, [formType, setValue]);
 
   return (
     <Form {...form}>
-      <form noValidate onSubmit={form.handleSubmit(onSubmit)} >
+      <form noValidate onSubmit={form.handleSubmit(onSubmit)}>
         <div className="space-y-2">
           <FormField
             control={form.control}
@@ -99,7 +105,10 @@ const TheForm = ({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Pilih tipe" />
@@ -107,32 +116,37 @@ const TheForm = ({
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="0">Barang</SelectItem>
-                    <SelectItem value="1">Bukan barang</SelectItem>
+                    <SelectItem value="1">Jasa</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
-          {form.watch("type") === '0' ?
+          {form.watch("type") === "0" ? (
             <>
               <SearchSelect
                 name="imId"
                 form={form}
                 label="Pilih Internal Memo"
                 placeholder="Pilih Internal Memo"
-                data={imComponents?.map((v) => ({ label: v.no, value: v.imId }))}
+                data={imComponents?.map((v) => ({
+                  label: v.no,
+                  value: v.imId,
+                }))}
               />
-              {
-                form.watch("imId") ?
-                  // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-                  imComponents.find((v) => v.imId === form.watch("imId"))?.barang.length! > 0 ?
-                    <FormField
-                      control={form.control}
-                      name="items"
-                      render={() => (
-                        <FormItem>
-                          {imComponents.find((v) => v.imId === form.watch('imId'))?.barang.map((item) => (
+              {form.watch("imId") ? (
+                // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+                imComponents.find((v) => v.imId === form.watch("imId"))?.barang
+                  .length! > 0 ? (
+                  <FormField
+                    control={form.control}
+                    name="items"
+                    render={() => (
+                      <FormItem>
+                        {imComponents
+                          .find((v) => v.imId === form.watch("imId"))
+                          ?.barang.map((item) => (
                             <FormField
                               key={item.id}
                               control={form.control}
@@ -141,36 +155,45 @@ const TheForm = ({
                                 return (
                                   <FormItem
                                     key={item.id}
-                                    className="flex flex-row items-center justify-between space-x-3 space-y-0 mt-4"
+                                    className="mt-4 flex flex-row items-center justify-between space-x-3 space-y-0"
                                   >
-                                    <div
-                                      className="flex flex-row items-center space-x-3 space-y-0"
-                                    >
+                                    <div className="flex flex-row items-center space-x-3 space-y-0">
                                       <FormControl>
                                         <Checkbox
-                                          checked={field.value?.includes(item.id)}
+                                          checked={field.value?.includes(
+                                            item.id,
+                                          )}
                                           onCheckedChange={(checked) => {
                                             return checked
-                                              ? field.onChange([...field.value, item.id])
+                                              ? field.onChange([
+                                                  ...field.value,
+                                                  item.id,
+                                                ])
                                               : field.onChange(
-                                                field.value?.filter(
-                                                  (value) => value !== item.id
-                                                )
-                                              )
+                                                  field.value?.filter(
+                                                    (value) =>
+                                                      value !== item.id,
+                                                  ),
+                                                );
                                           }}
                                         />
                                       </FormControl>
-                                      <div className='flex space-x-2 items-center'>
-                                        <Avatar className='rounded-sm w-12 h-12'>
+                                      <div className="flex items-center space-x-2">
+                                        <Avatar className="h-12 w-12 rounded-sm">
                                           {/* @ts-ignore */}
-                                          <AvatarImage src={item.image} alt="@shadcn" />
-                                          <AvatarFallback>{getInitials(item.name)}</AvatarFallback>
+                                          <AvatarImage
+                                            src={item.image ?? ""}
+                                            alt="@shadcn"
+                                          />
+                                          <AvatarFallback>
+                                            {getInitials(item.name)}
+                                          </AvatarFallback>
                                         </Avatar>
                                         <div className="flex flex-col">
-                                          <span className='truncate font-medium text-sm'>
+                                          <span className="truncate text-sm font-medium">
                                             {item.name}
                                           </span>
-                                          <span className='truncate text-sm'>
+                                          <span className="truncate text-sm">
                                             {item.code}
                                           </span>
                                         </div>
@@ -182,22 +205,23 @@ const TheForm = ({
                                       </p>
                                     </div>
                                   </FormItem>
-                                )
+                                );
                               }}
                             />
-                          ))
-                          }
-                        </FormItem>
-                      )}
-                    />
-                    :
-                    <div className="flex justify-center">
-                      <p className="my-4">Tidak ada barang</p>
-                    </div>
-                  : <div></div>
-              }
+                          ))}
+                      </FormItem>
+                    )}
+                  />
+                ) : (
+                  <div className="flex justify-center">
+                    <p className="my-4">Tidak ada barang</p>
+                  </div>
+                )
+              ) : (
+                <div></div>
+              )}
             </>
-            :
+          ) : (
             <>
               <FormField
                 control={form.control}
@@ -228,7 +252,7 @@ const TheForm = ({
               <FormField
                 control={form.control}
                 name="biaya"
-                render={({ }) => (
+                render={({}) => (
                   <FormItem>
                     <FormLabel>Biaya</FormLabel>
                     <FormControl>
@@ -236,7 +260,7 @@ const TheForm = ({
                         // {...field}
                         placeholder="Rp ..."
                         onValueChange={(_v, _n, value) => {
-                          form.setValue("biaya", value!.value)
+                          form.setValue("biaya", value!.value);
                         }}
                       />
                     </FormControl>
@@ -245,47 +269,44 @@ const TheForm = ({
                 )}
               />
             </>
-          }
+          )}
         </div>
         <DialogFooter className="mt-4">
-          <Button
-            type="submit"
-            disabled={isPending}
-          >
+          <Button type="submit" disabled={isPending}>
             Tambah
           </Button>
         </DialogFooter>
       </form>
     </Form>
-  )
-}
+  );
+};
 
 export default function TambahKomponenDialog({
   id,
-  imComponents
+  imComponents,
 }: {
-  id: string,
-  imComponents: RouterOutputs['perbaikan']['getImConponents']
+  id: string;
+  imComponents: RouterOutputs["perbaikan"]["getImConponents"];
 }) {
-  const router = useRouter()
-  const [open, setOpen] = useState(false)
-  const { mutateAsync, isPending } = api.perbaikan.addComponent.useMutation()
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const { mutateAsync, isPending } = api.perbaikan.addComponent.useMutation();
 
   const onSubmit = async (v: z.infer<typeof formSchema>) => {
     try {
-      const result = await mutateAsync({ perbaikanId: id, ...v })
-      toast.success(result.message)
-      router.refresh()
-      setOpen(false)
+      const result = await mutateAsync({ perbaikanId: id, ...v });
+      toast.success(result.message);
+      router.refresh();
+      setOpen(false);
     } catch (error: any) {
-      toast.error(error.message)
+      toast.error(error.message);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant={'secondary'}>
+        <Button size="sm" variant={"secondary"}>
           <Plus size={14} className="mr-2" />
           Tambah komponen
         </Button>
@@ -294,8 +315,13 @@ export default function TambahKomponenDialog({
         <DialogHeader>
           <DialogTitle>Tambah komponen</DialogTitle>
         </DialogHeader>
-        <TheForm onSubmit={onSubmit} isPending={isPending} imComponents={imComponents} />
+        <TheForm
+          onSubmit={onSubmit}
+          isPending={isPending}
+          imComponents={imComponents}
+        />
       </DialogContent>
     </Dialog>
-  )
+  );
 }
+

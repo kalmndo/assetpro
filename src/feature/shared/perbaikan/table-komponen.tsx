@@ -1,9 +1,9 @@
-"use client"
+"use client";
 import { DataTable } from "@/components/data-table";
-import { type ColumnDef } from '@tanstack/react-table'
-import { DataTableColumnHeader } from '@/components/data-table/column-header'
-import { z } from 'zod'
-import { RouterOutputs } from "@/trpc/react";
+import { type ColumnDef } from "@tanstack/react-table";
+import { DataTableColumnHeader } from "@/components/data-table/column-header";
+import { z } from "zod";
+import { type RouterOutputs } from "@/trpc/react";
 import Link from "next/link";
 
 const schema = z.object({
@@ -14,88 +14,101 @@ const schema = z.object({
   imId: z.string().nullable(),
   jumlah: z.number(),
   biaya: z.string(),
-})
+});
 
-type Schema = z.infer<typeof schema>
+type Schema = z.infer<typeof schema>;
 
 const columns: ColumnDef<Schema>[] = [
   {
-    accessorKey: 'type',
+    accessorKey: "type",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Tipe' />
+      <DataTableColumnHeader column={column} title="Tipe" />
     ),
     cell: ({ row }) => {
       return (
-        <span className='truncate font-medium sm:max-w-1 md:max-w-[1rem]'>
-          {row.getValue('type') === 0 ? "Barang" : row.getValue('type') === 1 ? 'Bukan barang' : ''}
+        <span className="truncate font-medium sm:max-w-1 md:max-w-[1rem]">
+          {row.getValue("type") === 0
+            ? "Barang"
+            : row.getValue("type") === 1
+              ? "Jasa"
+              : ""}
         </span>
-      )
+      );
     },
     enableSorting: false,
     enableHiding: false,
   },
   {
-    accessorKey: 'name',
+    accessorKey: "name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Nama' />
+      <DataTableColumnHeader column={column} title="Nama" />
     ),
     cell: ({ row }) => {
-      const isUser = window.location.pathname.split("/")[1] === 'permintaan' ? true : false
+      const isUser =
+        window.location.pathname.split("/")[1] === "permintaan" ? true : false;
       return (
         <div className="space-y-2">
-          <p>{row.getValue('name')}</p>
-          {
-
-            row.original.noIm &&
+          <p>{row.getValue("name")}</p>
+          {row.original.noIm && (
             <div className="flex space-x-3">
               <p className="font-semibold">No IM: </p>
-              <Link href={`${isUser ? '/permintaan/barang/' : '/permintaan-barang/'}${row.original.imId}`}>
-                <p className="text-blue-600 font-semibold">{row.original.noIm}</p>
+              <Link
+                href={`${isUser ? "/permintaan/barang/" : "/permintaan-barang/"}${row.original.imId}`}
+              >
+                <p className="font-semibold text-blue-600">
+                  {row.original.noIm}
+                </p>
               </Link>
             </div>
-          }
+          )}
         </div>
-      )
+      );
     },
     enableSorting: false,
     enableHiding: false,
   },
   {
-    accessorKey: 'jumlah',
+    accessorKey: "jumlah",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Jumlah' />
+      <DataTableColumnHeader column={column} title="Jumlah" />
     ),
     cell: ({ row }) => {
-      if (row.getValue("jumlah") === 'Total') {
-        return <p className="text-right font-semibold">{row.getValue("jumlah")}</p>
+      if (row.getValue("jumlah") === "Total") {
+        return (
+          <p className="text-right font-semibold">{row.getValue("jumlah")}</p>
+        );
       }
       return (
-        <p className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-          {row.getValue('jumlah')}
+        <p className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+          {row.getValue("jumlah")}
         </p>
-      )
+      );
     },
     enableSorting: false,
     enableHiding: false,
   },
   {
-    accessorKey: 'biaya',
+    accessorKey: "biaya",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Biaya' />
+      <DataTableColumnHeader column={column} title="Biaya" />
     ),
     cell: ({ row }) => {
       return (
-        <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-          {row.getValue('biaya')}
+        <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+          {row.getValue("biaya")}
         </span>
-      )
+      );
     },
     enableSorting: false,
     enableHiding: false,
   },
-]
+];
 
-export default function TableKomponen({ data }: { data: RouterOutputs['perbaikan']['get']['components'] }) {
+export default function TableKomponen({
+  data,
+}: {
+  data: RouterOutputs["perbaikan"]["get"]["components"];
+}) {
   return (
     <DataTable
       // @ts-ignore
@@ -104,5 +117,6 @@ export default function TableKomponen({ data }: { data: RouterOutputs['perbaikan
       columns={columns}
       isPagintation={false}
     />
-  )
+  );
 }
+
