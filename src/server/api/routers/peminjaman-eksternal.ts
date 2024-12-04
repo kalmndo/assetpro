@@ -3,7 +3,6 @@ import PENOMORAN from "@/lib/penomoran";
 import { ROLE } from "@/lib/role";
 import { STATUS } from "@/lib/status";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { type Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -32,7 +31,6 @@ export const peminjamanEksternalRouter = createTRPCRouter({
           id,
         },
         include: {
-          Barang: true,
           Ruang: true,
           Pemohon: {
             include: {
@@ -73,50 +71,10 @@ export const peminjamanEksternalRouter = createTRPCRouter({
 
       const pemohon = res.Pemohon;
 
-      let listAvailableAsets: Prisma.DaftarAsetGetPayload<{
-        include: { Pengguna: true };
-      }>[] = [];
-
-      if (res.type) {
-        const aset = await ctx.db.daftarAset.findMany({
-          where: {
-            barangId: res.Barang!.id,
-            PeminjamanAsetInternal: {
-              none: {
-                from: {
-                  lte: res.tglKembali,
-                },
-                to: {
-                  gte: res.tglPinjam,
-                },
-              },
-            },
-            PeminjamanAsetEksternal: {
-              none: {
-                from: {
-                  lte: res.tglKembali,
-                },
-                to: {
-                  gte: res.tglPinjam,
-                },
-              },
-            },
-          },
-          include: {
-            Pengguna: true,
-            Ruang: true,
-          },
-        });
-
-        listAvailableAsets = aset;
-      }
-
       return {
         id: res.id,
         no: res.no,
-        tipe: res.type ? "Barang" : "Ruang",
-        item: res.type ? res.Barang?.name : res.Ruang?.name,
-        jumlah: res.jumlah,
+        item: res.Ruang?.name,
         pemohon,
         peruntukan: res.peruntukan,
         from: res.tglPinjam.toLocaleString("id-ID", {
@@ -135,7 +93,6 @@ export const peminjamanEksternalRouter = createTRPCRouter({
         isMalCanReceive,
         peminjam: res.peminjam,
         biaya: "Rp" + " " + res.biaya.toLocaleString("id-ID"),
-        listAvailableAsets,
         asets: res.PeminjamanAsetEksternal,
       };
     }),
@@ -156,7 +113,6 @@ export const peminjamanEksternalRouter = createTRPCRouter({
         createdAt: "desc",
       },
       include: {
-        Barang: true,
         Ruang: true,
       },
     });
@@ -177,12 +133,10 @@ export const peminjamanEksternalRouter = createTRPCRouter({
     );
 
     const res = result.map((v) => {
-      const nama = v.barangId ? v.Barang?.name : v.Ruang?.name;
       return {
         id: v.id,
         no: v.no,
-        type: v.type === 0 ? "Ruang" : "Barang",
-        nama,
+        nama: v.Ruang?.name,
         peruntukan: v.peruntukan,
         status: v.status,
         tanggal: v.createdAt.toLocaleDateString("id-ID"),
@@ -223,12 +177,9 @@ export const peminjamanEksternalRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        type: z.string(),
-        barangId: z.string(),
         ruangId: z.string(),
         peminjam: z.string(),
         peruntukan: z.string(),
-        jumlah: z.string(),
         tglPinjam: z.date(),
         jamPinjam: z.string(),
         tglKembali: z.date(),
@@ -238,11 +189,8 @@ export const peminjamanEksternalRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const {
-        type: typeString,
-        barangId,
         ruangId,
         peruntukan,
-        jumlah,
         peminjam,
         biaya,
         tglPinjam: pin,
@@ -281,8 +229,6 @@ export const peminjamanEksternalRouter = createTRPCRouter({
             },
           });
 
-          const type = Number(typeString);
-
           let penomoran = await tx.penomoran.findUnique({
             where: {
               id: PENOMORAN.PEMINJAMAN_EKSTERNAL,
@@ -304,10 +250,7 @@ export const peminjamanEksternalRouter = createTRPCRouter({
           const peminjaman = await tx.peminjamanExternal.create({
             data: {
               no: getPenomoran(penomoran),
-              type,
-              ...(type === 0
-                ? { ruangId }
-                : { barangId, jumlah: Number(jumlah) }),
+              ruangId,
               peruntukan,
               tglPinjam,
               tglKembali,
@@ -317,6 +260,18 @@ export const peminjamanEksternalRouter = createTRPCRouter({
               pemohonId: userId,
             },
           });
+
+          if (peminjaman) {
+            await tx.penomoran.update({
+              where: {
+                id: PENOMORAN.PEMINJAMAN_EKSTERNAL,
+                year: String(new Date().getFullYear()),
+              },
+              data: {
+                number: { increment: 1 },
+              },
+            });
+          }
 
           for (const { user } of userRolesResult) {
             const desc = `<p class="text-sm font-semibold">${userResult?.name}<span class="font-normal ml-[5px]">Meminta persetujuan permintaan peminjaman eksternal ${peminjaman.no}</span></p>`;

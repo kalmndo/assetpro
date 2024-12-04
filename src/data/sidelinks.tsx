@@ -220,24 +220,16 @@ export const sidelinks: SideLink[] = [
   {
     title: "Peminjaman",
     label: "",
-    href: "",
-    icon: <ArchiveRestore size={18} />,
-    sub: [
-      {
-        title: "Internal",
-        label: "",
-        href: "/peminjaman/internal",
-        icon: <Briefcase size={18} />,
-        role: ROLE.PEMINJAMAN_INTERNAL_VIEW.id,
-      },
-      {
-        title: "Eksternal",
-        label: "",
-        href: "/peminjaman/eksternal",
-        icon: <BaggageClaim size={18} />,
-        role: ROLE.PEMINJAMAN_EKSTERNAL_VIEW.id,
-      },
-    ],
+    href: "/peminjaman",
+    icon: <Briefcase size={18} />,
+    role: ROLE.PEMINJAMAN_INTERNAL_VIEW.id,
+  },
+  {
+    title: "Penyewaan",
+    label: "",
+    href: "/penyewaan",
+    icon: <BaggageClaim size={18} />,
+    role: ROLE.PEMINJAMAN_EKSTERNAL_VIEW.id,
   },
   {
     title: "",

@@ -23,18 +23,14 @@ import { type RouterOutputs } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { CalendarIcon, LoaderCircle } from "lucide-react";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const formSchema = z.object({
-  type: z.string().min(1).max(255),
-  barangId: z.string().min(1),
   ruangId: z.string().min(1),
   peminjam: z.string().min(1),
   peruntukan: z.string().min(1),
   biaya: z.string().min(1),
-  jumlah: z.string().min(1),
   tglPinjam: z.date(),
   jamPinjam: z.string(),
   tglKembali: z.date(),
@@ -114,29 +110,11 @@ export const Form = ({ data, onSubmit, isPending }: Props) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: "0",
-      barangId: "",
       ruangId: "",
       peminjam: "",
       peruntukan: "",
-      jumlah: "0",
     },
   });
-
-  const formType = form.watch("type");
-  const setValue = form.setValue;
-
-  useEffect(() => {
-    if (formType === "0") {
-      setValue("barangId", "1");
-      setValue("ruangId", "");
-      setValue("jumlah", "0");
-    } else {
-      setValue("ruangId", "1");
-      setValue("barangId", "");
-      setValue("jumlah", "");
-    }
-  }, [formType, setValue]);
 
   return (
     <div className="relative">
@@ -146,61 +124,16 @@ export const Form = ({ data, onSubmit, isPending }: Props) => {
             <div className="col-span-1 space-y-4">
               <div className="">
                 <SearchSelect
-                  data={[
-                    { label: "Ruang", value: "0" },
-                    { label: "Barang", value: "1" },
-                  ]}
+                  data={data.ruangs.map((v) => ({
+                    label: v.label,
+                    value: v.value,
+                  }))}
                   form={form}
-                  label="Tipe"
-                  name="type"
-                  placeholder="Pilih tipe"
+                  label="Pilih ruang"
+                  name="ruangId"
+                  placeholder="Pilih ruang"
                 />
               </div>
-              {formType === "0" ? (
-                <div className="">
-                  <SearchSelect
-                    data={data.ruangs.map((v) => ({
-                      label: v.label,
-                      value: v.value,
-                    }))}
-                    form={form}
-                    label="Pilih ruang"
-                    name="ruangId"
-                    placeholder="Pilih ruang"
-                  />
-                </div>
-              ) : (
-                <>
-                  <div className="">
-                    <SearchSelect
-                      data={data.barangs}
-                      form={form}
-                      label="Barang"
-                      name="barangId"
-                      placeholder="Barang"
-                    />
-                  </div>
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="jumlah"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Jumlah</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="Jumlah"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </>
-              )}
               <div>
                 <FormField
                   control={form.control}

@@ -711,27 +711,25 @@ model PeminjamanHistory {
 model PeminjamanExternal {
   id         String   @id @default(cuid())
   no         String
-  type       Int
   pemohonId  String
   peminjam   String
-  barangId   String?
   ruangId    String?
   peruntukan String
   tglPinjam  DateTime
   tglKembali DateTime
   status     String
-  jumlah     Int?
   biaya      Int
 
-  Pemohon User          @relation(fields: [pemohonId], references: [id])
-  Barang  MasterBarang? @relation(fields: [barangId], references: [id])
-  Ruang   MasterRuang?  @relation(fields: [ruangId], references: [id])
+  Pemohon User         @relation(fields: [pemohonId], references: [id])
+  Ruang   MasterRuang? @relation(fields: [ruangId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   PeminjamanExternalHistory PeminjamanExternalHistory[]
   PeminjamanAsetEksternal   PeminjamanAsetEksternal[]
+  MasterBarang              MasterBarang?               @relation(fields: [masterBarangId], references: [id])
+  masterBarangId            String?
 }
 
 model PeminjamanExternalHistory {

@@ -17,7 +17,6 @@ import formatDate from "@/lib/formatDate";
 import ApproveDialog from "./_components/approve-dialog";
 import SendToUserDialog from "./_components/send-to-user-dialog";
 import ReceiveDialog from "./_components/receive-dialog";
-import SelectAsetDialog from "./_components/select-aset-dialog";
 import TableAset from "./_components/table-aset";
 
 export default async function Page({
@@ -34,19 +33,19 @@ export default async function Page({
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/peminjaman">Peminjaman Eksternal</Link>
+              <Link href="/peminjaman">Sewa</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Detail Peminjaman Eksternal</BreadcrumbPage>
+            <BreadcrumbPage>Detail Permintaan Sewa</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
       <div className="my-4 flex justify-between">
         <div className="">
           <h1 className="text-2xl font-bold tracking-tight">
-            Form Permintaan Peminjaman Eksternal
+            Form Permintaan Sewa
           </h1>
         </div>
       </div>
@@ -93,20 +92,10 @@ export default async function Page({
                 <p className="font-semibold">{data.peminjam}</p>
               </div>
               <div className="mb-4 space-y-2">
-                <p className="text-sm">Tipe</p>
-                <p className="font-semibold">{data.tipe}</p>
-              </div>
-              <div className="mb-4 space-y-2">
-                <p className="text-sm">{data.tipe}</p>
+                <p className="text-sm">Ruang</p>
                 <p className="font-semibold">{data.item}</p>
               </div>
               <div className="mb-4 flex gap-10">
-                {data.tipe === "Barang" && (
-                  <div className="space-y-2">
-                    <p className="text-sm">Jumlah</p>
-                    <p className="font-semibold ">{data.jumlah}</p>
-                  </div>
-                )}
                 <div className="space-y-2">
                   <p className="text-sm">Biaya</p>
                   <p className="font-semibold ">{data.biaya}</p>
@@ -140,17 +129,7 @@ export default async function Page({
         <div className="p-4">
           {data.isCanApprove && (
             <div className="flex justify-end space-x-4">
-              {data.tipe === "Barang" ? (
-                <SelectAsetDialog
-                  id={data.id}
-                  // eslint-disable-next-line
-                  // @ts-ignore
-                  data={data.listAvailableAsets}
-                  jumlah={data.jumlah!}
-                />
-              ) : (
-                <ApproveDialog id={data.id} />
-              )}
+              <ApproveDialog id={data.id} />
             </div>
           )}
           {data.isCanSendToUser && (
@@ -199,4 +178,3 @@ export default async function Page({
     </div>
   );
 }
-
