@@ -31,6 +31,7 @@ export const DialogQr = ({
         <div ref={contentRef} className="flex items-center justify-center">
           <div>
             <QRCodeSVG value={id} />
+            <p className="mt-4 text-center">{id}</p>
           </div>
         </div>
         <Button
