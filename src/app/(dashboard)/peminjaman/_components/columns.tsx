@@ -1,9 +1,9 @@
-"use client"
-import { type ColumnDef } from '@tanstack/react-table'
-import { DataTableColumnHeader } from '@/components/data-table/column-header'
-import { z } from 'zod'
-import Link from 'next/link'
-import { getStatus } from '@/lib/status'
+"use client";
+import { type ColumnDef } from "@tanstack/react-table";
+import { DataTableColumnHeader } from "@/components/data-table/column-header";
+import { z } from "zod";
+import Link from "next/link";
+import { getStatus } from "@/lib/status";
 
 export const schema = z.object({
   id: z.string(),
@@ -14,117 +14,120 @@ export const schema = z.object({
   jadwalPinjam: z.string(),
   tanggal: z.string(),
   status: z.string(),
-})
+});
 
-export type Schema = z.infer<typeof schema>
+export type Schema = z.infer<typeof schema>;
 
 export const columns: ColumnDef<Schema>[] = [
   {
-    accessorKey: 'no',
+    accessorKey: "no",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='No' />
+      <DataTableColumnHeader column={column} title="No" />
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`internal/${row.original.id}`} className='flex w-full'>
-          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('no')}
+        <Link href={`peminjaman/${row.original.id}`} className="flex w-full">
+          <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+            {row.getValue("no")}
           </span>
         </Link>
-      )
+      );
     },
     enableSorting: false,
     enableHiding: false,
   },
   {
-    accessorKey: 'type',
+    accessorKey: "type",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Tipe' />
+      <DataTableColumnHeader column={column} title="Tipe" />
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`internal/${row.original.id}`} className='flex w-full'>
-          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('type')}
+        <Link href={`peminjaman/${row.original.id}`} className="flex w-full">
+          <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+            {row.getValue("type")}
           </span>
         </Link>
-      )
+      );
     },
   },
   {
-    accessorKey: 'nama',
+    accessorKey: "nama",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Nama' />
+      <DataTableColumnHeader column={column} title="Nama" />
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`internal/${row.original.id}`} className='flex w-full'>
-          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('nama')}
+        <Link href={`peminjaman/${row.original.id}`} className="flex w-full">
+          <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+            {row.getValue("nama")}
           </span>
         </Link>
-      )
+      );
     },
   },
   {
-    accessorKey: 'peruntukan',
+    accessorKey: "peruntukan",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Peruntukan' />
+      <DataTableColumnHeader column={column} title="Peruntukan" />
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`internal/${row.original.id}`} className='flex w-full'>
-          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('peruntukan')}
+        <Link href={`peminjaman/${row.original.id}`} className="flex w-full">
+          <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+            {row.getValue("peruntukan")}
           </span>
         </Link>
-      )
+      );
     },
   },
   {
-    accessorKey: 'jadwalPinjam',
+    accessorKey: "jadwalPinjam",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Jadwal Pinjam' />
+      <DataTableColumnHeader column={column} title="Jadwal Pinjam" />
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`internal/${row.original.id}`} className='flex w-full'>
-          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('jadwalPinjam')}
+        <Link href={`peminjaman/${row.original.id}`} className="flex w-full">
+          <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+            {row.getValue("jadwalPinjam")}
           </span>
         </Link>
-      )
+      );
     },
   },
   {
-    accessorKey: 'status',
+    accessorKey: "status",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Status' />
+      <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => {
-      const { color, name } = getStatus(row.getValue('status'))
+      const { color, name } = getStatus(row.getValue("status"));
       return (
-        <Link href={`internal/${row.original.id}`} className='flex w-full'>
-          <span style={{ color }} className='max-w-32 truncate font-semibold sm:max-w-72 md:max-w-[31rem]'>
+        <Link href={`peminjaman/${row.original.id}`} className="flex w-full">
+          <span
+            style={{ color }}
+            className="max-w-32 truncate font-semibold sm:max-w-72 md:max-w-[31rem]"
+          >
             {name}
           </span>
         </Link>
-      )
+      );
     },
   },
   {
-    accessorKey: 'tanggal',
+    accessorKey: "tanggal",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Tanggal' />
+      <DataTableColumnHeader column={column} title="Tanggal" />
     ),
     cell: ({ row }) => {
       return (
-        <Link href={`internal/${row.original.id}`} className='flex w-full'>
-          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('tanggal')}
+        <Link href={`peminjaman/${row.original.id}`} className="flex w-full">
+          <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+            {row.getValue("tanggal")}
           </span>
         </Link>
-      )
+      );
     },
-  }
-]
+  },
+];
