@@ -1,8 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RouterOutputs } from "@/trpc/react";
+import { type RouterOutputs } from "@/trpc/react";
 import { Activity, CreditCard, DollarSign, Users } from "lucide-react";
 
-export default function TheCard({ data }: { data: RouterOutputs['daftarAset']['get']['card'] }) {
+export default function TheCard({
+  data,
+}: {
+  data: RouterOutputs["daftarAset"]["get"]["card"];
+}) {
   return (
     <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
       <Card x-chunk="dashboard-01-chunk-3">
@@ -16,9 +20,7 @@ export default function TheCard({ data }: { data: RouterOutputs['daftarAset']['g
       </Card>
       <Card x-chunk="dashboard-01-chunk-0">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="font-medium">
-            Harga pembelian
-          </CardTitle>
+          <CardTitle className="font-medium">Harga pembelian</CardTitle>
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -27,9 +29,7 @@ export default function TheCard({ data }: { data: RouterOutputs['daftarAset']['g
       </Card>
       <Card x-chunk="dashboard-01-chunk-1">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="font-medium">
-            Nilai penyusutan
-          </CardTitle>
+          <CardTitle className="font-medium">Nilai penyusutan</CardTitle>
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -47,5 +47,6 @@ export default function TheCard({ data }: { data: RouterOutputs['daftarAset']['g
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
+
