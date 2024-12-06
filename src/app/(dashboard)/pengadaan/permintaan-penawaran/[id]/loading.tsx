@@ -10,27 +10,30 @@ import {
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function Page() {
+export default function Loading() {
   return (
     <div>
       <Breadcrumb>
         <BreadcrumbList>
+          <BreadcrumbItem>Pengadaan</BreadcrumbItem>
+          <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/permintaan-barang">Permintaan Barang</Link>
+              <Link href="/permintaan-pembelian">Permintaan Penawaran</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Detail Internal Memo</BreadcrumbPage>
+            <BreadcrumbPage>Detail Permintaan Penawaran</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
       <div className="my-4 flex justify-between">
         <div className="">
-          <h1 className="text-2xl font-bold tracking-tight">Internal Memo</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Form Permintaan Penawaran
+          </h1>
         </div>
-        <div className="">{/* <AddDialog data={modalData} /> */}</div>
       </div>
       <div className="rounded-sm border">
         <div className="flex justify-between p-4">
@@ -41,30 +44,15 @@ export default function Page() {
           <div className="col-span-2 space-y-4">
             <div className="space-y-2">
               <p className="text-sm">Nomor</p>
-              <Skeleton className="h-6 w-[100px]" />
+              <Skeleton className="h-6 w-[200px]" />
             </div>
             <div className="space-y-2">
               <p className="text-sm">Tanggal</p>
               <Skeleton className="h-6 w-[100px]" />
             </div>
             <div className="space-y-2">
-              <p className="text-sm">Ruang</p>
-              <Skeleton className="h-6 w-[100px]" />
-            </div>
-            <div className="space-y-2">
-              <p className="text-sm">Perihal</p>
-              <Skeleton className="h-4 w-[100px]" />
-            </div>
-          </div>
-          <div className="space-y-4">
-            <p className="text-sm">Pemohon</p>
-
-            <Skeleton className="h-14 w-14 rounded-full" />
-
-            <Skeleton className="h-6 w-[100px]" />
-            <div className="space-y-4 text-sm">
-              <Skeleton className="h-4 w-[100px]" />
-              <Skeleton className="h-4 w-[100px]" />
+              <p className="text-sm">Internal Memo</p>
+              {/* <p className="text-sm">{data.perihal}</p> */}
             </div>
           </div>
         </div>
@@ -72,4 +60,3 @@ export default function Page() {
     </div>
   );
 }
-

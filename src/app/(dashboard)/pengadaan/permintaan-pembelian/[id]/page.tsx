@@ -1,28 +1,38 @@
 import { Separator } from "@/components/ui/separator";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import Link from "next/link";
 import { api } from "@/trpc/server";
 import { getStatus } from "@/lib/status";
 import { Table } from "./_components/table";
 import ApproveDialog from "./_components/approve-dialog";
 
-export default async function Page({ params: { id } }: { params: { id: string } }) {
-  const data = await api.permintaanPembelian.get({ id })
+export default async function Page({
+  params: { id },
+}: {
+  params: { id: string };
+}) {
+  const data = await api.permintaanPembelian.get({ id });
 
-  const { name: status, color } = getStatus(data.status)
-
+  const { name: status, color } = getStatus(data.status);
 
   return (
     <div>
       <Breadcrumb>
         <BreadcrumbList>
-          <BreadcrumbItem>
-            Pengadaan
-          </BreadcrumbItem>
+          <BreadcrumbItem>Pengadaan</BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/permintaan-pembelian">Permintaan Pembelian</Link>
+              <Link href="/pengadaan/permintaan-pembelian">
+                Permintaan Pembelian
+              </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
@@ -33,18 +43,17 @@ export default async function Page({ params: { id } }: { params: { id: string } 
       </Breadcrumb>
       <div className="my-4 flex justify-between">
         <div className="">
-          <h1 className='text-2xl font-bold tracking-tight'>
+          <h1 className="text-2xl font-bold tracking-tight">
             Form Permintaan Pembelian Barang
           </h1>
         </div>
-        <div className="">
-          {/* <AddDialog data={modalData} /> */}
-        </div>
+        <div className="">{/* <AddDialog data={modalData} /> */}</div>
       </div>
       <div className="rounded-sm border">
         <div className="flex justify-between p-4">
-          <div style={{ color }} className="font-semibold">{status}</div>
-          <div>Print</div>
+          <div style={{ color }} className="font-semibold">
+            {status}
+          </div>
         </div>
         <Separator />
         <div className="grid grid-cols-3 gap-4 p-4">
@@ -61,7 +70,10 @@ export default async function Page({ params: { id } }: { params: { id: string } 
               <p className="text-sm">Internal Memo</p>
               {data.ims.map((v) => (
                 <div key={v.id}>
-                  <Link href={`/permintaan-barang/${v.id}`} className="col-span-2 text-blue-600 font-semibold text-xs hover:underline">
+                  <Link
+                    href={`/permintaan-barang/${v.id}`}
+                    className="col-span-2 text-xs font-semibold text-blue-600 hover:underline"
+                  >
                     {v.no}
                   </Link>
                 </div>
@@ -90,5 +102,6 @@ export default async function Page({ params: { id } }: { params: { id: string } 
         </div>
       </div>
     </div>
-  )
+  );
 }
+

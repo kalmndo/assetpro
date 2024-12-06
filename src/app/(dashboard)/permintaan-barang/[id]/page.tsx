@@ -1,5 +1,12 @@
 import { Separator } from "@/components/ui/separator";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { api } from "@/trpc/server";
@@ -7,14 +14,18 @@ import { getStatus } from "@/lib/status";
 import { Table } from "@/feature/shared/detail-internal-memo";
 import { getInitials } from "@/lib/utils";
 
-export default async function Page({ params: { id } }: { params: { id: string } }) {
-  const data = await api.permintaanBarang.get({ id })
-  const uom = await api.mUom.getSelect()
-  const { color, name: status } = getStatus(data.status)
+export default async function Page({
+  params: { id },
+}: {
+  params: { id: string };
+}) {
+  const data = await api.permintaanBarang.get({ id });
+  const uom = await api.mUom.getSelect();
+  const { color, name: status } = getStatus(data.status);
 
   const modalData = {
-    uom
-  }
+    uom,
+  };
 
   return (
     <div>
@@ -33,18 +44,15 @@ export default async function Page({ params: { id } }: { params: { id: string } 
       </Breadcrumb>
       <div className="my-4 flex justify-between">
         <div className="">
-          <h1 className='text-2xl font-bold tracking-tight'>
-            Internal Memo
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight">Internal Memo</h1>
         </div>
-        <div className="">
-          {/* <AddDialog data={modalData} /> */}
-        </div>
+        <div className="">{/* <AddDialog data={modalData} /> */}</div>
       </div>
       <div className="rounded-sm border">
         <div className="flex justify-between p-4">
-          <div style={{ color }} className="font-semibold">{status}</div>
-          <div>Print</div>
+          <div style={{ color }} className="font-semibold">
+            {status}
+          </div>
         </div>
         <Separator />
         <div className="grid grid-cols-3 gap-4 p-4">
@@ -68,14 +76,16 @@ export default async function Page({ params: { id } }: { params: { id: string } 
           </div>
           <div className="space-y-4">
             <p className="text-sm">Pemohon</p>
-            <Avatar className='w-14 h-14'>
+            <Avatar className="h-14 w-14">
               <AvatarImage src={data.pemohon.image} alt="@shadcn" />
               <AvatarFallback>{getInitials(data.pemohon.name)}</AvatarFallback>
             </Avatar>
             <p className="font-semibold">{data.pemohon.name}</p>
             <div className="text-sm">
               <p>{data.pemohon.title}</p>
-              <p>{data.pemohon.department} - {data.pemohon.departmentUnit}</p>
+              <p>
+                {data.pemohon.department} - {data.pemohon.departmentUnit}
+              </p>
             </div>
           </div>
         </div>
@@ -84,5 +94,6 @@ export default async function Page({ params: { id } }: { params: { id: string } 
         </div>
       </div>
     </div>
-  )
+  );
 }
+
