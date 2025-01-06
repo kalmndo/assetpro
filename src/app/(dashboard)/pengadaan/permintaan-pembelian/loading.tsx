@@ -6,7 +6,7 @@ export default function Loading() {
       header={["No ", "Jumlah Barang", "Tanggal", "Status"]}
       title="Permintaan Pembelian"
       subTitle="List permintaan pembelian."
-      placeholder="Nomor FPPB ..."
+      placeholder="No FPPB ..."
       isButton={false}
     />
   );

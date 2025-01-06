@@ -12,6 +12,7 @@ import { ROLE } from "@/lib/role";
 import PENOMORAN from "@/lib/penomoran";
 import monthToRoman from "@/lib/monthToRomans";
 import getPenomoran from "@/lib/getPenomoran";
+import notifDesc from "@/lib/notifDesc";
 
 export const permintaanPembelianRouter = createTRPCRouter({
 	getAll: protectedProcedure
@@ -146,7 +147,7 @@ export const permintaanPembelianRouter = createTRPCRouter({
 					const permPem = await tx.permintaanPembelian.create({
 						data: {
 							no: getPenomoran(penomoran),
-							status: "pengajuan"
+							status: STATUS.PENGAJUAN.id
 						}
 					})
 
@@ -235,6 +236,24 @@ export const permintaanPembelianRouter = createTRPCRouter({
 						data: {
 							number: { increment: 1 }
 						}
+					})
+
+					const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.PEMBELIAN_APPROVE.id } })
+					const userIds = allRoles.map((v) => v.userId)
+					const user = await tx.user.findFirst({
+						where: {
+							id: ctx.session.user.id
+						}
+					})
+
+					await tx.notification.createMany({
+						data: userIds.map((v) => ({
+							fromId: ctx.session.user.id,
+							toId: v,
+							link: `/pengadaan/permintaan-pembelian/${permPem.id}`,
+							desc: notifDesc(user!.name, "Permintaan pembelian barang", permPem.no),
+							isRead: false,
+						}))
 					})
 				})
 				return {
@@ -326,6 +345,25 @@ export const permintaanPembelianRouter = createTRPCRouter({
 							}
 						})
 					}
+
+					const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.PEMBELIAN_SELECT_VENDOR.id } })
+					const userIds = allRoles.map((v) => v.userId)
+					const user = await tx.user.findFirst({
+						where: {
+							id: ctx.session.user.id
+						}
+					})
+
+					await tx.notification.createMany({
+						data: userIds.map((v) => ({
+							fromId: ctx.session.user.id,
+							toId: v,
+							link: `/pengadaan/permintaan-penawaran${permPem.id}`,
+							desc: notifDesc(user!.name, "Permintaan penawaran ke vendor", permPem.no),
+							isRead: false,
+						}))
+					})
+
 				})
 
 				return {

@@ -20,9 +20,10 @@ export const userRouter = createTRPCRouter({
           include: {
             From: true,
           },
-          orderBy: {
-            createdAt: "desc",
-          },
+          orderBy: [
+            { isRead: "asc" }, // Sort by `isRead` first
+            { createdAt: "desc" }, // Then sort by `createdAt`
+          ],
         },
       },
     });
@@ -242,10 +243,10 @@ export const userRouter = createTRPCRouter({
               createMany:
                 role.length > 0
                   ? {
-                      data: role.map((v) => ({
-                        roleId: v,
-                      })),
-                    }
+                    data: role.map((v) => ({
+                      roleId: v,
+                    })),
+                  }
                   : undefined,
             },
           },

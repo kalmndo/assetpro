@@ -8,6 +8,7 @@ import checkKetersediaanByBarang from "../shared/check-ketersediaan-by-barang";
 import formatDate from "@/lib/formatDate";
 import PENOMORAN from "@/lib/penomoran";
 import getPenomoran from "@/lib/getPenomoran";
+import notifDesc from "@/lib/notifDesc";
 
 export const permintaanBarangRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -573,8 +574,6 @@ export const permintaanBarangRouter = createTRPCRouter({
               v.status !== STATUS.IM_REJECT.id,
           );
           // <p class="text-sm font-semibold">Adam Kalalmondo<span class="font-normal ml-2">meminta persetujuan internal memo</span></p>
-          const notifDesc = `<p class="text-sm font-semibold">${user?.name}<span class="font-normal ml-[5px]">Menyetujui ${res.no}</span></p>`;
-
           if (untouchedBarangs.length > 0) {
             for (const iterator of untouchedBarangs) {
               const qty = Number(iterator.qty);
@@ -760,12 +759,25 @@ Catatan: ${v.catatan}
             });
           }
 
+          const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.IM_APPROVE.id } })
+          const userIds = allRoles.map((v) => v.userId)
+
+          await tx.notification.createMany({
+            data: userIds.map((v) => ({
+              fromId: userId,
+              toId: v,
+              link: `/permintaan/barang/${pb.id}`,
+              desc: notifDesc(res.Pemohon.name, "Meminta barang", res.no),
+              isRead: false,
+            }))
+          })
+
           await tx.notification.create({
             data: {
               fromId: userId,
               toId: res.pemohondId,
               link: `/permintaan/barang/${pb.id}`,
-              desc: notifDesc,
+              desc: notifDesc(user!.name, "Menyetujui", res.no),
               isRead: false,
             },
           });

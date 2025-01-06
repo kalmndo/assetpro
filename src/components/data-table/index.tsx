@@ -36,6 +36,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   facetedFilter?: DataTableFacetedFilterProps[]
   filter?: DataTableToolbarFilterProps
+  defaultFilters?: {id: string, value: string | string[]}[]
   columnVisibilityDefaultState?: VisibilityState
   checkboxToolbarActions?: { title: string, desc: string, handleAction(table: any): void }[]
   isPagintation?: boolean
@@ -51,6 +52,7 @@ export function DataTable<TData, TValue>({
   data,
   facetedFilter,
   filter,
+  defaultFilters = [],
   columnVisibilityDefaultState = {},
   checkboxToolbarActions,
   isPagintation = true,
@@ -62,7 +64,8 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(columnVisibilityDefaultState)
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(defaultFilters)
+  console.log("co", columnFilters)
   const [sorting, setSorting] = React.useState<SortingState>([])
 
   const table = useReactTable({
