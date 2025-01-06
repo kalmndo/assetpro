@@ -358,7 +358,7 @@ export const permintaanPembelianRouter = createTRPCRouter({
 						data: userIds.map((v) => ({
 							fromId: ctx.session.user.id,
 							toId: v,
-							link: `/pengadaan/permintaan-penawaran${permPem.id}`,
+							link: `/pengadaan/permintaan-penawaran/${permPem.id}`,
 							desc: notifDesc(user!.name, "Permintaan penawaran ke vendor", permPem.no),
 							isRead: false,
 						}))

@@ -7,6 +7,8 @@ import { v4 as uuidv4 } from "uuid";
 import formatPhoneNumber from "@/lib/formatPhoneNumber";
 import PENOMORAN from "@/lib/penomoran";
 import getPenomoran from "@/lib/getPenomoran";
+import { ROLE } from "@/lib/role";
+import notifDesc from "@/lib/notifDesc";
 
 export const permintaanPenawaranRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -279,6 +281,24 @@ https://assetpro.site/vendor/pp/${result.id}`;
               },
             });
           }
+
+					const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.NEGO_SUBMIT.id } })
+					const userIds = allRoles.map((v) => v.userId)
+					const user = await tx.user.findFirst({
+						where: {
+							id: ctx.session.user.id
+						}
+					})
+
+					await tx.notification.createMany({
+						data: userIds.map((v) => ({
+							fromId: ctx.session.user.id,
+							toId: v,
+							link: `/pengadaan/penawaran-harga/${permPem.id}`,
+							desc: notifDesc(user!.name, "Negosiasi ke vendor", permPem.no),
+							isRead: false,
+						}))
+					})
 
         });
         return {

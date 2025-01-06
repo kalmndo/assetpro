@@ -8,6 +8,7 @@ import formatPhoneNumber from "@/lib/formatPhoneNumber";
 import isTodayOrAfter from "@/lib/isTodayOrAfter";
 import PENOMORAN from "@/lib/penomoran";
 import getPenomoran from "@/lib/getPenomoran";
+import notifDesc from "@/lib/notifDesc";
 // import isTodayOrAfter from "@/lib/isTodayOrAfter";
 
 export const penawaranHargaRouter = createTRPCRouter({
@@ -403,6 +404,27 @@ https://assetpro.site/vendor/ph/${result.id}`;
               pembelianBarangId: v.id,
             })),
           });
+
+          const allRoles = await tx.masterEvaluasiUser.findMany({
+            orderBy: {
+              nilai: 'asc'
+            }
+          })
+					const user = await tx.user.findFirst({
+						where: {
+							id: ctx.session.user.id
+						}
+					})
+
+          await tx.notification.create({
+            data: {
+							fromId: ctx.session.user.id,
+							toId: allRoles[0]!.userId,
+							link: `/pengadaan/evaluasi-harga/${evaluasi.id}`,
+							desc: notifDesc(user!.name, "Evaluasi harga vendor", evaluasi.no),
+							isRead: false,
+            }
+          })
         });
 
         return {
