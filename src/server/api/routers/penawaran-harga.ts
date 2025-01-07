@@ -360,22 +360,22 @@ https://assetpro.site/vendor/ph/${result.id}`;
             );
           }
           let penomoran = await tx.penomoran.findUnique({
-						where: {
-							id: PENOMORAN.EVALUASI_HARGA,
-							year: String(new Date().getFullYear())
-						}
-					})
+            where: {
+              id: PENOMORAN.EVALUASI_HARGA,
+              year: String(new Date().getFullYear())
+            }
+          })
 
-					if (!penomoran) {
-						penomoran = await tx.penomoran.create({
-							data: {
-								id: PENOMORAN.EVALUASI_HARGA,
-								code: "FEPHB",
-								number: 0,
-								year: String(new Date().getFullYear())
-							}
-						})
-					}
+          if (!penomoran) {
+            penomoran = await tx.penomoran.create({
+              data: {
+                id: PENOMORAN.EVALUASI_HARGA,
+                code: "FEPHB",
+                number: 0,
+                year: String(new Date().getFullYear())
+              }
+            })
+          }
 
           // EVALUASI CREATE
           const evaluasi = await tx.evaluasi.create({
@@ -387,16 +387,16 @@ https://assetpro.site/vendor/ph/${result.id}`;
           });
 
           if (evaluasi) {
-						await tx.penomoran.update({
-							where: {
-								id: PENOMORAN.EVALUASI_HARGA,
-								year: String(new Date().getFullYear())
-							},
-							data: {
-								number: { increment: 1 }
-							}
-						})
-					}
+            await tx.penomoran.update({
+              where: {
+                id: PENOMORAN.EVALUASI_HARGA,
+                year: String(new Date().getFullYear())
+              },
+              data: {
+                number: { increment: 1 }
+              }
+            })
+          }
 
           await tx.evaluasiBarang.createMany({
             data: barang.map((v) => ({
@@ -410,22 +410,27 @@ https://assetpro.site/vendor/ph/${result.id}`;
               nilai: 'asc'
             }
           })
-					const user = await tx.user.findFirst({
-						where: {
-							id: ctx.session.user.id
-						}
-					})
+          const user = await tx.user.findFirst({
+            where: {
+              id: ctx.session.user.id
+            }
+          })
 
           await tx.notification.create({
             data: {
-							fromId: ctx.session.user.id,
-							toId: allRoles[0]!.userId,
-							link: `/pengadaan/evaluasi-harga/${evaluasi.id}`,
-							desc: notifDesc(user!.name, "Evaluasi harga vendor", evaluasi.no),
-							isRead: false,
+              fromId: ctx.session.user.id,
+              toId: allRoles[0]!.userId,
+              link: `/pengadaan/evaluasi-harga/${evaluasi.id}`,
+              desc: notifDesc(user!.name, "Evaluasi harga vendor", evaluasi.no),
+              isRead: false,
             }
           })
-        });
+        },
+          {
+            maxWait: 5000, // default: 2000
+            timeout: 10000, // default: 5000
+          }
+        );
 
         return {
           ok: true,

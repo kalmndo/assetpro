@@ -1,6 +1,7 @@
 import { CurrencyInput } from "@/components/currency-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { useAtom, type PrimitiveAtom } from "jotai";
 
 export default function Items({
@@ -174,6 +175,7 @@ export default function Items({
             Rp {barang.totalHarga?.toLocaleString("id-Id")}
           </div>
         </div>
+        <Separator />
       </div>
     </div>
   );

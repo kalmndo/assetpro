@@ -250,6 +250,7 @@ https://assetpro.site/vendor/pp/${result.id}`;
               year: String(new Date().getFullYear()),
             },
           });
+          console.log("ada", penomoran)
 
           if (!penomoran) {
             penomoran = await tx.penomoran.create({
@@ -282,30 +283,36 @@ https://assetpro.site/vendor/pp/${result.id}`;
             });
           }
 
-					const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.NEGO_SUBMIT.id } })
-					const userIds = allRoles.map((v) => v.userId)
-					const user = await tx.user.findFirst({
-						where: {
-							id: ctx.session.user.id
-						}
-					})
+          const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.NEGO_SUBMIT.id } })
+          const userIds = allRoles.map((v) => v.userId)
+          const user = await tx.user.findFirst({
+            where: {
+              id: ctx.session.user.id
+            }
+          })
 
-					await tx.notification.createMany({
-						data: userIds.map((v) => ({
-							fromId: ctx.session.user.id,
-							toId: v,
-							link: `/pengadaan/penawaran-harga/${permPem.id}`,
-							desc: notifDesc(user!.name, "Negosiasi ke vendor", permPem.no),
-							isRead: false,
-						}))
-					})
+          await tx.notification.createMany({
+            data: userIds.map((v) => ({
+              fromId: ctx.session.user.id,
+              toId: v,
+              link: `/pengadaan/penawaran-harga/${permPem.id}`,
+              desc: notifDesc(user!.name, "Negosiasi ke vendor", permPem.no),
+              isRead: false,
+            }))
+          })
 
-        });
+        },
+          {
+            maxWait: 5000, // default: 2000
+            timeout: 10000, // default: 5000
+          }
+        );
         return {
           ok: true,
           message: "Berhasil mengirim permintaan penawaran",
         };
       } catch (error) {
+        console.log("err", error)
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Tidak ada form ini",

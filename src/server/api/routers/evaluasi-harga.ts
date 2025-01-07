@@ -8,6 +8,7 @@ import { type DefaultArgs } from "@prisma/client/runtime/library";
 import PENOMORAN from "@/lib/penomoran";
 import getPenomoran from "@/lib/getPenomoran";
 import notifDesc from "@/lib/notifDesc";
+import { ROLE } from "@/lib/role";
 
 export const evaluasiHargaRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -379,7 +380,6 @@ export const evaluasiHargaRouter = createTRPCRouter({
                   vendorId: value.vendorId,
                 },
               });
-
               if (po) {
                 await tx.penomoran.update({
                   where: {
@@ -391,6 +391,19 @@ export const evaluasiHargaRouter = createTRPCRouter({
                   }
                 })
               }
+
+              const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.PO_VIEW.id } })
+              const userIds = allRoles.map((v) => v.userId)
+
+              await tx.notification.createMany({
+                data: userIds.map((v) => ({
+                  fromId: ctx.session.user.id,
+                  toId: v,
+                  link: `/pengadaan/purchase-order/${po.id}`,
+                  desc: notifDesc(currentUser!, "Membuat po", po.no),
+                  isRead: false,
+                }))
+              })
 
               for (const val of value.barangs) {
                 for (const { barangSplitId } of pBSPBB.filter(
@@ -415,21 +428,6 @@ export const evaluasiHargaRouter = createTRPCRouter({
               }
             }
 
-            const user = await tx.user.findFirst({
-              where: {
-                id: ctx.session.user.id
-              }
-            })
-
-            await tx.notification.create({
-              data: {
-                fromId: ctx.session.user.id,
-                toId: nextUserId!,
-                link: `/pengadaan/evaluasi-harga/${id}`,
-                desc: notifDesc(user!.name, "Evaluasi harga vendor", evaluasi!.no),
-                isRead: false,
-              }
-            })
 
             await tx.evaluasi.update({
               where: {
@@ -481,7 +479,12 @@ export const evaluasiHargaRouter = createTRPCRouter({
               },
             });
           }
-        });
+        },
+          {
+            maxWait: 5000, // default: 2000
+            timeout: 10000, // default: 5000
+          }
+        );
 
         return {
           ok: true,

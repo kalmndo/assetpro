@@ -1,5 +1,7 @@
 import getPenomoran from "@/lib/getPenomoran";
+import notifDesc from "@/lib/notifDesc";
 import PENOMORAN from "@/lib/penomoran";
+import { ROLE } from "@/lib/role";
 import { STATUS } from "@/lib/status";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { Prisma } from "@prisma/client";
@@ -197,6 +199,24 @@ export const barangMasukRouter = createTRPCRouter({
               no: getPenomoran(penomoran),
             },
           });
+
+          const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.GUDANG_MASUK_VIEW.id } })
+          const userIds = allRoles.map((v) => v.userId)
+          const user = await tx.user.findFirst({
+            where: {
+              id: ctx.session.user.id
+            }
+          })
+
+          await tx.notification.createMany({
+            data: userIds.map((v) => ({
+              fromId: ctx.session.user.id,
+              toId: v,
+              link: `/gudang/masuk/${fttb.id}`,
+              desc: notifDesc(user!.name, "Form tanda terima barang", fttb.no),
+              isRead: false,
+            }))
+          })
 
           if (fttb) {
             await tx.penomoran.update({
@@ -518,7 +538,12 @@ export const barangMasukRouter = createTRPCRouter({
               });
             }
           }
-        });
+        },
+          {
+            maxWait: 5000, // default: 2000
+            timeout: 10000, // default: 5000
+          }
+        );
         return {
           ok: true,
           message: "Berhasil membuat barang masuk",

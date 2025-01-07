@@ -6,6 +6,8 @@ import { TRPCError } from "@trpc/server";
 import { type PrismaClient } from "@prisma/client";
 import PENOMORAN from "@/lib/penomoran";
 import getPenomoran from "@/lib/getPenomoran";
+import { ROLE } from "@/lib/role";
+import notifDesc from "@/lib/notifDesc";
 
 export const barangKeluarRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -152,6 +154,24 @@ export const barangKeluarRouter = createTRPCRouter({
               status: STATUS.SELESAI.id,
             },
           });
+
+          const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.GUDANG_KELUAR_VIEW.id } })
+          const userIds = allRoles.map((v) => v.userId)
+          const user = await tx.user.findFirst({
+            where: {
+              id: ctx.session.user.id
+            }
+          })
+
+          await tx.notification.createMany({
+            data: userIds.map((v) => ({
+              fromId: ctx.session.user.id,
+              toId: v,
+              link: `/gudang/keluar/${ftkb.id}`,
+              desc: notifDesc(user!.name, "Form tanda keluar barang", ftkb.no),
+              isRead: false,
+            }))
+          })
 
           if (ftkb) {
             await tx.penomoran.update({
@@ -374,7 +394,12 @@ export const barangKeluarRouter = createTRPCRouter({
               }
             }
           }
-        });
+        },
+          {
+            maxWait: 5000, // default: 2000
+            timeout: 10000, // default: 5000
+          }
+        );
         return {
           ok: true,
           message: "Berhasil membuat form keluar barang",
