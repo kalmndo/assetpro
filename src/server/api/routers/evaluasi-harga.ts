@@ -7,6 +7,7 @@ import { type PrismaClient } from "@prisma/client";
 import { type DefaultArgs } from "@prisma/client/runtime/library";
 import PENOMORAN from "@/lib/penomoran";
 import getPenomoran from "@/lib/getPenomoran";
+import notifDesc from "@/lib/notifDesc";
 
 export const evaluasiHargaRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -265,6 +266,7 @@ export const evaluasiHargaRouter = createTRPCRouter({
           const {
             isCreatePo: isPO,
             nextUser,
+            nextUserId,
             currentUser,
           } = await isCreatePo(ctx.db, vendorIds, userId);
 
@@ -357,7 +359,7 @@ export const evaluasiHargaRouter = createTRPCRouter({
                   year: String(new Date().getFullYear())
                 }
               })
-    
+
               if (!penomoran) {
                 penomoran = await tx.penomoran.create({
                   data: {
@@ -413,6 +415,22 @@ export const evaluasiHargaRouter = createTRPCRouter({
               }
             }
 
+            const user = await tx.user.findFirst({
+              where: {
+                id: ctx.session.user.id
+              }
+            })
+
+            await tx.notification.create({
+              data: {
+                fromId: ctx.session.user.id,
+                toId: nextUserId!,
+                link: `/pengadaan/evaluasi-harga/${id}`,
+                desc: notifDesc(user!.name, "Evaluasi harga vendor", evaluasi!.no),
+                isRead: false,
+              }
+            })
+
             await tx.evaluasi.update({
               where: {
                 id,
@@ -437,6 +455,23 @@ export const evaluasiHargaRouter = createTRPCRouter({
                 },
               });
             }
+
+            const user = await tx.user.findFirst({
+              where: {
+                id: ctx.session.user.id
+              }
+            })
+
+            await tx.notification.create({
+              data: {
+                fromId: ctx.session.user.id,
+                toId: nextUserId!,
+                link: `/pengadaan/evaluasi-harga/${id}`,
+                desc: notifDesc(user!.name, "Evaluasi harga vendor", evaluasi!.no),
+                isRead: false,
+              }
+            })
+
             await tx.evaluasi.update({
               where: {
                 id,
@@ -523,6 +558,7 @@ async function isCreatePo(
       button: "Teruskan",
       currentUser: masterEvaluasiUser[userIndex]?.User.name,
       nextUser: masterEvaluasiUser[userIndex + 1]?.User.name,
+      nextUserId: masterEvaluasiUser[userIndex + 1]?.User.id,
     };
   }
 }
