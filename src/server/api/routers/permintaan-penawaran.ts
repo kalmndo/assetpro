@@ -286,7 +286,7 @@ https://assetpro.site/vendor/pp/${result.id}`;
           }
 
           const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.NEGO_SUBMIT.id } })
-          const userIds = allRoles.map((v) => v.userId)
+          const userIds = allRoles.map((v) => v.userId).filter((v) => v !== ctx.session.user.id)
           const user = await tx.user.findFirst({
             where: {
               id: ctx.session.user.id
@@ -304,7 +304,7 @@ https://assetpro.site/vendor/pp/${result.id}`;
               },
             });
             await pusherServer.trigger(
-              userIds,
+              v,
               "notification",
               {
                 id: notification.id,
