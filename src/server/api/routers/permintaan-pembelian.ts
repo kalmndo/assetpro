@@ -368,7 +368,7 @@ export const permintaanPembelianRouter = createTRPCRouter({
 					}
 
 					const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.PEMBELIAN_SELECT_VENDOR.id } })
-					const userIds = allRoles.map((v) => v.userId)
+					const userIds = allRoles.map((v) => v.userId).filter((v) => v !== ctx.session.user.id)
 					const user = await tx.user.findFirst({
 						where: {
 							id: ctx.session.user.id
@@ -385,7 +385,7 @@ export const permintaanPembelianRouter = createTRPCRouter({
 							},
 						});
 						await pusherServer.trigger(
-							userIds,
+							v,
 							"notification",
 							{
 								id: notification.id,
