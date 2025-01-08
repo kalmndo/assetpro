@@ -794,12 +794,12 @@ Catatan: ${v.catatan}
               },
             });
             await pusherServer.trigger(
-              userIds,
+              v,
               "notification",
               {
                 id: notification.id,
                 fromId: userId,
-                toId: userId,
+                toId: v,
                 link: `/permintaan/barang/${pb.id}`,
                 desc: notifDesc(res.Pemohon.name, "Meminta barang", res.no),
                 isRead: false,
@@ -811,17 +811,6 @@ Catatan: ${v.catatan}
               }
             )
           }
-
-
-          await tx.notification.create({
-            data: {
-              fromId: userId,
-              toId: res.pemohondId,
-              link: `/permintaan/barang/${pb.id}`,
-              desc: notifDesc(user!.name, "Menyetujui", res.no),
-              isRead: false,
-            },
-          });
         });
         return {
           ok: true,
