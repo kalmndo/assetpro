@@ -814,7 +814,7 @@ Catatan: ${v.catatan}
             }
           } else {
             const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.GUDANG_REQUEST_VIEW.id } })
-            const userIds = allRoles.map((v) => v.userId)
+            const userIds = allRoles.map((v) => v.userId).filter((v) => v !== userId)
 
             for (const v of userIds) {
               const notification = await tx.notification.create({
