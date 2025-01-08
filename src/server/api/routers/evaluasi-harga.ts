@@ -414,7 +414,7 @@ export const evaluasiHargaRouter = createTRPCRouter({
                   },
                 });
                 await pusherServer.trigger(
-                  userIds,
+                  v,
                   "notification",
                   {
                     id: notification.id,

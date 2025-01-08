@@ -3,7 +3,7 @@ import { DataTable } from "@/components/data-table";
 import { columns } from "./columns";
 import { STATUS } from "@/lib/status";
 
-const status = [STATUS.PENGAJUAN, STATUS.SELESAI]
+const status = [STATUS.PENGAJUAN, STATUS.PROCESS, STATUS.SELESAI]
 
 export function Table({ data }: { data: any }) {
   return (
