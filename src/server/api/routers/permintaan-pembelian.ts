@@ -10,9 +10,10 @@ import { STATUS } from "@/lib/status";
 import { TRPCError } from "@trpc/server";
 import { ROLE } from "@/lib/role";
 import PENOMORAN from "@/lib/penomoran";
-import monthToRoman from "@/lib/monthToRomans";
 import getPenomoran from "@/lib/getPenomoran";
 import notifDesc from "@/lib/notifDesc";
+import { getPusherInstance } from "@/lib/pusher/server";
+const pusherServer = getPusherInstance();
 
 export const permintaanPembelianRouter = createTRPCRouter({
 	getAll: protectedProcedure
@@ -246,15 +247,35 @@ export const permintaanPembelianRouter = createTRPCRouter({
 						}
 					})
 
-					await tx.notification.createMany({
-						data: userIds.map((v) => ({
-							fromId: ctx.session.user.id,
-							toId: v,
-							link: `/pengadaan/permintaan-pembelian/${permPem.id}`,
-							desc: notifDesc(user!.name, "Permintaan pembelian barang", permPem.no),
-							isRead: false,
-						}))
-					})
+					for (const v of userIds) {
+						const notification = await tx.notification.create({
+							data: {
+								fromId: ctx.session.user.id,
+								toId: v,
+								link: `/pengadaan/permintaan-pembelian/${permPem.id}`,
+								desc: notifDesc(user!.name, "Permintaan pembelian barang", permPem.no),
+								isRead: false,
+							},
+						});
+						await pusherServer.trigger(
+							userIds,
+							"notification",
+							{
+								id: notification.id,
+								fromId: ctx.session.user.id,
+								toId: v,
+								link: `/pengadaan/permintaan-pembelian/${permPem.id}`,
+								desc: notifDesc(user!.name, "Permintaan pembelian barang", permPem.no),
+								isRead: false,
+								createdAt: notification.createdAt,
+								From: {
+									image: user?.image,
+									name: user?.name
+								},
+							}
+						)
+					}
+
 				})
 				return {
 					ok: true,
@@ -353,17 +374,34 @@ export const permintaanPembelianRouter = createTRPCRouter({
 							id: ctx.session.user.id
 						}
 					})
-
-					await tx.notification.createMany({
-						data: userIds.map((v) => ({
-							fromId: ctx.session.user.id,
-							toId: v,
-							link: `/pengadaan/permintaan-penawaran/${permPem.id}`,
-							desc: notifDesc(user!.name, "Permintaan penawaran ke vendor", permPem.no),
-							isRead: false,
-						}))
-					})
-
+					for (const v of userIds) {
+						const notification = await tx.notification.create({
+							data: {
+								fromId: ctx.session.user.id,
+								toId: v,
+								link: `/pengadaan/permintaan-penawaran/${permPem.id}`,
+								desc: notifDesc(user!.name, "Permintaan penawaran ke vendor", permPem.no),
+								isRead: false,
+							},
+						});
+						await pusherServer.trigger(
+							userIds,
+							"notification",
+							{
+								id: notification.id,
+								fromId: ctx.session.user.id,
+								toId: v,
+								link: `/pengadaan/permintaan-penawaran/${permPem.id}`,
+								desc: notifDesc(user!.name, "Permintaan penawaran ke vendor", permPem.no),
+								isRead: false,
+								createdAt: notification.createdAt,
+								From: {
+									image: user?.image,
+									name: user?.name
+								},
+							}
+						)
+					}
 				})
 
 				return {

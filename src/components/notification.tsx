@@ -11,11 +11,13 @@ import {
 import { Bell } from "lucide-react"
 import { ScrollArea } from "./ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import Link from "next/link"
 import { api, type RouterOutputs } from "@/trpc/react"
 import { getInitials } from "@/lib/utils"
+import { pusherClient } from "@/lib/pusher/client"
+
 
 function Item({
   item,
@@ -42,13 +44,30 @@ function Item({
 }
 
 export default function Notification({
-  notifications
+  notifications,
+  userId
 }: {
   notifications: RouterOutputs['user']['me']['notifications']
+  userId: string
 }) {
   const [notifs, setNotifs] = useState(notifications)
   const [open, setOpen] = useState(false)
   const { mutateAsync } = api.notification.clickNotification.useMutation()
+
+
+  useEffect(() => {
+    const channel = pusherClient.subscribe(userId)
+
+    channel.bind('notification', (data: any) => {
+      const audio = new Audio("/audio.wav"); // Replace with your audio file's path
+      audio.play();
+      setNotifs((prev) => [data, ...prev])
+    })
+
+    return () => {
+      channel.unbind();
+    }
+  }, [])
 
   const onLinkClicked = (item: RouterOutputs['user']['me']['notifications'][0]) => async () => {
     setOpen(false)

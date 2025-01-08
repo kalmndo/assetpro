@@ -9,6 +9,9 @@ import PENOMORAN from "@/lib/penomoran";
 import getPenomoran from "@/lib/getPenomoran";
 import notifDesc from "@/lib/notifDesc";
 import { ROLE } from "@/lib/role";
+import { getPusherInstance } from "@/lib/pusher/server";
+
+const pusherServer = getPusherInstance();
 
 export const evaluasiHargaRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -394,16 +397,41 @@ export const evaluasiHargaRouter = createTRPCRouter({
 
               const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.PO_VIEW.id } })
               const userIds = allRoles.map((v) => v.userId)
-
-              await tx.notification.createMany({
-                data: userIds.map((v) => ({
-                  fromId: ctx.session.user.id,
-                  toId: v,
-                  link: `/pengadaan/purchase-order/${po.id}`,
-                  desc: notifDesc(currentUser!, "Membuat po", po.no),
-                  isRead: false,
-                }))
+              const user = await tx.user.findFirst({
+                where: {
+                  id: ctx.session.user.id
+                }
               })
+
+              for (const v of userIds) {
+                const notification = await tx.notification.create({
+                  data: {
+                    fromId: ctx.session.user.id,
+                    toId: v,
+                    link: `/pengadaan/purchase-order/${po.id}`,
+                    desc: notifDesc(currentUser!, "Membuat po", po.no),
+                    isRead: false,
+                  },
+                });
+                await pusherServer.trigger(
+                  userIds,
+                  "notification",
+                  {
+                    id: notification.id,
+                    fromId: ctx.session.user.id,
+                    toId: v,
+                    link: `/pengadaan/purchase-order/${po.id}`,
+                    desc: notifDesc(currentUser!, "Membuat po", po.no),
+                    isRead: false,
+                    createdAt: notification.createdAt,
+                    From: {
+                      image: user?.image,
+                      name: user?.name
+                    },
+                  }
+                )
+              }
+
 
               for (const val of value.barangs) {
                 for (const { barangSplitId } of pBSPBB.filter(

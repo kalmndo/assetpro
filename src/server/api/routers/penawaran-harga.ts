@@ -9,7 +9,9 @@ import isTodayOrAfter from "@/lib/isTodayOrAfter";
 import PENOMORAN from "@/lib/penomoran";
 import getPenomoran from "@/lib/getPenomoran";
 import notifDesc from "@/lib/notifDesc";
+import { getPusherInstance } from "@/lib/pusher/server";
 // import isTodayOrAfter from "@/lib/isTodayOrAfter";
+const pusherServer = getPusherInstance();
 
 export const penawaranHargaRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -416,7 +418,7 @@ https://assetpro.site/vendor/ph/${result.id}`;
             }
           })
 
-          await tx.notification.create({
+          const notification = await tx.notification.create({
             data: {
               fromId: ctx.session.user.id,
               toId: allRoles[0]!.userId,
@@ -425,6 +427,24 @@ https://assetpro.site/vendor/ph/${result.id}`;
               isRead: false,
             }
           })
+
+          await pusherServer.trigger(
+            allRoles[0]!.userId,
+            "notification",
+            {
+              id: notification.id,
+              fromId: ctx.session.user.id,
+              toId: allRoles[0]!.userId,
+              link: `/pengadaan/evaluasi-harga/${evaluasi.id}`,
+              desc: notifDesc(user!.name, "Evaluasi harga vendor", evaluasi.no),
+              isRead: false,
+              createdAt: notification.createdAt,
+              From: {
+                image: user?.image,
+                name: user?.name
+              },
+            }
+          )
         },
           {
             maxWait: 5000, // default: 2000

@@ -33,7 +33,7 @@ export default async function LayoutYa({ children }: Props) {
           <Search />
           <div className="ml-auto flex items-center space-x-4">
             {/* <ThemeSwitch /> */}
-            <Notification notifications={result.notifications} />
+            <Notification notifications={result.notifications} userId={result.id} />
             <Cart />
             <UserNav data={result} />
           </div>

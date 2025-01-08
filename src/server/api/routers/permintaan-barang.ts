@@ -9,6 +9,8 @@ import formatDate from "@/lib/formatDate";
 import PENOMORAN from "@/lib/penomoran";
 import getPenomoran from "@/lib/getPenomoran";
 import notifDesc from "@/lib/notifDesc";
+import { getPusherInstance } from "@/lib/pusher/server";
+const pusherServer = getPusherInstance();
 
 export const permintaanBarangRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -443,7 +445,7 @@ export const permintaanBarangRouter = createTRPCRouter({
             });
           }
           const desc = `<p class="text-sm font-semibold">${user?.name}<span class="font-normal ml-[5px]">Meminta persetujuan internal memo ${pb.no}</span></p>`;
-          await tx.notification.create({
+          const notification = await tx.notification.create({
             data: {
               fromId: userId,
               // TODO: Benerin ini kalau gak ada atasan
@@ -453,6 +455,25 @@ export const permintaanBarangRouter = createTRPCRouter({
               isRead: false,
             },
           });
+          await pusherServer.trigger(
+            atasanId!,
+            "notification",
+            {
+              id: notification.id,
+              fromId: userId,
+              toId: atasanId ?? userId,
+              link: `/permintaan/barang/${pb.id}`,
+              desc,
+              isRead: false,
+              createdAt: notification.createdAt,
+              From: {
+                image: user?.image,
+                name: user?.name
+              },
+              notifToIds: []
+            }
+          )
+
           return {
             id: pb.id,
           };
@@ -762,15 +783,35 @@ Catatan: ${v.catatan}
           const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.IM_APPROVE.id } })
           const userIds = allRoles.map((v) => v.userId)
 
-          await tx.notification.createMany({
-            data: userIds.map((v) => ({
-              fromId: userId,
-              toId: v,
-              link: `/permintaan/barang/${pb.id}`,
-              desc: notifDesc(res.Pemohon.name, "Meminta barang", res.no),
-              isRead: false,
-            }))
-          })
+          for (const v of userIds) {
+            const notification = await tx.notification.create({
+              data: {
+                fromId: userId,
+                toId: v,
+                link: `/permintaan/barang/${pb.id}`,
+                desc: notifDesc(user!.name, "Menyetujui", res.no),
+                isRead: false,
+              },
+            });
+            await pusherServer.trigger(
+              userIds,
+              "notification",
+              {
+                id: notification.id,
+                fromId: userId,
+                toId: userId,
+                link: `/permintaan/barang/${pb.id}`,
+                desc: notifDesc(res.Pemohon.name, "Meminta barang", res.no),
+                isRead: false,
+                createdAt: notification.createdAt,
+                From: {
+                  image: user?.image,
+                  name: user?.name
+                },
+              }
+            )
+          }
+
 
           await tx.notification.create({
             data: {

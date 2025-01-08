@@ -30,7 +30,7 @@ export const env = createEnv({
     AWS_SECRET_ACCESS_KEY: z.string(),
     AWS_REGION: z.string(),
     // REDIS
-    REDIS_URL: z.string()
+    REDIS_URL: z.string(),
   },
 
   /**

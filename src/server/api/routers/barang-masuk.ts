@@ -1,12 +1,15 @@
 import getPenomoran from "@/lib/getPenomoran";
 import notifDesc from "@/lib/notifDesc";
 import PENOMORAN from "@/lib/penomoran";
+import { getPusherInstance } from "@/lib/pusher/server";
 import { ROLE } from "@/lib/role";
 import { STATUS } from "@/lib/status";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+
+const pusherServer = getPusherInstance();
 
 export const barangMasukRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -208,15 +211,34 @@ export const barangMasukRouter = createTRPCRouter({
             }
           })
 
-          await tx.notification.createMany({
-            data: userIds.map((v) => ({
-              fromId: ctx.session.user.id,
-              toId: v,
-              link: `/gudang/masuk/${fttb.id}`,
-              desc: notifDesc(user!.name, "Form tanda terima barang", fttb.no),
-              isRead: false,
-            }))
-          })
+          for (const v of userIds) {
+            const notification = await tx.notification.create({
+              data: {
+                fromId: ctx.session.user.id,
+                toId: v,
+                link: `/gudang/masuk/${fttb.id}`,
+                desc: notifDesc(user!.name, "Form tanda terima barang", fttb.no),
+                isRead: false,
+              },
+            });
+            await pusherServer.trigger(
+              userIds,
+              "notification",
+              {
+                id: notification.id,
+                fromId: ctx.session.user.id,
+                toId: v,
+                link: `/gudang/masuk/${fttb.id}`,
+                desc: notifDesc(user!.name, "Form tanda terima barang", fttb.no),
+                isRead: false,
+                createdAt: notification.createdAt,
+                From: {
+                  image: user?.image,
+                  name: user?.name
+                },
+              }
+            )
+          }
 
           if (fttb) {
             await tx.penomoran.update({

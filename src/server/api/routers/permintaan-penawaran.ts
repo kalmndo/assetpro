@@ -9,6 +9,8 @@ import PENOMORAN from "@/lib/penomoran";
 import getPenomoran from "@/lib/getPenomoran";
 import { ROLE } from "@/lib/role";
 import notifDesc from "@/lib/notifDesc";
+import { getPusherInstance } from "@/lib/pusher/server";
+const pusherServer = getPusherInstance();
 
 export const permintaanPenawaranRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -291,15 +293,34 @@ https://assetpro.site/vendor/pp/${result.id}`;
             }
           })
 
-          await tx.notification.createMany({
-            data: userIds.map((v) => ({
-              fromId: ctx.session.user.id,
-              toId: v,
-              link: `/pengadaan/penawaran-harga/${permPem.id}`,
-              desc: notifDesc(user!.name, "Negosiasi ke vendor", permPem.no),
-              isRead: false,
-            }))
-          })
+          for (const v of userIds) {
+            const notification = await tx.notification.create({
+              data: {
+                fromId: ctx.session.user.id,
+                toId: v,
+                link: `/pengadaan/penawaran-harga/${permPem.id}`,
+                desc: notifDesc(user!.name, "Negosiasi ke vendor", permPem.no),
+                isRead: false,
+              },
+            });
+            await pusherServer.trigger(
+              userIds,
+              "notification",
+              {
+                id: notification.id,
+                fromId: ctx.session.user.id,
+                toId: v,
+                link: `/pengadaan/penawaran-harga/${permPem.id}`,
+                desc: notifDesc(user!.name, "Negosiasi ke vendor", permPem.no),
+                isRead: false,
+                createdAt: notification.createdAt,
+                From: {
+                  image: user?.image,
+                  name: user?.name
+                },
+              }
+            )
+          }
 
         },
           {

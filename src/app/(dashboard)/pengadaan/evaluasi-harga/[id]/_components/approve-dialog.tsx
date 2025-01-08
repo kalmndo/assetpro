@@ -21,7 +21,8 @@ const defaultData = {
   total: 0,
   button: '',
   currentUser: '',
-  nextUser: ''
+  nextUser: '',
+  nextUserId: ''
 }
 
 export default function ApproveDialog({

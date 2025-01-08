@@ -8,6 +8,8 @@ import PENOMORAN from "@/lib/penomoran";
 import getPenomoran from "@/lib/getPenomoran";
 import { ROLE } from "@/lib/role";
 import notifDesc from "@/lib/notifDesc";
+import { getPusherInstance } from "@/lib/pusher/server";
+const pusherServer = getPusherInstance();
 
 export const barangKeluarRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -163,15 +165,34 @@ export const barangKeluarRouter = createTRPCRouter({
             }
           })
 
-          await tx.notification.createMany({
-            data: userIds.map((v) => ({
-              fromId: ctx.session.user.id,
-              toId: v,
-              link: `/gudang/keluar/${ftkb.id}`,
-              desc: notifDesc(user!.name, "Form tanda keluar barang", ftkb.no),
-              isRead: false,
-            }))
-          })
+          for (const v of userIds) {
+            const notification = await tx.notification.create({
+              data: {
+                fromId: ctx.session.user.id,
+                toId: v,
+                link: `/gudang/keluar/${ftkb.id}`,
+                desc: notifDesc(user!.name, "Form tanda keluar barang", ftkb.no),
+                isRead: false,
+              },
+            });
+            await pusherServer.trigger(
+              userIds,
+              "notification",
+              {
+                id: notification.id,
+                fromId: ctx.session.user.id,
+                toId: v,
+                link: `/gudang/keluar/${ftkb.id}`,
+                desc: notifDesc(user!.name, "Form tanda keluar barang", ftkb.no),
+                isRead: false,
+                createdAt: notification.createdAt,
+                From: {
+                  image: user?.image,
+                  name: user?.name
+                },
+              }
+            )
+          }
 
           if (ftkb) {
             await tx.penomoran.update({
