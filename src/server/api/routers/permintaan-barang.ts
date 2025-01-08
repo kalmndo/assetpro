@@ -780,37 +780,72 @@ Catatan: ${v.catatan}
             });
           }
 
-          const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.IM_APPROVE.id } })
-          const userIds = allRoles.map((v) => v.userId)
+          if (isAtasan) {
+            const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.IM_APPROVE.id } })
+            const userIds = allRoles.map((v) => v.userId)
 
-          for (const v of userIds) {
-            const notification = await tx.notification.create({
-              data: {
-                fromId: userId,
-                toId: v,
-                link: `/permintaan/barang/${pb.id}`,
-                desc: notifDesc(user!.name, "Menyetujui", res.no),
-                isRead: false,
-              },
-            });
-            await pusherServer.trigger(
-              v,
-              "notification",
-              {
-                id: notification.id,
-                fromId: userId,
-                toId: v,
-                link: `/permintaan/barang/${pb.id}`,
-                desc: notifDesc(res.Pemohon.name, "Meminta barang", res.no),
-                isRead: false,
-                createdAt: notification.createdAt,
-                From: {
-                  image: user?.image,
-                  name: user?.name
+            for (const v of userIds) {
+              const notification = await tx.notification.create({
+                data: {
+                  fromId: userId,
+                  toId: v,
+                  link: `/permintaan/barang/${pb.id}`,
+                  desc: notifDesc(user!.name, "Menyetujui", res.no),
+                  isRead: false,
                 },
-              }
-            )
+              });
+              await pusherServer.trigger(
+                v,
+                "notification",
+                {
+                  id: notification.id,
+                  fromId: userId,
+                  toId: v,
+                  link: `/permintaan/barang/${pb.id}`,
+                  desc: notifDesc(res.Pemohon.name, "Meminta barang", res.no),
+                  isRead: false,
+                  createdAt: notification.createdAt,
+                  From: {
+                    image: user?.image,
+                    name: user?.name
+                  },
+                }
+              )
+            }
+          } else {
+            const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.GUDANG_REQUEST_VIEW.id } })
+            const userIds = allRoles.map((v) => v.userId)
+
+            for (const v of userIds) {
+              const notification = await tx.notification.create({
+                data: {
+                  fromId: userId,
+                  toId: v,
+                  link: "/gudang/permintaan",
+                  desc: notifDesc(user!.name, "Menyetujui", res.no),
+                  isRead: false,
+                },
+              });
+              await pusherServer.trigger(
+                v,
+                "notification",
+                {
+                  id: notification.id,
+                  fromId: userId,
+                  toId: v,
+                  link: "/gudang/permintaan",
+                  desc: notifDesc(user!.name, "Menyetujui", res.no),
+                  isRead: false,
+                  createdAt: notification.createdAt,
+                  From: {
+                    image: user?.image,
+                    name: user?.name
+                  },
+                }
+              )
+            }
           }
+
         });
         return {
           ok: true,
