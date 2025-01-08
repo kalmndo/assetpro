@@ -136,6 +136,41 @@ export const permintaanPenawaranRouter = createTRPCRouter({
         unsendVendors: isPengajuan ? [] : getVendors.filter((v) => !v.status),
       };
     }),
+
+  changeDate: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        deadline: z.date(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, deadline } = input
+      try {
+
+        const penawaranResult = await ctx.db.permintaanPenawaran.update({
+          where: {
+            id,
+          },
+          data: {
+            deadline,
+            status: STATUS.SELESAI.id,
+          },
+        });
+
+        return {
+          ok: true,
+          message: "Berhasil mengubah tanggal permintaan penawaran",
+        };
+
+      } catch (error) {
+        console.log("err", error)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Tidak ada form ini",
+        });
+      }
+    }),
   send: protectedProcedure
     .input(
       z.object({

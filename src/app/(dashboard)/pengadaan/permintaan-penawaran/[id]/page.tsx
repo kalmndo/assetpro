@@ -53,8 +53,8 @@ export default async function Page({
           <div style={{ color }} className="font-semibold">
             {status}
           </div>
-          {status !== STATUS.PENGAJUAN.id && (
-            <Menu vendors={data.unsendVendors} />
+          {data.status !== STATUS.MENUNGGU.id && (
+            <Menu vendors={data.unsendVendors} id={data.id} />
           )}
         </div>
         <Separator />

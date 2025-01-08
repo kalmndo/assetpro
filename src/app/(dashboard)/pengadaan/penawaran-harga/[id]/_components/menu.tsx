@@ -10,11 +10,14 @@ import { Info, Menu as MenuIcon, Printer } from "lucide-react";
 import { useState } from "react";
 import DialogMenuVendor from "./dialog-menu-vendor";
 import { type RouterOutputs } from "@/trpc/react";
+import ChangeDate from "./change-date";
 
 export default function Menu({
   vendors,
+  id
 }: {
   vendors: RouterOutputs["penawaranHarga"]["get"]["unsendVendors"];
+  id: string
 }) {
   const [dialog, setDialog] = useState<{
     data: typeof vendors | undefined;
@@ -32,7 +35,9 @@ export default function Menu({
           <MenuIcon />
         </DropdownMenuTrigger>
         <DropdownMenuContent side="bottom" align="end">
-          <DropdownMenuItem onSelect={() => console.log("")}>
+          <DropdownMenuItem
+            onSelect={() => setDialog({ data: [], open: "change" })}
+          >
             <Printer size={18} className="mr-2" />
             Ubah tanggal
           </DropdownMenuItem>
@@ -47,6 +52,11 @@ export default function Menu({
       <DialogMenuVendor
         vendors={vendors}
         open={dialog.open === "manual"}
+        onClose={onClose}
+      />
+      <ChangeDate
+        id={id}
+        open={dialog.open === "change"}
         onClose={onClose}
       />
     </>
