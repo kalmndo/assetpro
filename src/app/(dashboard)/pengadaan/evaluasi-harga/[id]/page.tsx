@@ -51,7 +51,6 @@ export default async function Page({
           <div style={{ color }} className="font-semibold">
             {status}
           </div>
-          <Menu id="a" />
         </div>
         <Separator />
         <div className="grid grid-cols-3 gap-4 p-4">

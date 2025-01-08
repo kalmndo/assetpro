@@ -3,7 +3,7 @@ import { DataTable } from "@/components/data-table";
 import { columns } from "./columns";
 import { STATUS } from "@/lib/status";
 
-const status = [STATUS.MENUNGGU, STATUS.SELESAI]
+const status = [STATUS.PENGAJUAN, STATUS.SELESAI]
 
 export function Table({ data }: { data: any }) {
   return (
@@ -13,7 +13,7 @@ export function Table({ data }: { data: any }) {
         columns={columns}
         filter={{ column: "no", placeholder: "Nomor FEPHB..." }}
         defaultFilters={[
-          { id: 'status', value: [STATUS.MENUNGGU.id] }
+          { id: 'status', value: [STATUS.PENGAJUAN.id] }
         ]}
         facetedFilter={[
           {

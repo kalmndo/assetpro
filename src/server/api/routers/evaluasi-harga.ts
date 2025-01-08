@@ -488,7 +488,7 @@ export const evaluasiHargaRouter = createTRPCRouter({
               }
             })
 
-            await tx.notification.create({
+            const notification = await tx.notification.create({
               data: {
                 fromId: ctx.session.user.id,
                 toId: nextUserId!,
@@ -497,6 +497,24 @@ export const evaluasiHargaRouter = createTRPCRouter({
                 isRead: false,
               }
             })
+
+            await pusherServer.trigger(
+              nextUserId!,
+              "notification",
+              {
+                id: notification.id,
+                fromId: ctx.session.user.id,
+                toId: nextUserId!,
+                link: `/pengadaan/evaluasi-harga/${id}`,
+                desc: notifDesc(user!.name, "Evaluasi harga vendor", evaluasi!.no),
+                isRead: false,
+                createdAt: notification.createdAt,
+                From: {
+                  image: user?.image,
+                  name: user?.name
+                },
+              }
+            )
 
             await tx.evaluasi.update({
               where: {
