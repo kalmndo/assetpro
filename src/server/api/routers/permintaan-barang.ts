@@ -10,6 +10,7 @@ import PENOMORAN from "@/lib/penomoran";
 import getPenomoran from "@/lib/getPenomoran";
 import notifDesc from "@/lib/notifDesc";
 import { getPusherInstance } from "@/lib/pusher/server";
+import { notificationQueue } from "@/app/api/queue/notification/route";
 const pusherServer = getPusherInstance();
 
 export const permintaanBarangRouter = createTRPCRouter({
@@ -361,18 +362,19 @@ export const permintaanBarangRouter = createTRPCRouter({
       const { perihal, ruangId, peruntukan, barang } = input;
       const pemohondId = ctx.session.user.id;
 
+      const userId = ctx.session.user.id;
+
+      const user = await ctx.db.user.findFirst({
+        where: {
+          id: userId,
+        },
+        include: {
+          UserRole: true,
+        },
+      });
+
       try {
         const result = await ctx.db.$transaction(async (tx) => {
-          const userId = ctx.session.user.id;
-
-          const user = await tx.user.findFirst({
-            where: {
-              id: userId,
-            },
-            include: {
-              UserRole: true,
-            },
-          });
 
           const atasanId = user?.atasanId;
 
@@ -455,29 +457,21 @@ export const permintaanBarangRouter = createTRPCRouter({
               isRead: false,
             },
           });
-          await pusherServer.trigger(
-            atasanId!,
-            "notification",
-            {
-              id: notification.id,
-              fromId: userId,
-              toId: atasanId ?? userId,
-              link: `/permintaan/barang/${pb.id}`,
-              desc,
-              isRead: false,
-              createdAt: notification.createdAt,
-              From: {
-                image: user?.image,
-                name: user?.name
-              },
-              notifToIds: []
-            }
-          )
 
           return {
             id: pb.id,
+            link: `/permintaan/barang/${pb.id}`,
+            desc,
+            notification
           };
         });
+
+        await notificationQueue.enqueue({
+          link: result.link,
+          desc: result.desc,
+          notifications: [result.notification],
+          from: user
+        })
 
         return {
           ok: true,
