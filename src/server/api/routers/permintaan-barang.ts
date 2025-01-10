@@ -378,23 +378,12 @@ export const permintaanBarangRouter = createTRPCRouter({
 
           const atasanId = user?.atasanId;
 
-          let penomoran = await tx.penomoran.findUnique({
-            where: {
-              id: PENOMORAN.IM,
-              year: String(new Date().getFullYear()),
-            },
-          });
 
-          if (!penomoran) {
-            penomoran = await tx.penomoran.create({
-              data: {
-                id: PENOMORAN.IM,
-                code: "IM",
-                number: 0,
-                year: String(new Date().getFullYear()),
-              },
-            });
-          }
+					const penomoran = await tx.penomoran.upsert({
+						where: { id: PENOMORAN.IM, year: String(new Date().getFullYear()) },
+						update: { number: { increment: 1 } },
+						create: { id: PENOMORAN.IM, code: 'FPPB', number: 0, year: String(new Date().getFullYear()) },
+					});
 
           const pb = await tx.permintaanBarang.create({
             data: {
@@ -409,43 +398,42 @@ export const permintaanBarangRouter = createTRPCRouter({
             },
           });
 
-          if (pb) {
-            await tx.penomoran.update({
-              where: {
-                id: PENOMORAN.IM,
-                year: String(new Date().getFullYear()),
-              },
+          // Prepare data for batch insertion
+          const permintaanBarangData = barang.map(({ id, qty, uomId, kodeAnggaran, deskripsi }) => ({
+            barangId: id,
+            status: STATUS.PENGAJUAN.id,
+            permintaanId: pb.id,
+            qty: Number(qty),
+            qtyOrdered: 0,
+            qtyOut: 0,
+            uomId,
+            desc: deskripsi,
+            kodeAnggaran, // Keep kodeAnggaran for later processing
+          }));
+
+          // Insert all PermintaanBarangBarang records and retrieve their IDs
+          const createdPbbRecords = await Promise.all(
+            permintaanBarangData.map(({ kodeAnggaran, ...data }) => tx.permintaanBarangBarang.create({
               data: {
-                number: { increment: 1 },
+                ...data,
               },
-            });
-          }
+            }))
+          );
 
-          for (const b of barang) {
-            const { id, qty, uomId, kodeAnggaran, deskripsi } = b;
+          // Prepare batch data for kodeAnggaran insertion
+          const kodeAnggaranBatchData = createdPbbRecords.flatMap((pbbRecord, index) => {
+            const { id: pbbId } = pbbRecord;
+            return permintaanBarangData[index]!.kodeAnggaran.map((kodeAnggaranId) => ({
+              kodeAnggaranId,
+              pbbId,
+            }));
+          });
 
-            const pbbId = await tx.permintaanBarangBarang.create({
-              data: {
-                barangId: id,
-                status: STATUS.PENGAJUAN.id,
-                permintaanId: pb.id,
-                qty: Number(qty),
-                qtyOrdered: 0,
-                qtyOut: 0,
-                uomId,
-                desc: deskripsi,
-              },
-            });
+          // Insert all kodeAnggaran entries in one batch
+          await tx.permintaanBarangBarangKodeAnggaran.createMany({
+            data: kodeAnggaranBatchData,
+          });
 
-            await tx.permintaanBarangBarangKodeAnggaran.createMany({
-              data: kodeAnggaran.map((v) => {
-                return {
-                  kodeAnggaranId: v,
-                  pbbId: pbbId.id,
-                };
-              }),
-            });
-          }
           const desc = `<p class="text-sm font-semibold">${user?.name}<span class="font-normal ml-[5px]">Meminta persetujuan internal memo ${pb.no}</span></p>`;
           const notification = await tx.notification.create({
             data: {
