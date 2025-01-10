@@ -4,13 +4,14 @@ const pusherServer = getPusherInstance();
 
 // test
 export const notificationQueue = Queue(
-  "api/queues/notification", // 👈 the route it's reachable on
+  "api/queue/notification", // 👈 the route it's reachable on
   async (data: {
     notifications: any[],
     from: any,
     link: string,
     desc: string
   }) => {
+    console.log("jalan gak?")
     const { link, desc, notifications, from } = data
     notifications.map(notification =>
       pusherServer.trigger(

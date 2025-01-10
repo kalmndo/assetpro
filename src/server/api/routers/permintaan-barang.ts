@@ -379,11 +379,11 @@ export const permintaanBarangRouter = createTRPCRouter({
           const atasanId = user?.atasanId;
 
 
-					const penomoran = await tx.penomoran.upsert({
-						where: { id: PENOMORAN.IM, year: String(new Date().getFullYear()) },
-						update: { number: { increment: 1 } },
-						create: { id: PENOMORAN.IM, code: 'FPPB', number: 0, year: String(new Date().getFullYear()) },
-					});
+          const penomoran = await tx.penomoran.upsert({
+            where: { id: PENOMORAN.IM, year: String(new Date().getFullYear()) },
+            update: { number: { increment: 1 } },
+            create: { id: PENOMORAN.IM, code: 'FPPB', number: 0, year: String(new Date().getFullYear()) },
+          });
 
           const pb = await tx.permintaanBarang.create({
             data: {
@@ -445,6 +445,7 @@ export const permintaanBarangRouter = createTRPCRouter({
               isRead: false,
             },
           });
+
 
           return {
             id: pb.id,
