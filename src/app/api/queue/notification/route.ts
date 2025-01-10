@@ -7,11 +7,12 @@ const pusherServer = getPusherInstance();
 export const notificationQueue = Queue(
   "api/queues/email", // 👈 the route it's reachable on
   async (data: {
-    form: any,
     notifications: any[],
-    from: any
+    from: any,
+    link: string,
+    desc: string
   }) => {
-    const { form, notifications, from } = data
+    const { link, desc, notifications, from } = data
     await Promise.all(
       notifications.map(notification =>
         pusherServer.trigger(
@@ -21,8 +22,8 @@ export const notificationQueue = Queue(
             id: notification.id,
             fromId: from.id,
             toId: notification.toId,
-            link: `/pengadaan/permintaan-pembelian/${form.id}`,
-            desc: notifDesc(from.name, "Permintaan pembelian barang", form.no),
+            link,
+            desc,
             isRead: false,
             createdAt: notification.createdAt,
             From: {

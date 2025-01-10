@@ -267,8 +267,9 @@ export const permintaanPembelianRouter = createTRPCRouter({
 					}
 				)
 
-				await notificationQueue.enqueue({
-					form: data.permPem,
+				notificationQueue.enqueue({
+					link: `/pengadaan/permintaan-pembelian/${data.permPem.id}`,
+					desc: notifDesc(user!.name, "Permintaan pembelian barang", data.permPem.no),
 					notifications: data.notifications,
 					from: user
 				})
@@ -365,8 +366,9 @@ export const permintaanPembelianRouter = createTRPCRouter({
 					}
 				})
 
-				await notificationQueue.enqueue({
-					form: data.permPem,
+				notificationQueue.enqueue({
+					link: `/pengadaan/permintaan-penawaran/${data.permPem.id}`,
+					desc: notifDesc(user!.name, "Permintaan penawaran ke vendor", data.permPem.no),
 					notifications: data.notifications,
 					from: user
 				})
