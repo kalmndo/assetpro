@@ -12,8 +12,7 @@ import { ROLE } from "@/lib/role";
 import PENOMORAN from "@/lib/penomoran";
 import getPenomoran from "@/lib/getPenomoran";
 import notifDesc from "@/lib/notifDesc";
-import { getPusherInstance } from "@/lib/pusher/server";
-const pusherServer = getPusherInstance();
+import { notificationQueue } from "@/app/api/queue/notification/route";
 
 export const permintaanPembelianRouter = createTRPCRouter({
 	getAll: protectedProcedure
@@ -125,26 +124,21 @@ export const permintaanPembelianRouter = createTRPCRouter({
 			const { takTersedia } = await checkKetersediaanByBarang(ctx.db, barangGroupResult)
 			const barangs = takTersedia.flatMap((v) => v.permintaanBarang)
 			const im = imToUpdateStatus(barangs)
+			const user = await ctx.db.user.findFirst({
+				where: {
+					id: ctx.session.user.id
+				}
+			})
+			const allRoles = await ctx.db.userRole.findMany({ where: { roleId: ROLE.PEMBELIAN_APPROVE.id } })
+			const userIds = allRoles.map((v) => v.userId).filter((v) => v !== ctx.session.user.id)
 
 			try {
-				await ctx.db.$transaction(async (tx) => {
-					let penomoran = await tx.penomoran.findUnique({
-						where: {
-							id: PENOMORAN.PERMINTAAN_PEMBELIAN,
-							year: String(new Date().getFullYear())
-						}
-					})
-
-					if (!penomoran) {
-						penomoran = await tx.penomoran.create({
-							data: {
-								id: PENOMORAN.PERMINTAAN_PEMBELIAN,
-								code: "FPPB",
-								number: 0,
-								year: String(new Date().getFullYear())
-							}
-						})
-					}
+				const data = await ctx.db.$transaction(async (tx) => {
+					const penomoran = await tx.penomoran.upsert({
+						where: { id: PENOMORAN.PERMINTAAN_PEMBELIAN, year: String(new Date().getFullYear()) },
+						update: { number: { increment: 1 } },
+						create: { id: PENOMORAN.PERMINTAAN_PEMBELIAN, code: 'FPPB', number: 0, year: String(new Date().getFullYear()) },
+					});
 					const permPem = await tx.permintaanPembelian.create({
 						data: {
 							no: getPenomoran(penomoran),
@@ -152,136 +146,139 @@ export const permintaanPembelianRouter = createTRPCRouter({
 						}
 					})
 
-					for (const iterator of im) {
-						await tx.permintaanBarang.update({
-							where: {
-								id: iterator
-							},
-							data: {
-								status: STATUS.PROCESS.id
-							}
-						})
-					}
+					await tx.permintaanBarang.updateMany({
+						where: { id: { in: im } },
+						data: { status: STATUS.PROCESS.id },
+					});
+
 					await tx.pBPP.createMany({
 						data: im.map((v) => ({ permintaanId: v, pembelianId: permPem.id }))
 					})
 
+					const permintaanPembelianBarangData = takTersedia.map(value => ({
+						barangId: value.id,
+						formId: permPem.id,
+						qty: value.permintaan,
+					}));
+					const ppb = await tx.permintaanPembelianBarang.createManyAndReturn({
+						data: permintaanPembelianBarangData,
+					});
+
+					const permintaanBarangUpdates = [];
+					const permintaanBarangSplitData = [];
+
 					for (const value of takTersedia) {
-						const ppb = await tx.permintaanPembelianBarang.create({
-							data: {
-								barangId: value.id,
-								formId: permPem.id,
-								qty: value.permintaan
-							}
-						})
-						const groupPermintaanBarangLeft: string[] = []
-
 						for (const iterator of value.permintaanBarang) {
-							if (iterator.permintaan !== iterator.beli) {
-								groupPermintaanBarangLeft.push(iterator.id)
-
-							}
 							const data = {
 								qtyOrdered: iterator.beli,
+								...(iterator.status === 'approve' && { status: STATUS.PROCESS.id }),
 							};
+							permintaanBarangUpdates.push({ id: iterator.id, data });
 
-							if (iterator.status === 'approve') {
-								// @ts-ignore
-								data.status = { set: STATUS.PROCESS.id };
-							}
-							await tx.permintaanBarangBarang.update({
+							permintaanBarangSplitData.push({
+								pbbId: iterator.id,
+								qty: iterator.beli,
+								status: 'order',
+								PermintaanBarangBarangSplitHistory: {
+									create: {
+										formNo: permPem.no,
+										formType: 'permintaan-pembelian',
+										desc: 'Permintaan pembelian',
+									},
+								},
+							});
+						}
+					}
+
+					await Promise.all(
+						permintaanBarangUpdates.map(update =>
+							tx.permintaanBarangBarang.update({
+								where: { id: update.id },
+								data: update.data,
+							}),
+						),
+					);
+
+					const spr = await tx.permintaanBarangBarangSplit.createManyAndReturn({
+						data: permintaanBarangSplitData.map(split => ({
+							pbbId: split.pbbId,
+							qty: split.qty,
+							status: split.status,
+						})),
+					});
+
+					await tx.permintaanBarangBarangSplitHistory.createMany({
+						data: spr.map(split => ({
+							barangSplitId: split.id,
+							formNo: permPem.no,
+							formType: "permintaan-pembelian",
+							desc: "Permintaan pembelian",
+						})),
+					})
+
+					const pbspbbs = spr.flatMap(spr =>
+						ppb.map(ppb => ({
+							sprId: spr.id,
+							ppbId: ppb.id
+						}))
+					)
+
+					await tx.pBSPBB.createMany({
+						data: pbspbbs.map((v) => ({
+							barangSplitId: v.sprId,
+							pembelianBarangId: v.ppbId
+						}))
+					})
+
+					await Promise.all(
+						takTersedia.map((v) => (
+
+							tx.permintaanBarangBarangGroup.update({
 								where: {
-									id: iterator.id
+									barangId: v.id
 								},
-								data
-							})
-							const splitResult = await tx.permintaanBarangBarangSplit.create({
 								data: {
-									pbbId: iterator.id,
-									qty: iterator.beli,
-									status: 'order',
-									PermintaanBarangBarangSplitHistory: {
-										create: {
-											formNo: permPem.no,
-											formType: 'permintaan-pembelian',
-											desc: 'Permintaan pembelian'
-										}
-									}
-								},
-								include: {
-									PermintaanBarangBarangSplitHistory: true
+									ordered: { increment: v.permintaan }
 								}
 							})
-							await tx.pBSPBB.create({
-								data: {
-									barangSplitId: splitResult.id,
-									pembelianBarangId: ppb.id
-								}
-							})
-						}
+						))
+					)
 
-						await tx.permintaanBarangBarangGroup.update({
-							where: {
-								barangId: value.id,
-							},
-							data: {
-								ordered: { increment: value.permintaan },
-							}
-						})
-					}
-					await tx.penomoran.update({
-						where: {
-							id: PENOMORAN.PERMINTAAN_PEMBELIAN,
-							year: String(new Date().getFullYear())
-						},
-						data: {
-							number: { increment: 1 }
-						}
+
+					const notifications = await tx.notification.createManyAndReturn({
+						data: userIds.map((v) => ({
+							fromId: ctx.session.user.id,
+							toId: v,
+							link: `/pengadaan/permintaan-pembelian/${permPem.id}`,
+							desc: notifDesc(user!.name, "Permintaan pembelian barang", permPem.no),
+							isRead: false,
+						}))
 					})
 
-					const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.PEMBELIAN_APPROVE.id } })
-					const userIds = allRoles.map((v) => v.userId).filter((v) => v !== ctx.session.user.id)
-					const user = await tx.user.findFirst({
-						where: {
-							id: ctx.session.user.id
-						}
-					})
-
-					for (const v of userIds) {
-						const notification = await tx.notification.create({
-							data: {
-								fromId: ctx.session.user.id,
-								toId: v,
-								link: `/pengadaan/permintaan-pembelian/${permPem.id}`,
-								desc: notifDesc(user!.name, "Permintaan pembelian barang", permPem.no),
-								isRead: false,
-							},
-						});
-						await pusherServer.trigger(
-							v,
-							"notification",
-							{
-								id: notification.id,
-								fromId: ctx.session.user.id,
-								toId: v,
-								link: `/pengadaan/permintaan-pembelian/${permPem.id}`,
-								desc: notifDesc(user!.name, "Permintaan pembelian barang", permPem.no),
-								isRead: false,
-								createdAt: notification.createdAt,
-								From: {
-									image: user?.image,
-									name: user?.name
-								},
-							}
-						)
+					return {
+						permPem,
+						notifications
 					}
 
+				},
+					{
+						maxWait: 10000, // default: 2000
+						timeout: 20000, // default: 5000
+					}
+				)
+
+				await notificationQueue.enqueue({
+					form: data.permPem,
+					notifications: data.notifications,
+					from: user
 				})
+
 				return {
 					ok: true,
 					message: 'Berhasil membuat permintaan pembelian'
 				}
 			} catch (error) {
+				console.log("error", error)
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
 					message: "Kemunkingan terjadi kesalahan sistem, silahkan coba lagi",
@@ -293,8 +290,15 @@ export const permintaanPembelianRouter = createTRPCRouter({
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
 			const { id } = input
+			const allRoles = await ctx.db.userRole.findMany({ where: { roleId: ROLE.PEMBELIAN_SELECT_VENDOR.id } })
+			const userIds = allRoles.map((v) => v.userId).filter((v) => v !== ctx.session.user.id)
+			const user = await ctx.db.user.findFirst({
+				where: {
+					id: ctx.session.user.id
+				}
+			})
 			try {
-				await ctx.db.$transaction(async (tx) => {
+				const data = await ctx.db.$transaction(async (tx) => {
 					const permintaanPembelian = await tx.permintaanPembelian.update({
 						where: {
 							id
@@ -319,34 +323,23 @@ export const permintaanPembelianRouter = createTRPCRouter({
 
 					const barangSplitIds = result.flatMap((v) => v.PBSPBB.flatMap((aa) => aa.barangSplitId))
 
-					for (const value of barangSplitIds) {
-						await tx.permintaanBarangBarangSplitHistory.create({
-							data: {
+					await tx.permintaanBarangBarangSplitHistory.createMany({
+						data: barangSplitIds.map((value) => (
+							{
 								desc: 'Permintaan pembelian disetujui',
 								formNo: permintaanPembelian.no,
 								formType: 'permintaan-pembelian',
 								barangSplitId: value
 							}
-						})
-					}
-
-					let penomoran = await tx.penomoran.findUnique({
-						where: {
-							id: PENOMORAN.PERMINTAAN_PENAWARAN,
-							year: String(new Date().getFullYear())
-						}
+						))
 					})
 
-					if (!penomoran) {
-						penomoran = await tx.penomoran.create({
-							data: {
-								id: PENOMORAN.PERMINTAAN_PENAWARAN,
-								code: "FPP",
-								number: 0,
-								year: String(new Date().getFullYear())
-							}
-						})
-					}
+					const penomoran = await tx.penomoran.upsert({
+						where: { id: PENOMORAN.PERMINTAAN_PEMBELIAN, year: String(new Date().getFullYear()) },
+						update: { number: { increment: 1 } },
+						create: { id: PENOMORAN.PERMINTAAN_PEMBELIAN, code: 'FPPB', number: 0, year: String(new Date().getFullYear()) },
+					});
+
 					const permPem = await tx.permintaanPenawaran.create({
 						data: {
 							no: getPenomoran(penomoran),
@@ -355,53 +348,27 @@ export const permintaanPembelianRouter = createTRPCRouter({
 						}
 					})
 
-					if (permPem) {
-						await tx.penomoran.update({
-							where: {
-								id: PENOMORAN.PERMINTAAN_PENAWARAN,
-								year: String(new Date().getFullYear())
-							},
-							data: {
-								number: { increment: 1 }
-							}
-						})
-					}
-
-					const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.PEMBELIAN_SELECT_VENDOR.id } })
-					const userIds = allRoles.map((v) => v.userId).filter((v) => v !== ctx.session.user.id)
-					const user = await tx.user.findFirst({
-						where: {
-							id: ctx.session.user.id
+					const notifications = await tx.notification.createManyAndReturn({
+						data: userIds.map((v) => ({
+							fromId: ctx.session.user.id,
+							toId: v,
+							link: `/pengadaan/permintaan-penawaran/${permPem.id}`,
+							desc: notifDesc(user!.name, "Permintaan penawaran ke vendor", permPem.no),
+							isRead: false,
 						}
+						))
 					})
-					for (const v of userIds) {
-						const notification = await tx.notification.create({
-							data: {
-								fromId: ctx.session.user.id,
-								toId: v,
-								link: `/pengadaan/permintaan-penawaran/${permPem.id}`,
-								desc: notifDesc(user!.name, "Permintaan penawaran ke vendor", permPem.no),
-								isRead: false,
-							},
-						});
-						await pusherServer.trigger(
-							v,
-							"notification",
-							{
-								id: notification.id,
-								fromId: ctx.session.user.id,
-								toId: v,
-								link: `/pengadaan/permintaan-penawaran/${permPem.id}`,
-								desc: notifDesc(user!.name, "Permintaan penawaran ke vendor", permPem.no),
-								isRead: false,
-								createdAt: notification.createdAt,
-								From: {
-									image: user?.image,
-									name: user?.name
-								},
-							}
-						)
+
+					return {
+						notifications,
+						permPem
 					}
+				})
+
+				await notificationQueue.enqueue({
+					form: data.permPem,
+					notifications: data.notifications,
+					from: user
 				})
 
 				return {

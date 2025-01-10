@@ -31,6 +31,7 @@ import { RESET } from "jotai/utils";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getSession } from "next-auth/react";
+import UplaodImage from "./upload-image";
 
 const formSchema = z.object({
   perihal: z.string().min(1).max(9999),
@@ -144,6 +145,7 @@ export default function Content({
               </FormItem>
             )}
           />
+          {/* <UplaodImage /> */}
           <Table className="mt-10">
             <TableHeader>
               <TableRow>
