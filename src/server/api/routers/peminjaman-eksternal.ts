@@ -229,23 +229,11 @@ export const peminjamanEksternalRouter = createTRPCRouter({
             },
           });
 
-          let penomoran = await tx.penomoran.findUnique({
-            where: {
-              id: PENOMORAN.PEMINJAMAN_EKSTERNAL,
-              year: String(new Date().getFullYear()),
-            },
+          const penomoran = await tx.penomoran.upsert({
+            where: { id: PENOMORAN.PEMINJAMAN_EKSTERNAL, year: String(new Date().getFullYear()) },
+            update: { number: { increment: 1 } },
+            create: { id: PENOMORAN.PEMINJAMAN_EKSTERNAL, code: 'FPK', number: 0, year: String(new Date().getFullYear()) },
           });
-
-          if (!penomoran) {
-            penomoran = await tx.penomoran.create({
-              data: {
-                id: PENOMORAN.PEMINJAMAN_EKSTERNAL,
-                code: "FPK",
-                number: 0,
-                year: String(new Date().getFullYear()),
-              },
-            });
-          }
 
           const peminjaman = await tx.peminjamanExternal.create({
             data: {
@@ -260,18 +248,6 @@ export const peminjamanEksternalRouter = createTRPCRouter({
               pemohonId: userId,
             },
           });
-
-          if (peminjaman) {
-            await tx.penomoran.update({
-              where: {
-                id: PENOMORAN.PEMINJAMAN_EKSTERNAL,
-                year: String(new Date().getFullYear()),
-              },
-              data: {
-                number: { increment: 1 },
-              },
-            });
-          }
 
           for (const { user } of userRolesResult) {
             const desc = `<p class="text-sm font-semibold">${userResult?.name}<span class="font-normal ml-[5px]">Meminta persetujuan permintaan peminjaman eksternal ${peminjaman.no}</span></p>`;

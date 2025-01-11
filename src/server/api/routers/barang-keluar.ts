@@ -9,6 +9,7 @@ import getPenomoran from "@/lib/getPenomoran";
 import { ROLE } from "@/lib/role";
 import notifDesc from "@/lib/notifDesc";
 import { getPusherInstance } from "@/lib/pusher/server";
+import { notificationQueue } from "@/app/api/queue/notification/route";
 const pusherServer = getPusherInstance();
 
 export const barangKeluarRouter = createTRPCRouter({
@@ -120,7 +121,14 @@ export const barangKeluarRouter = createTRPCRouter({
     .input(z.array(z.string()))
     .mutation(async ({ ctx, input }) => {
       try {
-        await ctx.db.$transaction(async (tx) => {
+        const allRoles = await ctx.db.userRole.findMany({ where: { roleId: ROLE.GUDANG_KELUAR_VIEW.id } })
+        const userIds = allRoles.map((v) => v.userId).filter((v) => v !== ctx.session.user.id)
+        const user = await ctx.db.user.findFirst({
+          where: {
+            id: ctx.session.user.id
+          }
+        })
+        const result = await ctx.db.$transaction(async (tx) => {
           const barangGroupResult =
             await tx.permintaanBarangBarangGroup.findMany({
               where: {
@@ -132,23 +140,11 @@ export const barangKeluarRouter = createTRPCRouter({
             barangGroupResult,
           );
 
-          let penomoran = await tx.penomoran.findUnique({
-            where: {
-              id: PENOMORAN.KELUAR_BARANG,
-              year: String(new Date().getFullYear()),
-            },
+          const penomoran = await tx.penomoran.upsert({
+            where: { id: PENOMORAN.KELUAR_BARANG, year: String(new Date().getFullYear()) },
+            update: { number: { increment: 1 } },
+            create: { id: PENOMORAN.KELUAR_BARANG, code: 'FTKB', number: 0, year: String(new Date().getFullYear()) },
           });
-
-          if (!penomoran) {
-            penomoran = await tx.penomoran.create({
-              data: {
-                id: PENOMORAN.KELUAR_BARANG,
-                code: "FTKB",
-                number: 0,
-                year: String(new Date().getFullYear()),
-              },
-            });
-          }
 
           const ftkb = await tx.ftkb.create({
             data: {
@@ -157,54 +153,15 @@ export const barangKeluarRouter = createTRPCRouter({
             },
           });
 
-          const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.GUDANG_KELUAR_VIEW.id } })
-          const userIds = allRoles.map((v) => v.userId).filter((v) => v !== ctx.session.user.id)
-          const user = await tx.user.findFirst({
-            where: {
-              id: ctx.session.user.id
-            }
+          const notifications = await tx.notification.createManyAndReturn({
+            data: userIds.map((v) => ({
+              fromId: ctx.session.user.id,
+              toId: v,
+              link: `/gudang/keluar/${ftkb.id}`,
+              desc: notifDesc(user!.name, "Form tanda keluar barang", ftkb.no),
+              isRead: false,
+            }))
           })
-
-          for (const v of userIds) {
-            const notification = await tx.notification.create({
-              data: {
-                fromId: ctx.session.user.id,
-                toId: v,
-                link: `/gudang/keluar/${ftkb.id}`,
-                desc: notifDesc(user!.name, "Form tanda keluar barang", ftkb.no),
-                isRead: false,
-              },
-            });
-            await pusherServer.trigger(
-              userIds,
-              "notification",
-              {
-                id: notification.id,
-                fromId: ctx.session.user.id,
-                toId: v,
-                link: `/gudang/keluar/${ftkb.id}`,
-                desc: notifDesc(user!.name, "Form tanda keluar barang", ftkb.no),
-                isRead: false,
-                createdAt: notification.createdAt,
-                From: {
-                  image: user?.image,
-                  name: user?.name
-                },
-              }
-            )
-          }
-
-          if (ftkb) {
-            await tx.penomoran.update({
-              where: {
-                id: PENOMORAN.KELUAR_BARANG,
-                year: String(new Date().getFullYear()),
-              },
-              data: {
-                number: { increment: 1 },
-              },
-            });
-          }
 
           const permintaanBarangIds = tersedia.flatMap(
             (v) => v.permintaanBarangId,
@@ -415,12 +372,23 @@ export const barangKeluarRouter = createTRPCRouter({
               }
             }
           }
+          return {
+            notifications,
+            link: `/gudang/keluar/${ftkb.id}`,
+            desc: notifDesc(user!.name, "Form tanda keluar barang", ftkb.no),
+          }
         },
           {
             maxWait: 5000, // default: 2000
             timeout: 10000, // default: 5000
           }
         );
+        const { notifications, desc, link } = result
+
+        notificationQueue.enqueue({
+          from: user,
+          notifications
+        })
         return {
           ok: true,
           message: "Berhasil membuat form keluar barang",

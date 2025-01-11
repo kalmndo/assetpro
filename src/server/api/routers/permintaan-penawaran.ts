@@ -10,6 +10,7 @@ import getPenomoran from "@/lib/getPenomoran";
 import { ROLE } from "@/lib/role";
 import notifDesc from "@/lib/notifDesc";
 import { getPusherInstance } from "@/lib/pusher/server";
+import { notificationQueue } from "@/app/api/queue/notification/route";
 const pusherServer = getPusherInstance();
 
 export const permintaanPenawaranRouter = createTRPCRouter({
@@ -207,7 +208,17 @@ export const permintaanPenawaranRouter = createTRPCRouter({
       };
 
       try {
-        await ctx.db.$transaction(async (tx) => {
+
+        const allRoles = await ctx.db.userRole.findMany({ where: { roleId: ROLE.NEGO_SUBMIT.id } })
+        const userIds = allRoles.map((v) => v.userId).filter((v) => v !== ctx.session.user.id)
+        const user = await ctx.db.user.findFirst({
+          where: {
+            id: ctx.session.user.id
+          }
+        })
+
+
+        const result = await ctx.db.$transaction(async (tx) => {
           const penawaranResult = await tx.permintaanPenawaran.update({
             where: {
               id,
@@ -281,24 +292,12 @@ https://assetpro.site/vendor/pp/${result.id}`;
 
             sendWhatsAppMessage(formatPhoneNumber(result.Vendor.nohp), message);
           }
-          let penomoran = await tx.penomoran.findUnique({
-            where: {
-              id: PENOMORAN.PENAWARAN_HARGA,
-              year: String(new Date().getFullYear()),
-            },
-          });
-          console.log("ada", penomoran)
 
-          if (!penomoran) {
-            penomoran = await tx.penomoran.create({
-              data: {
-                id: PENOMORAN.PENAWARAN_HARGA,
-                code: "FPH",
-                number: 0,
-                year: String(new Date().getFullYear()),
-              },
-            });
-          }
+          const penomoran = await tx.penomoran.upsert({
+            where: { id: PENOMORAN.PENAWARAN_HARGA, year: String(new Date().getFullYear()) },
+            update: { number: { increment: 1 } },
+            create: { id: PENOMORAN.PENAWARAN_HARGA, code: 'FPH', number: 0, year: String(new Date().getFullYear()) },
+          });
 
           const permPem = await tx.penawaranHarga.create({
             data: {
@@ -308,53 +307,19 @@ https://assetpro.site/vendor/pp/${result.id}`;
             },
           });
 
-          if (permPem) {
-            await tx.penomoran.update({
-              where: {
-                id: PENOMORAN.PENAWARAN_HARGA,
-                year: String(new Date().getFullYear()),
-              },
-              data: {
-                number: { increment: 1 },
-              },
-            });
-          }
-
-          const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.NEGO_SUBMIT.id } })
-          const userIds = allRoles.map((v) => v.userId).filter((v) => v !== ctx.session.user.id)
-          const user = await tx.user.findFirst({
-            where: {
-              id: ctx.session.user.id
+          const notifications = await tx.notification.createManyAndReturn({
+            data: userIds.map((v) => ({
+              fromId: ctx.session.user.id,
+              toId: v,
+              link: `/pengadaan/penawaran-harga/${permPem.id}`,
+              desc: notifDesc(user!.name, "Negosiasi ke vendor", permPem.no),
+              isRead: false,
             }
+            ))
           })
 
-          for (const v of userIds) {
-            const notification = await tx.notification.create({
-              data: {
-                fromId: ctx.session.user.id,
-                toId: v,
-                link: `/pengadaan/penawaran-harga/${permPem.id}`,
-                desc: notifDesc(user!.name, "Negosiasi ke vendor", permPem.no),
-                isRead: false,
-              },
-            });
-            await pusherServer.trigger(
-              v,
-              "notification",
-              {
-                id: notification.id,
-                fromId: ctx.session.user.id,
-                toId: v,
-                link: `/pengadaan/penawaran-harga/${permPem.id}`,
-                desc: notifDesc(user!.name, "Negosiasi ke vendor", permPem.no),
-                isRead: false,
-                createdAt: notification.createdAt,
-                From: {
-                  image: user?.image,
-                  name: user?.name
-                },
-              }
-            )
+          return {
+            notifications
           }
 
         },
@@ -363,6 +328,12 @@ https://assetpro.site/vendor/pp/${result.id}`;
             timeout: 10000, // default: 5000
           }
         );
+        const { notifications } = result
+
+        notificationQueue.enqueue({
+          notifications: notifications,
+          from: user
+        })
         return {
           ok: true,
           message: "Berhasil mengirim permintaan penawaran",

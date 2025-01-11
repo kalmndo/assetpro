@@ -378,23 +378,12 @@ export const perbaikanRouter = createTRPCRouter({
             where: { id: userId },
           });
 
-          let penomoran = await tx.penomoran.findUnique({
-            where: {
-              id: PENOMORAN.IM,
-              year: String(new Date().getFullYear()),
-            },
+          const penomoran = await tx.penomoran.upsert({
+            where: { id: PENOMORAN.IM, year: String(new Date().getFullYear()) },
+            update: { number: { increment: 1 } },
+            create: { id: PENOMORAN.IM, code: 'IM', number: 0, year: String(new Date().getFullYear()) },
           });
 
-          if (!penomoran) {
-            penomoran = await tx.penomoran.create({
-              data: {
-                id: PENOMORAN.IM,
-                code: "IM",
-                number: 0,
-                year: String(new Date().getFullYear()),
-              },
-            });
-          }
 
           const perbaikan = await tx.perbaikan.create({
             data: {
@@ -405,18 +394,6 @@ export const perbaikanRouter = createTRPCRouter({
               status: STATUS.PENGAJUAN.id,
             },
           });
-
-          if (perbaikan) {
-            await tx.penomoran.update({
-              where: {
-                id: PENOMORAN.IM,
-                year: String(new Date().getFullYear()),
-              },
-              data: {
-                number: { increment: 1 },
-              },
-            });
-          }
 
           const desc = `<p class="text-sm font-semibold">${user?.name}<span class="font-normal ml-[5px]">Meminta persetujuan permintaan perbaikan ${perbaikan.no}</span></p>`;
           await tx.notification.create({

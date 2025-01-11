@@ -268,8 +268,6 @@ export const permintaanPembelianRouter = createTRPCRouter({
 				)
 
 				notificationQueue.enqueue({
-					link: `/pengadaan/permintaan-pembelian/${data.permPem.id}`,
-					desc: notifDesc(user!.name, "Permintaan pembelian barang", data.permPem.no),
 					notifications: data.notifications,
 					from: user
 				})
@@ -336,9 +334,9 @@ export const permintaanPembelianRouter = createTRPCRouter({
 					})
 
 					const penomoran = await tx.penomoran.upsert({
-						where: { id: PENOMORAN.PERMINTAAN_PEMBELIAN, year: String(new Date().getFullYear()) },
+						where: { id: PENOMORAN.PERMINTAAN_PENAWARAN, year: String(new Date().getFullYear()) },
 						update: { number: { increment: 1 } },
-						create: { id: PENOMORAN.PERMINTAAN_PEMBELIAN, code: 'FPPB', number: 0, year: String(new Date().getFullYear()) },
+						create: { id: PENOMORAN.PERMINTAAN_PENAWARAN, code: 'FPP', number: 0, year: String(new Date().getFullYear()) },
 					});
 
 					const permPem = await tx.permintaanPenawaran.create({
@@ -367,8 +365,6 @@ export const permintaanPembelianRouter = createTRPCRouter({
 				})
 
 				notificationQueue.enqueue({
-					link: `/pengadaan/permintaan-penawaran/${data.permPem.id}`,
-					desc: notifDesc(user!.name, "Permintaan penawaran ke vendor", data.permPem.no),
 					notifications: data.notifications,
 					from: user
 				})

@@ -8,11 +8,8 @@ export const notificationQueue = Queue(
   async (data: {
     notifications: any[],
     from: any,
-    link: string,
-    desc: string
   }) => {
-    console.log("jalan gak?")
-    const { link, desc, notifications, from } = data
+    const {  notifications, from } = data
     notifications.map(notification =>
       pusherServer.trigger(
         notification.toId,
@@ -21,8 +18,8 @@ export const notificationQueue = Queue(
           id: notification.id,
           fromId: from.id,
           toId: notification.toId,
-          link,
-          desc,
+          link: notification.link,
+          desc: notification.desc,
           isRead: false,
           createdAt: notification.createdAt,
           From: {

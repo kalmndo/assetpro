@@ -1,3 +1,4 @@
+import { notificationQueue } from "@/app/api/queue/notification/route";
 import getPenomoran from "@/lib/getPenomoran";
 import notifDesc from "@/lib/notifDesc";
 import PENOMORAN from "@/lib/penomoran";
@@ -158,7 +159,15 @@ export const barangMasukRouter = createTRPCRouter({
       const { poId, items } = input;
 
       try {
-        await ctx.db.$transaction(async (tx) => {
+        const allRoles = await ctx.db.userRole.findMany({ where: { roleId: ROLE.GUDANG_MASUK_VIEW.id } })
+        const userIds = allRoles.map((v) => v.userId).filter((v) => v !== ctx.session.user.id)
+        const user = await ctx.db.user.findFirst({
+          where: {
+            id: ctx.session.user.id
+          }
+        })
+
+        const result = await ctx.db.$transaction(async (tx) => {
           const poBarangs = await tx.poBarang.findMany({
             where: {
               id: {
@@ -178,23 +187,11 @@ export const barangMasukRouter = createTRPCRouter({
             },
           });
 
-          let penomoran = await tx.penomoran.findUnique({
-            where: {
-              id: PENOMORAN.MASUK_BARANG,
-              year: String(new Date().getFullYear()),
-            },
+          const penomoran = await tx.penomoran.upsert({
+            where: { id: PENOMORAN.MASUK_BARANG, year: String(new Date().getFullYear()) },
+            update: { number: { increment: 1 } },
+            create: { id: PENOMORAN.MASUK_BARANG, code: 'FTTB', number: 0, year: String(new Date().getFullYear()) },
           });
-
-          if (!penomoran) {
-            penomoran = await tx.penomoran.create({
-              data: {
-                id: PENOMORAN.MASUK_BARANG,
-                code: "FTTB",
-                number: 0,
-                year: String(new Date().getFullYear()),
-              },
-            });
-          }
 
           const fttb = await tx.fttb.create({
             data: {
@@ -203,54 +200,15 @@ export const barangMasukRouter = createTRPCRouter({
             },
           });
 
-          const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.GUDANG_MASUK_VIEW.id } })
-          const userIds = allRoles.map((v) => v.userId).filter((v) => v !== ctx.session.user.id)
-          const user = await tx.user.findFirst({
-            where: {
-              id: ctx.session.user.id
-            }
+          const notifications = await tx.notification.createManyAndReturn({
+            data: userIds.map((v) => ({
+              fromId: ctx.session.user.id,
+              toId: v,
+              link: `/gudang/masuk/${fttb.id}`,
+              desc: notifDesc(user!.name, "Form tanda terima barang", fttb.no),
+              isRead: false,
+            }))
           })
-
-          for (const v of userIds) {
-            const notification = await tx.notification.create({
-              data: {
-                fromId: ctx.session.user.id,
-                toId: v,
-                link: `/gudang/masuk/${fttb.id}`,
-                desc: notifDesc(user!.name, "Form tanda terima barang", fttb.no),
-                isRead: false,
-              },
-            });
-            await pusherServer.trigger(
-              v,
-              "notification",
-              {
-                id: notification.id,
-                fromId: ctx.session.user.id,
-                toId: v,
-                link: `/gudang/masuk/${fttb.id}`,
-                desc: notifDesc(user!.name, "Form tanda terima barang", fttb.no),
-                isRead: false,
-                createdAt: notification.createdAt,
-                From: {
-                  image: user?.image,
-                  name: user?.name
-                },
-              }
-            )
-          }
-
-          if (fttb) {
-            await tx.penomoran.update({
-              where: {
-                id: PENOMORAN.MASUK_BARANG,
-                year: String(new Date().getFullYear()),
-              },
-              data: {
-                number: { increment: 1 },
-              },
-            });
-          }
 
           const imIds: string[] = [];
 
@@ -326,25 +284,16 @@ export const barangMasukRouter = createTRPCRouter({
                 },
               });
 
+
+
               for (const val of theImdId) {
                 for (let i = 0; i < val.qty; i++) {
-                  let penomoran = await tx.penomoran.findUnique({
-                    where: {
-                      id: PENOMORAN.ASET,
-                      year: String(new Date().getFullYear()),
-                    },
+                  const penomoran = await tx.penomoran.upsert({
+                    where: { id: PENOMORAN.ASET, year: String(new Date().getFullYear()) },
+                    update: { number: { increment: 1 } },
+                    create: { id: PENOMORAN.ASET, code: 'INV/YAH', number: 0, year: String(new Date().getFullYear()) },
                   });
 
-                  if (!penomoran) {
-                    penomoran = await tx.penomoran.create({
-                      data: {
-                        id: PENOMORAN.ASET,
-                        code: "INV/YAH",
-                        number: 0,
-                        year: String(new Date().getFullYear()),
-                      },
-                    });
-                  }
                   const aset = await tx.daftarAset.create({
                     data: {
                       id: getPenomoran(penomoran),
@@ -357,18 +306,6 @@ export const barangMasukRouter = createTRPCRouter({
                       desc: val.desc,
                     },
                   });
-
-                  if (aset) {
-                    await tx.penomoran.update({
-                      where: {
-                        id: PENOMORAN.ASET,
-                        year: String(new Date().getFullYear()),
-                      },
-                      data: {
-                        number: { increment: 1 },
-                      },
-                    });
-                  }
                 }
               }
 
@@ -560,12 +497,22 @@ export const barangMasukRouter = createTRPCRouter({
               });
             }
           }
+          return {
+            notifications,
+          }
         },
           {
             maxWait: 5000, // default: 2000
             timeout: 10000, // default: 5000
           }
         );
+
+        const { notifications, } = result
+
+        notificationQueue.enqueue({
+          from: user,
+          notifications
+        })
         return {
           ok: true,
           message: "Berhasil membuat barang masuk",

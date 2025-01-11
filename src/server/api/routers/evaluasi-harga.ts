@@ -10,6 +10,7 @@ import getPenomoran from "@/lib/getPenomoran";
 import notifDesc from "@/lib/notifDesc";
 import { ROLE } from "@/lib/role";
 import { getPusherInstance } from "@/lib/pusher/server";
+import { notificationQueue } from "@/app/api/queue/notification/route";
 
 const pusherServer = getPusherInstance();
 
@@ -266,7 +267,15 @@ export const evaluasiHargaRouter = createTRPCRouter({
       const vendorIds = barangs.map((v) => v.vendorId);
 
       try {
-        await ctx.db.$transaction(async (tx) => {
+
+        const allRoles = await ctx.db.userRole.findMany({ where: { roleId: ROLE.PO_VIEW.id } })
+        const userIds = allRoles.map((v) => v.userId).filter((v) => v !== ctx.session.user.id)
+        const user = await ctx.db.user.findFirst({
+          where: {
+            id: ctx.session.user.id
+          }
+        })
+        const result = await ctx.db.$transaction(async (tx) => {
           const {
             isCreatePo: isPO,
             nextUser,
@@ -356,24 +365,15 @@ export const evaluasiHargaRouter = createTRPCRouter({
               ),
             );
 
-            for (const value of groupedData) {
-              let penomoran = await tx.penomoran.findUnique({
-                where: {
-                  id: PENOMORAN.PURCHASE_ORDER,
-                  year: String(new Date().getFullYear())
-                }
-              })
+            const notificationsData: any[][] = []
 
-              if (!penomoran) {
-                penomoran = await tx.penomoran.create({
-                  data: {
-                    id: PENOMORAN.PURCHASE_ORDER,
-                    code: "PO",
-                    number: 0,
-                    year: String(new Date().getFullYear())
-                  }
-                })
-              }
+            for (const value of groupedData) {
+
+              const penomoran = await tx.penomoran.upsert({
+                where: { id: PENOMORAN.PURCHASE_ORDER, year: String(new Date().getFullYear()) },
+                update: { number: { increment: 1 } },
+                create: { id: PENOMORAN.PURCHASE_ORDER, code: 'PO', number: 0, year: String(new Date().getFullYear()) },
+              });
 
               const po = await tx.pO.create({
                 data: {
@@ -383,55 +383,18 @@ export const evaluasiHargaRouter = createTRPCRouter({
                   vendorId: value.vendorId,
                 },
               });
-              if (po) {
-                await tx.penomoran.update({
-                  where: {
-                    id: PENOMORAN.PURCHASE_ORDER,
-                    year: String(new Date().getFullYear())
-                  },
-                  data: {
-                    number: { increment: 1 }
-                  }
-                })
-              }
 
-              const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.PO_VIEW.id } })
-              const userIds = allRoles.map((v) => v.userId).filter((v) => v!== ctx.session.user.id)
-              const user = await tx.user.findFirst({
-                where: {
-                  id: ctx.session.user.id
-                }
+              const notifications = await tx.notification.createManyAndReturn({
+                data: userIds.map((v) => ({
+                  fromId: ctx.session.user.id,
+                  toId: v,
+                  link: `/pengadaan/purchase-order/${po.id}`,
+                  desc: notifDesc(currentUser!, "Membuat po", po.no),
+                  isRead: false,
+                }))
               })
 
-              for (const v of userIds) {
-                const notification = await tx.notification.create({
-                  data: {
-                    fromId: ctx.session.user.id,
-                    toId: v,
-                    link: `/pengadaan/purchase-order/${po.id}`,
-                    desc: notifDesc(currentUser!, "Membuat po", po.no),
-                    isRead: false,
-                  },
-                });
-                await pusherServer.trigger(
-                  v,
-                  "notification",
-                  {
-                    id: notification.id,
-                    fromId: ctx.session.user.id,
-                    toId: v,
-                    link: `/pengadaan/purchase-order/${po.id}`,
-                    desc: notifDesc(currentUser!, "Membuat po", po.no),
-                    isRead: false,
-                    createdAt: notification.createdAt,
-                    From: {
-                      image: user?.image,
-                      name: user?.name
-                    },
-                  }
-                )
-              }
-
+              notificationsData.push(notifications)
 
               for (const val of value.barangs) {
                 for (const { barangSplitId } of pBSPBB.filter(
@@ -469,6 +432,8 @@ export const evaluasiHargaRouter = createTRPCRouter({
             return {
               ok: true,
               message: "Berhasil membuat PO",
+              notificationsData,
+              type: 'po'
             };
           } else {
             for (const { barangSplitId } of pBSPBB) {
@@ -482,11 +447,6 @@ export const evaluasiHargaRouter = createTRPCRouter({
               });
             }
 
-            const user = await tx.user.findFirst({
-              where: {
-                id: ctx.session.user.id
-              }
-            })
 
             const notification = await tx.notification.create({
               data: {
@@ -498,24 +458,6 @@ export const evaluasiHargaRouter = createTRPCRouter({
               }
             })
 
-            await pusherServer.trigger(
-              nextUserId!,
-              "notification",
-              {
-                id: notification.id,
-                fromId: ctx.session.user.id,
-                toId: nextUserId!,
-                link: `/pengadaan/evaluasi-harga/${id}`,
-                desc: notifDesc(user!.name, "Evaluasi harga vendor", evaluasi!.no),
-                isRead: false,
-                createdAt: notification.createdAt,
-                From: {
-                  image: user?.image,
-                  name: user?.name
-                },
-              }
-            )
-
             await tx.evaluasi.update({
               where: {
                 id,
@@ -524,6 +466,13 @@ export const evaluasiHargaRouter = createTRPCRouter({
                 status: STATUS.PROCESS.id,
               },
             });
+
+            return {
+              ok: true,
+              message: "Berhasil meneruskan evaluasi",
+              notification: [notification],
+              type: 'not'
+            };
           }
         },
           {
@@ -531,10 +480,28 @@ export const evaluasiHargaRouter = createTRPCRouter({
             timeout: 10000, // default: 5000
           }
         );
+        const { type, notificationsData, notification, ok, message } = result
+
+        if (type === 'po') {
+          if (notificationsData) {
+            notificationQueue.enqueue({
+              from: user,
+              notifications: notificationsData.flatMap((v) => v)
+            })
+          }
+
+        } else {
+          if (notification) {
+            notificationQueue.enqueue({
+              from: user,
+              notifications: notification
+            })
+          }
+        }
 
         return {
-          ok: true,
-          message: "Berhasil meneruskan evaluasi",
+          ok,
+          message
         };
       } catch (error) {
         throw new TRPCError({

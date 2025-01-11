@@ -284,23 +284,12 @@ export const peminjamanRouter = createTRPCRouter({
           const user = await tx.user.findFirst({ where: { id: userId } });
           const type = Number(typeString);
 
-          let penomoran = await tx.penomoran.findUnique({
-            where: {
-              id: PENOMORAN.IM,
-              year: String(new Date().getFullYear()),
-            },
+          const penomoran = await tx.penomoran.upsert({
+            where: { id: PENOMORAN.IM, year: String(new Date().getFullYear()) },
+            update: { number: { increment: 1 } },
+            create: { id: PENOMORAN.IM, code: 'IM', number: 0, year: String(new Date().getFullYear()) },
           });
 
-          if (!penomoran) {
-            penomoran = await tx.penomoran.create({
-              data: {
-                id: PENOMORAN.IM,
-                code: "IM",
-                number: 0,
-                year: String(new Date().getFullYear()),
-              },
-            });
-          }
 
           const peminjaman = await tx.peminjaman.create({
             data: {
@@ -317,17 +306,6 @@ export const peminjamanRouter = createTRPCRouter({
             },
           });
 
-          if (peminjaman) {
-            await tx.penomoran.update({
-              where: {
-                id: PENOMORAN.IM,
-                year: String(new Date().getFullYear()),
-              },
-              data: {
-                number: { increment: 1 },
-              },
-            });
-          }
           const desc = `<p class="text-sm font-semibold">${user?.name}<span class="font-normal ml-[5px]">Meminta persetujuan permintaan peminjaman ${peminjaman.no}</span></p>`;
           await tx.notification.create({
             data: {

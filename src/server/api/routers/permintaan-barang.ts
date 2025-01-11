@@ -382,7 +382,7 @@ export const permintaanBarangRouter = createTRPCRouter({
           const penomoran = await tx.penomoran.upsert({
             where: { id: PENOMORAN.IM, year: String(new Date().getFullYear()) },
             update: { number: { increment: 1 } },
-            create: { id: PENOMORAN.IM, code: 'FPPB', number: 0, year: String(new Date().getFullYear()) },
+            create: { id: PENOMORAN.IM, code: 'IM', number: 0, year: String(new Date().getFullYear()) },
           });
 
           const pb = await tx.permintaanBarang.create({
@@ -449,15 +449,11 @@ export const permintaanBarangRouter = createTRPCRouter({
 
           return {
             id: pb.id,
-            link: `/permintaan/barang/${pb.id}`,
-            desc,
             notification
           };
         });
 
-        await notificationQueue.enqueue({
-          link: result.link,
-          desc: result.desc,
+        notificationQueue.enqueue({
           notifications: [result.notification],
           from: user
         })
@@ -554,7 +550,7 @@ export const permintaanBarangRouter = createTRPCRouter({
       }
 
       try {
-        await ctx.db.$transaction(async (tx) => {
+       const result =  await ctx.db.$transaction(async (tx) => {
           const pb = await tx.permintaanBarang.update({
             where: { id },
             data: {
@@ -763,73 +759,53 @@ Catatan: ${v.catatan}
             });
           }
 
+          let notificationData = []
+
           if (isAtasan) {
             const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.IM_APPROVE.id } })
             const userIds = allRoles.map((v) => v.userId)
 
-            for (const v of userIds) {
-              const notification = await tx.notification.create({
-                data: {
-                  fromId: userId,
-                  toId: v,
-                  link: `/permintaan/barang/${pb.id}`,
-                  desc: notifDesc(user!.name, "Menyetujui", res.no),
-                  isRead: false,
-                },
-              });
-              await pusherServer.trigger(
-                v,
-                "notification",
-                {
-                  id: notification.id,
-                  fromId: userId,
-                  toId: v,
-                  link: `/permintaan/barang/${pb.id}`,
-                  desc: notifDesc(res.Pemohon.name, "Meminta barang", res.no),
-                  isRead: false,
-                  createdAt: notification.createdAt,
-                  From: {
-                    image: user?.image,
-                    name: user?.name
-                  },
-                }
-              )
-            }
+            const notifications = await tx.notification.createManyAndReturn({
+              data: userIds.map((v) => ({
+                fromId: userId,
+                toId: v,
+                link: `/permintaan/barang/${pb.id}`,
+                desc: notifDesc(user!.name, "Menyetujui", res.no),
+                isRead: false,
+              }))
+            })
+
+            notificationData = notifications
+
           } else {
             const allRoles = await tx.userRole.findMany({ where: { roleId: ROLE.GUDANG_REQUEST_VIEW.id } })
             const userIds = allRoles.map((v) => v.userId).filter((v) => v !== userId)
 
-            for (const v of userIds) {
-              const notification = await tx.notification.create({
-                data: {
-                  fromId: userId,
-                  toId: v,
-                  link: "/gudang/permintaan",
-                  desc: notifDesc(user!.name, "Menyetujui", res.no),
-                  isRead: false,
-                },
-              });
-              await pusherServer.trigger(
-                v,
-                "notification",
-                {
-                  id: notification.id,
-                  fromId: userId,
-                  toId: v,
-                  link: "/gudang/permintaan",
-                  desc: notifDesc(user!.name, "Menyetujui", res.no),
-                  isRead: false,
-                  createdAt: notification.createdAt,
-                  From: {
-                    image: user?.image,
-                    name: user?.name
-                  },
-                }
-              )
-            }
+            const notifications = await tx.notification.createManyAndReturn({
+              data: userIds.map((v) => ({
+                fromId: userId,
+                toId: v,
+                link: `/permintaan/barang/${pb.id}`,
+                desc: notifDesc(user!.name, "Menyetujui", res.no),
+                isRead: false,
+              }))
+            })
+
+            notificationData = notifications
+          }
+          return {
+            notificationData
           }
 
         });
+
+        const {notificationData} = result
+
+        notificationQueue.enqueue({
+          from: user,
+          notifications: notificationData
+        })
+        
         return {
           ok: true,
           message: "Berhasil menyetujui permintaan barang",

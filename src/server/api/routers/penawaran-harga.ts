@@ -10,6 +10,7 @@ import PENOMORAN from "@/lib/penomoran";
 import getPenomoran from "@/lib/getPenomoran";
 import notifDesc from "@/lib/notifDesc";
 import { getPusherInstance } from "@/lib/pusher/server";
+import { notificationQueue } from "@/app/api/queue/notification/route";
 // import isTodayOrAfter from "@/lib/isTodayOrAfter";
 const pusherServer = getPusherInstance();
 
@@ -216,7 +217,12 @@ export const penawaranHargaRouter = createTRPCRouter({
       const { id, deadline, barang } = input;
 
       try {
-        await ctx.db.$transaction(async (tx) => {
+        const user = await ctx.db.user.findFirst({
+          where: {
+            id: ctx.session.user.id
+          }
+        })
+        const result = await ctx.db.$transaction(async (tx) => {
           const penawaranResult = await tx.penawaranHarga.update({
             where: {
               id,
@@ -394,23 +400,12 @@ https://assetpro.site/vendor/ph/${result.id}`;
               message,
             );
           }
-          let penomoran = await tx.penomoran.findUnique({
-            where: {
-              id: PENOMORAN.EVALUASI_HARGA,
-              year: String(new Date().getFullYear())
-            }
-          })
 
-          if (!penomoran) {
-            penomoran = await tx.penomoran.create({
-              data: {
-                id: PENOMORAN.EVALUASI_HARGA,
-                code: "FEPHB",
-                number: 0,
-                year: String(new Date().getFullYear())
-              }
-            })
-          }
+          const penomoran = await tx.penomoran.upsert({
+            where: { id: PENOMORAN.EVALUASI_HARGA, year: String(new Date().getFullYear()) },
+            update: { number: { increment: 1 } },
+            create: { id: PENOMORAN.EVALUASI_HARGA, code: 'FEPHB', number: 0, year: String(new Date().getFullYear()) },
+          });
 
           // EVALUASI CREATE
           const evaluasi = await tx.evaluasi.create({
@@ -420,18 +415,6 @@ https://assetpro.site/vendor/ph/${result.id}`;
               penawaranHargaId: penawaranResult.id,
             },
           });
-
-          if (evaluasi) {
-            await tx.penomoran.update({
-              where: {
-                id: PENOMORAN.EVALUASI_HARGA,
-                year: String(new Date().getFullYear())
-              },
-              data: {
-                number: { increment: 1 }
-              }
-            })
-          }
 
           await tx.evaluasiBarang.createMany({
             data: barang.map((v) => ({
@@ -445,11 +428,6 @@ https://assetpro.site/vendor/ph/${result.id}`;
               nilai: 'asc'
             }
           })
-          const user = await tx.user.findFirst({
-            where: {
-              id: ctx.session.user.id
-            }
-          })
 
           const notification = await tx.notification.create({
             data: {
@@ -460,30 +438,22 @@ https://assetpro.site/vendor/ph/${result.id}`;
               isRead: false,
             }
           })
+          return {
+            notification
+          }
 
-          await pusherServer.trigger(
-            allRoles[0]!.userId,
-            "notification",
-            {
-              id: notification.id,
-              fromId: ctx.session.user.id,
-              toId: allRoles[0]!.userId,
-              link: `/pengadaan/evaluasi-harga/${evaluasi.id}`,
-              desc: notifDesc(user!.name, "Evaluasi harga vendor", evaluasi.no),
-              isRead: false,
-              createdAt: notification.createdAt,
-              From: {
-                image: user?.image,
-                name: user?.name
-              },
-            }
-          )
         },
           {
             maxWait: 5000, // default: 2000
             timeout: 10000, // default: 5000
           }
         );
+
+        const {notification} = result
+        notificationQueue.enqueue({
+          from:user,
+          notifications: [notification]
+        })
 
         return {
           ok: true,
