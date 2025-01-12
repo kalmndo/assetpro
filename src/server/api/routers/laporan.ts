@@ -63,6 +63,97 @@ export const laporanRouter = createTRPCRouter({
       });
       return result;
     }),
+  jumlah: protectedProcedure
+    .input(z.object({
+      kategoriId: z.string(),
+      subKategoriId: z.string(),
+      subSubKategoriId: z.string(),
+      org: z.string()
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { org, kategoriId, subKategoriId, subSubKategoriId } = input
+      const whereClause: any = {};
+
+      if (subSubKategoriId !== 'all') {
+        whereClause.subSubKategoriId = subSubKategoriId;
+      }
+      if (subKategoriId !== 'all') {
+        whereClause.SubSubKategori = {
+          SubKategori: {
+            id: subKategoriId,
+          },
+        };
+      }
+      if (kategoriId !== 'all') {
+        whereClause.SubSubKategori = whereClause.SubSubKategori || {};
+        whereClause.SubSubKategori.SubKategori = whereClause.SubSubKategori.SubKategori || {};
+        whereClause.SubSubKategori.SubKategori.Kategori = {
+          id: kategoriId,
+        };
+      }
+
+      const daftarAsetWhereClause =
+        org !== 'all'
+          ? {
+            Ruang: {
+              orgId: org,
+            },
+          }
+          : {};
+
+      const result = await ctx.db.masterBarang.findMany({
+        where: subSubKategoriId !== 'all' ? { subSubKategoriId } : {},
+        include: {
+          DaftarAset: {
+            where: daftarAsetWhereClause
+          },
+          SubSubKategori: {
+            include: {
+              SubKategori: {
+                include: {
+                  Kategori: true
+                }
+              }
+            }
+          }
+        }
+      })
+
+      console.log("result", result)
+      return []
+    }),
+  getJumlah: protectedProcedure
+    .query(async ({ ctx }) => {
+      const o = await ctx.db.organisasi.findMany()
+      const k = await ctx.db.masterBarangKategori.findMany({
+        where: {
+          golonganId: '1'
+        }
+      })
+      const sk = await ctx.db.masterBarangSubKategori.findMany({
+        where: {
+          fullCode: { startsWith: '1' }
+        }
+      })
+      const ssk = await ctx.db.masterBarangSubSubKategori.findMany({
+        where: {
+          fullCode: { startsWith: '1' }
+        }
+      })
+
+      const org = o.map((v) => ({ id: v.id, name: v.name }))
+      const kategori = k.map((v) => ({ id: v.id, name: v.name }))
+      const subKategori = sk.map((v) => ({ id: v.id, name: v.name, parent: v.kategoriId }))
+      const subSubKategori = ssk.map((v) => ({ id: v.id, name: v.name, parent: v.subKategoriId }))
+
+      return {
+        org: [{ id: 'all', name: 'Semua' }, ...org],
+        kategori: [{ id: 'all', name: 'Semua' }, ...kategori],
+        subKategori: [{ id: 'all', name: 'Semua' }, ...subKategori],
+        subSubKategori: [{ id: 'all', name: 'Semua' }, ...subSubKategori],
+      }
+
+    }),
   semuaAsetPerlokasi: protectedProcedure
     .input(
       z.object({

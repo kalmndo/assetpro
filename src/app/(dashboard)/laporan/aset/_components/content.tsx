@@ -26,6 +26,12 @@ const master = [
         to: "pengaturan/kode-anggaran",
         desc: "aset tanah",
       },
+      {
+        name: "Jumlah aset",
+        logo: <Layout />,
+        to: "aset/jumlah",
+        desc: "Jumlah aset",
+      },
     ],
   },
 ];

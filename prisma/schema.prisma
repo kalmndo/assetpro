@@ -2,9 +2,9 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl"]
-//  engineType = "binary"
+  //  engineType = "binary"
 }
 
 datasource db {
@@ -804,12 +804,13 @@ model Department {
 }
 
 model Vendor {
-  id       String @id @default(cuid())
+  id       String  @id @default(cuid())
   name     String
-  alamat   String
-  whatsapp String
-  nohp     String
-  email    String
+  kontak   String?
+  alamat   String?
+  whatsapp String?
+  nohp     String?
+  email    String?
 
   createdAt                 DateTime                    @default(now())
   updatedAt                 DateTime                    @updatedAt
@@ -1038,17 +1039,19 @@ model Notification {
 }
 
 model DaftarAset {
-  id             String  @unique // No Inventaris
-  barangId       String
-  fttbItemId     String?
-  penggunaId     String?
-  status         String
-  umur           Int
-  imId           String?
-  ruangId        String?
-  hargaPembelian Int     @default(0)
-  nilaiBuku      Int     @default(0)
-  desc           String?
+  id              String  @unique // No Inventaris
+  barangId        String
+  fttbItemId      String?
+  penggunaId      String?
+  status          String
+  umur            Int
+  imId            String?
+  ruangId         String?
+  hargaPembelian  Int     @default(0)
+  nilaiBuku       Int     @default(0)
+  nilaiPenyusutan Int     @default(0)
+  nilaiTambah     Int     @default(0)
+  desc            String?
 
   MasterBarang MasterBarang      @relation(fields: [barangId], references: [id])
   FttbItem     FttbItem?         @relation(fields: [fttbItemId], references: [id])
