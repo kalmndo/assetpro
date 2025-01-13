@@ -119,7 +119,24 @@ export const laporanRouter = createTRPCRouter({
         }
       })
 
-      console.log("result", result)
+
+
+      console.log("result", result.map((v) => {
+        const harga = v.DaftarAset.map((v) => v.hargaPembelian).reduce((a, b) => a + b, 0);
+        const susut = v.DaftarAset.map((v) => v.nilaiPenyusutan).reduce((a, b) => a + b, 0);
+        const buku = v.DaftarAset.map((v) => v.nilaiBuku).reduce((a, b) => a + b, 0);
+        const jumlah = v.DaftarAset.length
+
+
+        return {
+          id: v.id,
+          aset: v.name,
+          jumlah: JSON.stringify(v.DaftarAset, null, 2),
+          harga,
+          susut,
+          buku
+        }
+      }))
       return []
     }),
   getJumlah: protectedProcedure
