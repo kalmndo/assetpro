@@ -484,18 +484,49 @@ export const evaluasiHargaRouter = createTRPCRouter({
 
         if (type === 'po') {
           if (notificationsData) {
-            notificationQueue.enqueue({
-              from: user,
-              notifications: notificationsData.flatMap((v) => v)
-            })
+
+            await Promise.all(
+              notificationsData.flatMap((v) => (
+                pusherServer.trigger(
+                  v.toId,
+                  "notification",
+                  {
+                    id: v.id,
+                    fromId: user?.id,
+                    toId: v.toId,
+                    link: v.link,
+                    desc: v.desc,
+                    isRead: false,
+                    createdAt: v.createdAt,
+                    From: {
+                      image: user?.image,
+                      name: user?.name
+                    },
+                  }
+                )
+              ))
+            )
           }
 
         } else {
           if (notification) {
-            notificationQueue.enqueue({
-              from: user,
-              notifications: notification
-            })
+            await pusherServer.trigger(
+              notification.toId,
+              "notification",
+              {
+                id: notification.id,
+                fromId: user?.id,
+                toId: notification.toId,
+                link: notification.link,
+                desc: notification.desc,
+                isRead: false,
+                createdAt: notification.createdAt,
+                From: {
+                  image: user?.image,
+                  name: user?.name
+                },
+              }
+            )
           }
         }
 

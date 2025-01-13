@@ -813,11 +813,28 @@ Catatan: ${v.catatan}
         });
 
         const { notificationData } = result
-
-        notificationQueue.enqueue({
-          from: user,
-          notifications: notificationData
-        })
+        await Promise.all(
+          notificationData.map((v) => (
+            pusherServer.trigger(
+              v.toId,
+              "notification",
+              {
+                id: v.id,
+                fromId: user?.id,
+                toId: v.toId,
+                link: v.link,
+                desc: v.desc,
+                isRead: false,
+                createdAt: v.createdAt,
+                From: {
+                  image: user?.image,
+                  name: user?.name
+                },
+              }
+            )
+          ))
+        )
+        
 
         return {
           ok: true,

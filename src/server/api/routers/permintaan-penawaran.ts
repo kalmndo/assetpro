@@ -330,10 +330,27 @@ https://assetpro.site/vendor/pp/${result.id}`;
         );
         const { notifications } = result
 
-        notificationQueue.enqueue({
-          notifications: notifications,
-          from: user
-        })
+        await Promise.all(
+          notifications.map((v) => (
+            pusherServer.trigger(
+              v.toId,
+              "notification",
+              {
+                id: v.id,
+                fromId: user?.id,
+                toId: v.toId,
+                link: v.link,
+                desc: v.desc,
+                isRead: false,
+                createdAt: v.createdAt,
+                From: {
+                  image: user?.image,
+                  name: user?.name
+                },
+              }
+            )
+
+          )))
         return {
           ok: true,
           message: "Berhasil mengirim permintaan penawaran",

@@ -508,11 +508,28 @@ export const barangMasukRouter = createTRPCRouter({
         );
 
         const { notifications, } = result
+        await Promise.all(
+          notifications.map((v) => (
+            pusherServer.trigger(
+              v.toId,
+              "notification",
+              {
+                id: v.id,
+                fromId: user?.id,
+                toId: v.toId,
+                link: v.link,
+                desc: v.desc,
+                isRead: false,
+                createdAt: v.createdAt,
+                From: {
+                  image: user?.image,
+                  name: user?.name
+                },
+              }
+            )
+          ))
+        )
 
-        notificationQueue.enqueue({
-          from: user,
-          notifications
-        })
         return {
           ok: true,
           message: "Berhasil membuat barang masuk",

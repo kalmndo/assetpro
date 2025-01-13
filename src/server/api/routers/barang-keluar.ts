@@ -384,7 +384,7 @@ export const barangKeluarRouter = createTRPCRouter({
           }
         );
         const { notifications} = result
-        
+
         await Promise.all(
           notifications.map((v) => (
             pusherServer.trigger(
@@ -406,11 +406,7 @@ export const barangKeluarRouter = createTRPCRouter({
             )
           ))
         )
-await notifications.map
-        notificationQueue.enqueue({
-          from: user,
-          notifications
-        })
+        
         return {
           ok: true,
           message: "Berhasil membuat form keluar barang",

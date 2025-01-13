@@ -449,11 +449,24 @@ https://assetpro.site/vendor/ph/${result.id}`;
           }
         );
 
-        const {notification} = result
-        notificationQueue.enqueue({
-          from:user,
-          notifications: [notification]
-        })
+        const { notification } = result
+        await pusherServer.trigger(
+          notification.toId,
+          "notification",
+          {
+            id: notification.id,
+            fromId: user?.id,
+            toId: notification.toId,
+            link: notification.link,
+            desc: notification.desc,
+            isRead: false,
+            createdAt: notification.createdAt,
+            From: {
+              image: user?.image,
+              name: user?.name
+            },
+          }
+        )
 
         return {
           ok: true,
