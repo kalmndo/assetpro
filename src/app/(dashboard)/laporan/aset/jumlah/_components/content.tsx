@@ -1,7 +1,5 @@
 "use client";
 
-import { CalendarDatePicker } from "@/components/calendar-date-picker";
-import { DataTable } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -13,8 +11,59 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/trpc/react";
-import { LoaderCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, LoaderCircle } from "lucide-react";
 import { useState } from "react";
+import { DataTable } from "./table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import Link from "next/link";
+
+const renderSubComponent = ({ row }: { row: any }) => {
+
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="text-xs">No Inventaris</TableHead>
+          <TableHead className="text-xs">Harga pembelian </TableHead>
+          <TableHead className="text-xs">Nilai Penyusutan</TableHead>
+          <TableHead className="text-xs">Nilai Buku</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {row.original.children.map((item: any, i: number) => (
+          <TableRow key={i}>
+            <TableCell className="font-medium">
+              <Link
+                href={`/daftar-aset/${item.noInv.replace(/\//g, "-")}`}
+                className="flex w-full"
+              >
+                <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem] text-blue-800">
+                  {item.noInv}
+                </span>
+              </Link>
+            </TableCell>
+            <TableCell className="font-medium">
+              {item.harga}
+            </TableCell>
+            <TableCell className="font-medium">
+              {item.susut}
+            </TableCell>
+            <TableCell className="font-medium">
+              {item.buku}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  )
+}
 
 export default function Content({ datas }: { datas: any }) {
   const [org, setOrg] = useState<string>('all');
@@ -115,41 +164,19 @@ export default function Content({ datas }: { datas: any }) {
           data={data}
           columns={[
             {
-              id: "name",
+              id: "aset",
               header: "Aset",
               cell: ({ row }) => {
                 return (
                   <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-                    {row.original.name}
-                  </span>
-                );
-              },
-            },
-            {
-              id: "saldoAwal",
-              header: "Jumlah",
-              cell: ({ row }) => {
-                return (
-                  <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-                    Rp {row.original.saldoAwal.toLocaleString("id-ID")}
-                  </span>
-                );
-              },
-            },
-            {
-              id: "penambahan",
-              header: "Total harga pembelian",
-              cell: ({ row }) => {
-                return (
-                  <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-                    Rp {row.original.penambahan.toLocaleString("id-ID")}
+                    {row.original.aset}
                   </span>
                 );
               },
             },
             {
               id: "jumlah",
-              header: "Total penyusutan",
+              header: "Jumlah",
               cell: ({ row }) => {
                 return (
                   <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
@@ -159,8 +186,19 @@ export default function Content({ datas }: { datas: any }) {
               },
             },
             {
+              id: "harga",
+              header: "Total harga pembelian",
+              cell: ({ row }) => {
+                return (
+                  <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+                    Rp {row.original.harga.toLocaleString("id-ID")}
+                  </span>
+                );
+              },
+            },
+            {
               id: "susut",
-              header: "Total nilai buku",
+              header: "Total penyusutan",
               cell: ({ row }) => {
                 return (
                   <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
@@ -169,8 +207,37 @@ export default function Content({ datas }: { datas: any }) {
                 );
               },
             },
+            {
+              id: "buku",
+              header: "Total nilai buku",
+              cell: ({ row }) => {
+                return (
+                  <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+                    Rp {row.original.buku.toLocaleString("id-ID")}
+                  </span>
+                );
+              },
+            },
+            {
+              id: "drop",
+              // header: "Total nilai buku",
+              cell: ({ row }) => {
+                return (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={row.getToggleExpandedHandler()}
+                  >
+                    {row.getIsExpanded() ? <ChevronDown /> : <ChevronUp />}
+                  </Button>
+                );
+              },
+            },
           ]}
-          isPagintation={false}
+          // isPagintation={false}
+          // getIsRowExpanded={() => true}
+          getRowCanExpand={() => true}
+          renderSubComponent={renderSubComponent}
         />
       )}
     </div>

@@ -311,10 +311,10 @@ export const daftarAsetRouter = createTRPCRouter({
         no: res.id,
         garansi: pembelian?.Barang.garansi,
         card: {
-          harga: `Rp ${pembelian?.Barang.harga!.toLocaleString("id-ID")}`,
-          susut: `Rp ${totalPenyusutan?.toLocaleString("id-ID")}`,
-          biaya: `Rp ${(totalBiayaPerbaikan + totalBiayaExternal).toLocaleString("id-ID")}`,
-          nilai: `Rp ${(usia > 0 ? (hargaPembelian ?? 0 - residu) : (hargaPembelian ?? 0)).toLocaleString("id-ID")}`,
+          harga: `Rp ${res.hargaPembelian.toLocaleString("id-ID")}`,
+          susut: `Rp ${res.nilaiPenyusutan.toLocaleString('id-ID')}`,
+          biaya: `Rp ${res.nilaiTambah.toLocaleString("id-ID")}`,
+          nilai: `Rp ${res.nilaiBuku.toLocaleString("id-ID")}`,
         },
         barang: {
           image: barang.image,

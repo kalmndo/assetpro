@@ -105,7 +105,7 @@ export const laporanRouter = createTRPCRouter({
         where: subSubKategoriId !== 'all' ? { subSubKategoriId } : {},
         include: {
           DaftarAset: {
-            where: daftarAsetWhereClause
+            where: daftarAsetWhereClause,
           },
           SubSubKategori: {
             include: {
@@ -119,25 +119,28 @@ export const laporanRouter = createTRPCRouter({
         }
       })
 
-
-
-      console.log("result", result.map((v) => {
+      return result.filter((v) => v.DaftarAset.length > 0).map((v) => {
         const harga = v.DaftarAset.map((v) => v.hargaPembelian).reduce((a, b) => a + b, 0);
         const susut = v.DaftarAset.map((v) => v.nilaiPenyusutan).reduce((a, b) => a + b, 0);
         const buku = v.DaftarAset.map((v) => v.nilaiBuku).reduce((a, b) => a + b, 0);
         const jumlah = v.DaftarAset.length
 
-
         return {
           id: v.id,
           aset: v.name,
-          jumlah: JSON.stringify(v.DaftarAset, null, 2),
+          jumlah,
           harga,
           susut,
-          buku
+          buku,
+          children: v.DaftarAset.map((va) => ({
+            id: va.id,
+            noInv: va.id,
+            harga: va.hargaPembelian,
+            susut: va.nilaiPenyusutan,
+            buku: va.nilaiBuku
+          }))
         }
-      }))
-      return []
+      })
     }),
   getJumlah: protectedProcedure
     .query(async ({ ctx }) => {
