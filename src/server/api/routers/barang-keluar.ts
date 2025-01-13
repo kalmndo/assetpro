@@ -383,8 +383,30 @@ export const barangKeluarRouter = createTRPCRouter({
             timeout: 10000, // default: 5000
           }
         );
-        const { notifications, desc, link } = result
-
+        const { notifications} = result
+        
+        await Promise.all(
+          notifications.map((v) => (
+            pusherServer.trigger(
+              v.toId,
+              "notification",
+              {
+                id: v.id,
+                fromId: user?.id,
+                toId: v.toId,
+                link: v.link,
+                desc: v.desc,
+                isRead: false,
+                createdAt: v.createdAt,
+                From: {
+                  image: user?.image,
+                  name: user?.name
+                },
+              }
+            )
+          ))
+        )
+await notifications.map
         notificationQueue.enqueue({
           from: user,
           notifications

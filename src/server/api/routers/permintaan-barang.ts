@@ -453,10 +453,23 @@ export const permintaanBarangRouter = createTRPCRouter({
           };
         });
 
-        notificationQueue.enqueue({
-          notifications: [result.notification],
-          from: user
-        })
+        await pusherServer.trigger(
+          result.notification.toId,
+          "notification",
+          {
+            id: result.notification.id,
+            fromId: user?.id,
+            toId: result.notification.toId,
+            link: result.notification.link,
+            desc: result.notification.desc,
+            isRead: false,
+            createdAt: result.notification.createdAt,
+            From: {
+              image: user?.image,
+              name: user?.name
+            },
+          }
+        )
 
         return {
           ok: true,
@@ -550,7 +563,7 @@ export const permintaanBarangRouter = createTRPCRouter({
       }
 
       try {
-       const result =  await ctx.db.$transaction(async (tx) => {
+        const result = await ctx.db.$transaction(async (tx) => {
           const pb = await tx.permintaanBarang.update({
             where: { id },
             data: {
@@ -799,13 +812,13 @@ Catatan: ${v.catatan}
 
         });
 
-        const {notificationData} = result
+        const { notificationData } = result
 
         notificationQueue.enqueue({
           from: user,
           notifications: notificationData
         })
-        
+
         return {
           ok: true,
           message: "Berhasil menyetujui permintaan barang",

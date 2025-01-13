@@ -396,7 +396,7 @@ Silahkan klik link berikut untuk mengirim penawaran harga.
 https://assetpro.site/vendor/ph/${result.id}`;
 
             sendWhatsAppMessage(
-              formatPhoneNumber(result.Vendor.whatsapp),
+              formatPhoneNumber(result.Vendor.whatsapp ?? ''),
               message,
             );
           }
