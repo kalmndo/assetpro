@@ -37,7 +37,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   facetedFilter?: DataTableFacetedFilterProps[]
   filter?: DataTableToolbarFilterProps
-  defaultFilters?: {id: string, value: string | string[]}[]
+  defaultFilters?: { id: string, value: string | string[] }[]
   columnVisibilityDefaultState?: VisibilityState
   checkboxToolbarActions?: { title: string, desc: string, handleAction(table: any): void }[]
   isPagintation?: boolean
@@ -69,7 +69,6 @@ export function DataTable<TData, TValue>({
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [expanded, setExpanded] = React.useState<ExpandedState>({})
 
-
   const table = useReactTable({
     data,
     columns,
@@ -80,6 +79,7 @@ export function DataTable<TData, TValue>({
       columnFilters,
       expanded
     },
+    // @ts-ignore
     getSubRows: (row) => row.children,
     onExpandedChange: setExpanded,
     enableRowSelection: true,
@@ -94,9 +94,11 @@ export function DataTable<TData, TValue>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getRowCanExpand,
-    // getIsRowExpanded,
-    getExpandedRowModel: getExpandedRowModel()
+    getIsRowExpanded,
+    getExpandedRowModel: getExpandedRowModel(),
   })
+
+  console.log("table", table.getRowModel().rows)
 
   return (
     <div className='space-y-4'>
@@ -141,7 +143,7 @@ export function DataTable<TData, TValue>({
                   </TableRow>
                   {row.getIsExpanded() && (
                     <TableRow>
-                      <TableCell colSpan={row.getVisibleCells().length}>
+                      <TableCell colSpan={row.getAllCells().length}>
                         {renderSubComponent?.({ row })}
                       </TableCell>
                     </TableRow>
