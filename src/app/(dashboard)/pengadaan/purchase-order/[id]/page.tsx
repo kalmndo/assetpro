@@ -4,6 +4,7 @@ import Link from "next/link";
 import { api } from "@/trpc/server";
 import { getStatus } from "@/lib/status";
 import { Table } from "./_components/table";
+import Print from "./_components/print";
 
 export default async function Page({ params: { id } }: { params: { id: string } }) {
   const data = await api.po.get({ id })
@@ -34,14 +35,11 @@ export default async function Page({ params: { id } }: { params: { id: string } 
             Form Purchase Order
           </h1>
         </div>
-        <div className="">
-          {/* <AddDialog data={modalData} /> */}
-        </div>
       </div>
       <div className="rounded-sm border">
         <div className="flex justify-between p-4">
           <div style={{ color }} className="font-semibold">{status}</div>
-          <div>Print</div>
+          <Print />
         </div>
         <Separator />
         <div className="grid grid-cols-3 gap-4 p-4">
@@ -72,9 +70,6 @@ export default async function Page({ params: { id } }: { params: { id: string } 
         </div>
         <div className="p-4">
           <Table data={data} />
-          {/* <div className="my-4 flex justify-end">
-            {data.isApprove && <ApproveDialog id={data.id} />}
-          </div> */}
         </div>
       </div>
     </div>

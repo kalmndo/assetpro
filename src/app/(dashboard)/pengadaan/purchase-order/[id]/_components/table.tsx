@@ -38,16 +38,6 @@ export function Table({
         data={data.barang}
         columns={[
           ...columns,
-          // {
-          //   id: 'actions',
-          //   cell: ({ row }) => (
-          //     <DataTableRowActions>
-          //       <DropdownMenuItem onSelect={() => setDialog({ open: true, data: row.original })}>Pilih Vendor</DropdownMenuItem>
-          //     </DataTableRowActions>
-          //   ),
-          //   enableSorting: false,
-          //   enableHiding: false,
-          // },
         ]}
         isPagintation={false}
         getIsRowExpanded={() => true}

@@ -56,7 +56,6 @@ export default async function Page({
           <div style={{ color: "green" }} className="font-semibold">
             Digunakan
           </div>
-
           <Menu id={data.no} audit={data.audit} />
         </div>
         <Separator />
