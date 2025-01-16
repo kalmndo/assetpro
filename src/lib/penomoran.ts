@@ -10,6 +10,9 @@ const PENOMORAN = {
   MASUK_BARANG: "masuk-barang",
   ASET: "aset",
 
+  // PERBAIKAN
+  PERBAIKAN_EKSTERNAL: "perbaikan-barang",
+
   PEMINJAMAN_EKSTERNAL: "peminjaman-eksternal",
   PEMINJAMAN: "peminjaman",
 };

@@ -790,7 +790,7 @@ export const perbaikanRouter = createTRPCRouter({
 
       try {
         const result = await ctx.db.$transaction(async (tx) => {
-          const res =  await tx.perbaikan.update({
+          const res = await tx.perbaikan.update({
             where: {
               id,
             },
@@ -871,8 +871,6 @@ export const perbaikanRouter = createTRPCRouter({
       const { id, type, catatan, vendorId, asetId, pemohonId } = input;
       const isExternal = Number(type)
 
-      const allRoles = await ctx.db.userRole.findMany({ where: { roleId: ROLE.PERBAIKAN_PERMINTAAN_VIEW.id } })
-      const userIds = allRoles.map((v) => v.userId).filter((v) => v !== ctx.session.user.id)
       const user = await ctx.db.user.findFirst({ where: { id: ctx.session.user.id } })
 
       try {
@@ -895,10 +893,17 @@ export const perbaikanRouter = createTRPCRouter({
           });
 
           if (isExternal) {
+
+            const penomoran = await tx.penomoran.upsert({
+              where: { id: PENOMORAN.KELUAR_BARANG, year: String(new Date().getFullYear()) },
+              update: { number: { increment: 1 } },
+              create: { id: PENOMORAN.PERBAIKAN_EKSTERNAL, code: 'FPPK', number: 1, year: String(new Date().getFullYear()) },
+            });
+
             const per = await tx.perbaikanExternal.create({
               data: {
                 status: STATUS.PENGAJUAN.id,
-                no: Math.random().toString(),
+                no: getPenomoran(penomoran),
                 perbaikanId: id,
                 vendorId,
               },
@@ -910,10 +915,27 @@ export const perbaikanRouter = createTRPCRouter({
                 desc: `Permohonan perbaikan eksternal`,
               },
             });
+
+            const allRoles = await ctx.db.userRole.findMany({ where: { roleId: ROLE.PERBAIKAN_EKSTERNAL_APPROVE.id } })
+            const userIds = allRoles.map((v) => v.userId).filter((v) => v !== ctx.session.user.id)
+
+            const notifications = await tx.notification.createManyAndReturn({
+              data: [...userIds, pemohonId].map((v) => ({
+                fromId: ctx.session.user.id,
+                toId: v,
+                link: `/perbaikan/eksternal/${per.id}`,
+                desc: notifDesc(user!.name, "Permintaan perbaikan eksternal", per.no),
+                isRead: false,
+              }))
+            })
+
             return {
-              notifications: []
+              notifications
             }
           } else {
+            const allRoles = await ctx.db.userRole.findMany({ where: { roleId: ROLE.PERBAIKAN_PERMINTAAN_VIEW.id } })
+            const userIds = allRoles.map((v) => v.userId).filter((v) => v !== ctx.session.user.id)
+
             const notifications = await tx.notification.createManyAndReturn({
               data: [...userIds, pemohonId].map((v) => ({
                 fromId: ctx.session.user.id,
