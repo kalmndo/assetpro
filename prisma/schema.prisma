@@ -823,6 +823,7 @@ model Vendor {
 model Teknisi {
   id   String @unique // userId
   User User   @relation(fields: [id], references: [id])
+  isActive Int @default(1) // 1 true, 0 false
 
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt

@@ -8,23 +8,38 @@ import { z } from "zod";
 export const teknisiRouter = createTRPCRouter({
   getAll: protectedProcedure
     .query(async ({ ctx }) => {
-      const result = await ctx.db.departmentUnit.findMany({
+      const result = await ctx.db.teknisi.findMany({
+        where: {
+          isActive: 1
+        },
         orderBy: {
           createdAt: "desc"
         },
         include: {
-          Department: true
+          User: true
         }
       })
 
-      return result.map((v) => ({
-        ...v,
-        department: v.Department.name
-      }))
+      const users = await ctx.db.user.findMany({
+        where: {
+          id: { notIn: result.map((v) => v.User.id) }
+        }
+      })
+
+      return {
+        result,
+        users: users.map((v) => ({
+          label: v.name,
+          value: v.id
+        }))
+      }
     }),
   getSelect: protectedProcedure
     .query(async ({ ctx }) => {
       const result = await ctx.db.teknisi.findMany({
+        where: {
+          isActive: 1
+        },
         orderBy: {
           createdAt: "desc"
         },
@@ -40,62 +55,28 @@ export const teknisiRouter = createTRPCRouter({
     }),
   create: protectedProcedure
     .input(z.object({
-      name: z.string(),
-      departmentId: z.string()
-    }))
-    .mutation(async ({ ctx, input }) => {
-      const {
-        name,
-        departmentId
-      } = input
-
-      try {
-        await ctx.db.departmentUnit.create({
-          data: {
-            departmentId,
-            name,
-          },
-        })
-        return {
-          ok: true,
-          message: 'Berhasil menambah department unit'
-        }
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Kemunkingan terjadi kesalahan sistem, silahkan coba lagi",
-          cause: error,
-        });
-      }
-    }),
-
-  update: protectedProcedure
-    .input(z.object({
       id: z.string(),
-      name: z.string(),
-      departmentId: z.string()
     }))
     .mutation(async ({ ctx, input }) => {
       const {
         id,
-        name,
-        departmentId
       } = input
 
       try {
-
-        await ctx.db.departmentUnit.update({
+        await ctx.db.teknisi.upsert({
           where: {
             id
           },
-          data: {
-            name,
-            departmentId
+          create: {
+            id
           },
+          update: {
+            isActive: 1
+          }
         })
         return {
           ok: true,
-          message: 'Berhasil mengubah department unit'
+          message: 'Berhasil menambah teknisi'
         }
       } catch (error) {
         throw new TRPCError({
@@ -105,7 +86,6 @@ export const teknisiRouter = createTRPCRouter({
         });
       }
     }),
-
   remove: protectedProcedure
     .input(z.object({
       id: z.string(),
@@ -116,12 +96,15 @@ export const teknisiRouter = createTRPCRouter({
       } = input
 
       try {
-        await ctx.db.departmentUnit.delete({
+        await ctx.db.teknisi.update({
           where: { id },
+          data: {
+            isActive: 0
+          }
         })
         return {
           ok: true,
-          message: 'Berhasil menghapus department unit'
+          message: 'Berhasil menghapus teknisi'
         }
       } catch (error) {
         throw new TRPCError({
