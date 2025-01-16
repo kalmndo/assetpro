@@ -236,7 +236,7 @@ export default function Content({ datas }: { datas: any }) {
           ]}
           // isPagintation={false}
           // getIsRowExpanded={() => true}
-          // getRowCanExpand={() => true}
+          getRowCanExpand={() => true}
           renderSubComponent={renderSubComponent}
         />
       )}

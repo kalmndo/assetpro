@@ -67,7 +67,7 @@ export function DataTable<TData, TValue>({
     React.useState<VisibilityState>(columnVisibilityDefaultState)
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(defaultFilters)
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const [expanded, setExpanded] = React.useState<ExpandedState>({})
+  // const [expanded, setExpanded] = React.useState<ExpandedState>({})
 
   const table = useReactTable({
     data,
@@ -77,11 +77,11 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       columnFilters,
-      expanded
+      // expanded
     },
     // @ts-ignore
-    getSubRows: (row) => row.children,
-    onExpandedChange: setExpanded,
+    // getSubRows: (row) => row.children,
+    // onExpandedChange: setExpanded,
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
