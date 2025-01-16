@@ -406,9 +406,10 @@ export const perbaikanRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { asetId, keluhan } = input;
       const userId = ctx.session.user.id;
+      const user = await ctx.db.user.findFirst({ where: { id: userId } })
 
       try {
-        await ctx.db.$transaction(async (tx) => {
+        const result = await ctx.db.$transaction(async (tx) => {
           const user = await tx.user.findFirst({
             where: { id: userId },
           });
@@ -430,8 +431,15 @@ export const perbaikanRouter = createTRPCRouter({
             },
           });
 
+          await tx.perbaikanHistory.create({
+            data: {
+              perbaikanId: perbaikan.id,
+              desc: "Meminta permohonan perbaikan",
+            },
+          });
+
           const desc = `<p class="text-sm font-semibold">${user?.name}<span class="font-normal ml-[5px]">Meminta persetujuan permintaan perbaikan ${perbaikan.no}</span></p>`;
-          await tx.notification.create({
+          const notification = await tx.notification.create({
             data: {
               fromId: userId,
               // TODO: Benerin ini kalau gak ada atasan
@@ -441,13 +449,28 @@ export const perbaikanRouter = createTRPCRouter({
               isRead: false,
             },
           });
-          await tx.perbaikanHistory.create({
-            data: {
-              perbaikanId: perbaikan.id,
-              desc: "Meminta permohonan perbaikan",
-            },
-          });
+          return {
+            notification
+          }
         });
+
+        await pusherServer.trigger(
+          result.notification.toId,
+          "notification",
+          {
+            id: result.notification.id,
+            fromId: user?.id,
+            toId: result.notification.toId,
+            link: result.notification.link,
+            desc: result.notification.desc,
+            isRead: false,
+            createdAt: result.notification.createdAt,
+            From: {
+              image: user?.image,
+              name: user?.name
+            },
+          }
+        )
         return {
           ok: true,
           message: "Berhasil meminta permohonan perbaikan",
@@ -468,11 +491,14 @@ export const perbaikanRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { id } = input;
+
+      const allRoles = await ctx.db.userRole.findMany({ where: { roleId: ROLE.SELECT_TEKNISI.id } })
+      const userIds = allRoles.map((v) => v.userId)
+      const user = await ctx.db.user.findFirst({ where: { id: ctx.session.user.id } })
+
       try {
-        // ganti status jadi disetujui atasan
-        // create history perbaikan
-        await ctx.db.$transaction(async (tx) => {
-          await tx.perbaikan.update({
+        const result = await ctx.db.$transaction(async (tx) => {
+          const res = await tx.perbaikan.update({
             where: {
               id,
             },
@@ -486,7 +512,44 @@ export const perbaikanRouter = createTRPCRouter({
               desc: "Atasan menyetujui permintaan perbaikan",
             },
           });
+
+          const notifications = await tx.notification.createManyAndReturn({
+            data: [...userIds, res.userId].map((v) => ({
+              fromId: user!.id,
+              toId: v,
+              link: `/permintaan/perbaikan/${res.id}`,
+              desc: notifDesc(user!.name, "Menyetujui", res.no),
+              isRead: false,
+            }))
+          })
+          return {
+            notifications,
+          }
         });
+
+
+        const { notifications } = result
+        await Promise.all(
+          notifications.map((v) => (
+            pusherServer.trigger(
+              v.toId,
+              "notification",
+              {
+                id: v.id,
+                fromId: user?.id,
+                toId: v.toId,
+                link: v.link,
+                desc: v.desc,
+                isRead: false,
+                createdAt: v.createdAt,
+                From: {
+                  image: user?.image,
+                  name: user?.name
+                },
+              }
+            )
+          ))
+        )
 
         return {
           ok: true,
@@ -509,8 +572,13 @@ export const perbaikanRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { id, teknisiId } = input;
+
+      const allRoles = await ctx.db.userRole.findMany({ where: { roleId: ROLE.PERBAIKAN_PERMINTAAN_VIEW.id } })
+      const userIds = allRoles.map((v) => v.userId)
+      const user = await ctx.db.user.findFirst({ where: { id: ctx.session.user.id } })
+
       try {
-        await ctx.db.$transaction(async (tx) => {
+        const result = await ctx.db.$transaction(async (tx) => {
           const teknisi = await tx.teknisi.findFirst({
             where: { id: teknisiId },
             include: {
@@ -518,7 +586,7 @@ export const perbaikanRouter = createTRPCRouter({
             },
           });
 
-          await tx.perbaikan.update({
+          const res = await tx.perbaikan.update({
             where: {
               id,
             },
@@ -535,7 +603,43 @@ export const perbaikanRouter = createTRPCRouter({
               catatan: teknisi?.User.name,
             },
           });
+
+          const notifications = await tx.notification.createManyAndReturn({
+            data: [teknisiId, res.userId].map((v) => ({
+              fromId: user!.id,
+              toId: v,
+              link: `/permintaan/perbaikan/${res.id}`,
+              desc: notifDesc(user!.name, "Menyerahkan ke teknisi", res.no),
+              isRead: false,
+            }))
+          })
+          return {
+            notifications,
+          }
         });
+
+        const { notifications } = result
+        await Promise.all(
+          notifications.map((v) => (
+            pusherServer.trigger(
+              v.toId,
+              "notification",
+              {
+                id: v.id,
+                fromId: user?.id,
+                toId: v.toId,
+                link: v.link,
+                desc: v.desc,
+                isRead: false,
+                createdAt: v.createdAt,
+                From: {
+                  image: user?.image,
+                  name: user?.name
+                },
+              }
+            )
+          ))
+        )
 
         return {
           ok: true,
@@ -576,6 +680,7 @@ export const perbaikanRouter = createTRPCRouter({
               catatan,
             },
           });
+
         });
         return {
           ok: true,
@@ -597,9 +702,14 @@ export const perbaikanRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { id } = input;
+
+      const allRoles = await ctx.db.userRole.findMany({ where: { roleId: ROLE.PERBAIKAN_PERMINTAAN_VIEW.id } })
+      const userIds = allRoles.map((v) => v.userId)
+      const user = await ctx.db.user.findFirst({ where: { id: ctx.session.user.id } })
+
       try {
-        await ctx.db.$transaction(async (tx) => {
-          await tx.perbaikan.update({
+        const result = await ctx.db.$transaction(async (tx) => {
+          const res = await tx.perbaikan.update({
             where: {
               id,
             },
@@ -614,7 +724,44 @@ export const perbaikanRouter = createTRPCRouter({
               desc: `Teknisi menenrima barang dan memperbaiki barang`,
             },
           });
+
+          const notifications = await tx.notification.createManyAndReturn({
+            data: [...userIds, res.userId].map((v) => ({
+              fromId: user!.id,
+              toId: v,
+              link: `/permintaan/perbaikan/${res.id}`,
+              desc: notifDesc(user!.name, "Sedang memperbaiki barang", res.no),
+              isRead: false,
+            }))
+          })
+          return {
+            notifications,
+          }
         });
+
+        const { notifications } = result
+        await Promise.all(
+          notifications.map((v) => (
+            pusherServer.trigger(
+              v.toId,
+              "notification",
+              {
+                id: v.id,
+                fromId: user?.id,
+                toId: v.toId,
+                link: v.link,
+                desc: v.desc,
+                isRead: false,
+                createdAt: v.createdAt,
+                From: {
+                  image: user?.image,
+                  name: user?.name
+                },
+              }
+            )
+          ))
+        )
+
         return {
           ok: true,
           message: "Berhasil menerima barang",
@@ -636,9 +783,14 @@ export const perbaikanRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { id, catatan } = input;
+
+      const allRoles = await ctx.db.userRole.findMany({ where: { roleId: ROLE.PERBAIKAN_PERMINTAAN_VIEW.id } })
+      const userIds = allRoles.map((v) => v.userId)
+      const user = await ctx.db.user.findFirst({ where: { id: ctx.session.user.id } })
+
       try {
-        await ctx.db.$transaction(async (tx) => {
-          await tx.perbaikan.update({
+        const result = await ctx.db.$transaction(async (tx) => {
+          const res =  await tx.perbaikan.update({
             where: {
               id,
             },
@@ -654,7 +806,42 @@ export const perbaikanRouter = createTRPCRouter({
               desc: `Teknisi selesai memperbaiki dan mengirim barang ke user`,
             },
           });
+          const notifications = await tx.notification.createManyAndReturn({
+            data: [...userIds, res.userId].map((v) => ({
+              fromId: user!.id,
+              toId: v,
+              link: `/permintaan/perbaikan/${res.id}`,
+              desc: notifDesc(user!.name, "Selesai memperbaiki dan mengirim barang ke user", res.no),
+              isRead: false,
+            }))
+          })
+          return {
+            notifications,
+          }
         });
+
+        const { notifications } = result
+        await Promise.all(
+          notifications.map((v) => (
+            pusherServer.trigger(
+              v.toId,
+              "notification",
+              {
+                id: v.id,
+                fromId: user?.id,
+                toId: v.toId,
+                link: v.link,
+                desc: v.desc,
+                isRead: false,
+                createdAt: v.createdAt,
+                From: {
+                  image: user?.image,
+                  name: user?.name
+                },
+              }
+            )
+          ))
+        )
         return {
           ok: true,
           message: "Berhasil menyelesaikan perbaikan",
