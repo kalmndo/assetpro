@@ -33,7 +33,7 @@ import { SelectProps } from "@/lib/type";
 const formSchema = z.object({
   "type": z.string().min(1).max(255),
   "catatan": z.string().min(1).max(255),
-  "vendorId": z.string().min(1).max(255),
+  "vendorId": z.string(),
 })
 
 const TheForm = ({
@@ -131,10 +131,14 @@ const TheForm = ({
 
 export default function TeknisiUndoneDialog({
   id,
-  vendors
+  vendors,
+  asetId,
+  pemohonId
 }: {
   id: string,
-  vendors: SelectProps[]
+  vendors: SelectProps[],
+  asetId: string
+  pemohonId: string
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -142,7 +146,7 @@ export default function TeknisiUndoneDialog({
 
   const onSubmit = async (v: z.infer<typeof formSchema>) => {
     try {
-      const result = await mutateAsync({ id, ...v })
+      const result = await mutateAsync({ id, ...v, asetId, pemohonId })
       toast.success(result.message)
       router.refresh()
       setOpen(false)

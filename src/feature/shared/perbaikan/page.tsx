@@ -28,13 +28,9 @@ import formatDate from "@/lib/formatDate";
 
 export default function Page({
   data,
-  teknisi,
   imComponents,
-  vendors,
 }: {
   data: RouterOutputs["perbaikan"]["get"];
-  teknisi: SelectProps[];
-  vendors: SelectProps[];
   imComponents: RouterOutputs["perbaikan"]["getImConponents"];
 }) {
   const { color, name: status } = getStatus(data.status);
@@ -67,7 +63,7 @@ export default function Page({
           <div style={{ color }} className="font-semibold">
             {status}
           </div>
-          <div>Print</div>
+          {/* <div>Print</div> */}
         </div>
         <Separator />
         <div className="grid grid-cols-3 gap-4 p-4">
@@ -121,12 +117,12 @@ export default function Page({
                 <h3 className="text-xl font-semibold">{data.barang.name}</h3>
               </div>
               <p>No Inventaris: {data.barang.noInv}</p>
-              <p
+              {/* <p
                 className="text-sm leading-relaxed text-muted-foreground"
                 dangerouslySetInnerHTML={{
                   __html: data.barang.deskripsi ?? "",
                 }}
-              />
+              /> */}
             </div>
           </div>
           {data.teknisi && (
@@ -165,7 +161,7 @@ export default function Page({
           )}
           {data.isCanSelectTeknisi && (
             <div className="flex justify-end space-x-4">
-              <SelectTeknisiDialog id={data.id} teknisis={teknisi} />
+              <SelectTeknisiDialog id={data.id} teknisis={data.teknisis} />
             </div>
           )}
           {data.isTeknisiCanAccept && (
@@ -180,7 +176,7 @@ export default function Page({
           )}
           {data.isTeknisiCanDone && (
             <div className="flex justify-end space-x-4">
-              <TeknisiUndoneDialog id={data.id} vendors={vendors} />
+              <TeknisiUndoneDialog id={data.id} pemohonId={data.pemohon.id} vendors={data.vendors} asetId={data.barang.noInv} />
               <TeknisiDoneDialog id={data.id} />
             </div>
           )}

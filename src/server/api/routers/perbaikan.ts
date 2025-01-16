@@ -1,10 +1,14 @@
 import getPenomoran from "@/lib/getPenomoran";
+import notifDesc from "@/lib/notifDesc";
 import PENOMORAN from "@/lib/penomoran";
+import { getPusherInstance } from "@/lib/pusher/server";
 import { ROLE } from "@/lib/role";
 import { STATUS } from "@/lib/status";
+import { SelectProps } from "@/lib/type";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+const pusherServer = getPusherInstance();
 
 export const perbaikanRouter = createTRPCRouter({
   get: protectedProcedure
@@ -107,6 +111,35 @@ export const perbaikanRouter = createTRPCRouter({
 
       const totalComps = comps.map((v) => v.b).reduce((a, b) => a + b, 0);
 
+      let vendors: SelectProps[] = []
+
+      if (isTeknisiCanDone) {
+        const resv = await ctx.db.vendor.findMany()
+        vendors = resv.map((v) => ({
+          label: v.name,
+          value: v.id
+        }))
+      }
+
+      let teknisis: SelectProps[] = []
+
+      if (isCanSelectTeknisi) {
+
+        const rest = await ctx.db.teknisi.findMany({
+          orderBy: {
+            createdAt: "desc"
+          },
+          include: {
+            User: true
+          }
+        })
+
+        teknisis = rest.map((v) => ({
+          label: v.User.name,
+          value: v.id,
+        }))
+      }
+
       return {
         id: result.id,
         no: result.no,
@@ -140,16 +173,18 @@ export const perbaikanRouter = createTRPCRouter({
           comps.length === 0
             ? []
             : [
-                ...comps,
-                {
-                  id: "total",
-                  type: "",
-                  biaya: `Rp ${totalComps.toLocaleString("id-ID")}`,
-                  jumlah: "",
-                  name: "",
-                },
-              ],
+              ...comps,
+              {
+                id: "total",
+                type: "",
+                biaya: `Rp ${totalComps.toLocaleString("id-ID")}`,
+                jumlah: "",
+                name: "",
+              },
+            ],
         riwayat: result.PerbaikanHistory,
+        vendors,
+        teknisis
       };
     }),
   getImConponents: protectedProcedure
@@ -640,51 +675,110 @@ export const perbaikanRouter = createTRPCRouter({
         id: z.string(),
         vendorId: z.string(),
         catatan: z.string(),
+        type: z.string(),
+        asetId: z.string(),
+        pemohonId: z.string()
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, catatan, vendorId } = input;
+      const { id, type, catatan, vendorId, asetId, pemohonId } = input;
+      const isExternal = Number(type)
+
+      const allRoles = await ctx.db.userRole.findMany({ where: { roleId: ROLE.PERBAIKAN_PERMINTAAN_VIEW.id } })
+      const userIds = allRoles.map((v) => v.userId).filter((v) => v !== ctx.session.user.id)
+      const user = await ctx.db.user.findFirst({ where: { id: ctx.session.user.id } })
+
       try {
-        await ctx.db.$transaction(async (tx) => {
-          await tx.perbaikan.update({
+        const result = await ctx.db.$transaction(async (tx) => {
+          const res = await tx.perbaikan.update({
             where: {
               id,
             },
             data: {
               catatanTeknisi: catatan,
-              status: STATUS.TEKNISI_UNDONE_EXTERNAL.id,
+              status: isExternal ? STATUS.TEKNISI_UNDONE_EXTERNAL.id : STATUS.SELESAI.id,
             },
           });
 
           await tx.perbaikanHistory.create({
             data: {
               perbaikanId: id,
-              desc: `Barang dikirim ke eksternal untuk perbaikan lebih lanjut`,
+              desc: isExternal ? `Barang dikirim ke eksternal untuk perbaikan lebih lanjut` : 'Barang tidak dapat di perbaiki',
             },
           });
 
-          const per = await tx.perbaikanExternal.create({
-            data: {
-              status: STATUS.PENGAJUAN.id,
-              no: Math.random().toString(),
-              perbaikanId: id,
-              vendorId,
-            },
-          });
+          if (isExternal) {
+            const per = await tx.perbaikanExternal.create({
+              data: {
+                status: STATUS.PENGAJUAN.id,
+                no: Math.random().toString(),
+                perbaikanId: id,
+                vendorId,
+              },
+            });
 
-          await tx.perbaikanExternalHistory.create({
-            data: {
-              perbaikanExternalId: per.id,
-              desc: `Permohonan perbaikan eksternal`,
-            },
-          });
+            await tx.perbaikanExternalHistory.create({
+              data: {
+                perbaikanExternalId: per.id,
+                desc: `Permohonan perbaikan eksternal`,
+              },
+            });
+            return {
+              notifications: []
+            }
+          } else {
+            const notifications = await tx.notification.createManyAndReturn({
+              data: [...userIds, pemohonId].map((v) => ({
+                fromId: ctx.session.user.id,
+                toId: v,
+                link: `/perbaikan/permintaan/${res.id}`,
+                desc: notifDesc(user!.name, "Barang tidak dapat di perbaiki", res.no),
+                isRead: false,
+              }))
+            })
+            await tx.daftarAset.update({
+              where: {
+                id: asetId
+              },
+              data: {
+                status: STATUS.ASET_BROKE.id
+              }
+            })
+            return {
+              notifications
+            }
+          }
         });
+
+        const { notifications } = result
+        await Promise.all(
+          notifications.map((v) => (
+            pusherServer.trigger(
+              v.toId,
+              "notification",
+              {
+                id: v.id,
+                fromId: user?.id,
+                toId: v.toId,
+                link: v.link,
+                desc: v.desc,
+                isRead: false,
+                createdAt: v.createdAt,
+                From: {
+                  image: user?.image,
+                  name: user?.name
+                },
+              }
+            )
+          ))
+        )
 
         return {
           ok: true,
           message: "Berhasil ",
         };
       } catch (error) {
+        console.log("error", error)
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Kemunkingan terjadi kesalahan sistem, silahkan coba lagi",

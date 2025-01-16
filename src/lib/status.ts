@@ -105,6 +105,16 @@ export const STATUS = {
     name: 'Idle',
     color: '#15803c'
   },
+  ASET_USED: {
+    id: 'aset-used',
+    name: 'Digunakan',
+    color: '#15803c'
+  },
+  ASET_BROKE: {
+    id: 'aset-broke',
+    name: 'Rusak',
+    color: '#15803c'
+  },
   BOOKED: {
     id: 'booked',
     name: 'Booked',

@@ -54,7 +54,7 @@ export default async function Page({
       <div className="mt-4 rounded-sm border">
         <div className="flex justify-between p-4">
           <div style={{ color: "green" }} className="font-semibold">
-            Digunakan
+            {data.status}
           </div>
           <Menu id={data.no} audit={data.audit} />
         </div>
