@@ -8,8 +8,8 @@ import Link from "next/link";
 import printJS from 'print-js'
 
 
-export default function Print() {
-  const [instance, updateInstance] = usePDF({ document: <PDF /> });
+export default function Print({data}: {data:any}) {
+  const [instance, updateInstance] = usePDF({ document: <PDF data={data} /> });
 
   if (instance.loading) return (
     <div className="flex items-center gap-4">

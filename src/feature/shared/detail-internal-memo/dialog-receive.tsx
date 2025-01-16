@@ -40,7 +40,7 @@ export const DialogReceive = (
 
       toast.success(result.message)
       onOpenChange()
-      router.refresh()
+      location.reload()
     } catch (error: any) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
       toast.error(error.message)

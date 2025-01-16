@@ -1,29 +1,29 @@
 import { Page, Text, View, Document, StyleSheet, Font, Image } from '@react-pdf/renderer';
 
-const data = {
-  no: '',
-  tanggal: '',
-  kirim: '',
-  vendor: {
-    name: '',
-    kontak: '',
-    whatsapp: 'alamat',
-    alamat: ''
-  },
-  items: [
-    {
-      no: 1,
-      kode: '1.23.12.22.233',
-      name: 'Komputer',
-      qty: '12',
-      uom: 'Pcs',
-      harga: `Rp 10.000`,
-      totalHarga: `Rp 120.000`
-    }
-  ]
-}
+// const data = {
+//   no: '',
+//   tanggal: '',
+//   kirim: '',
+//   vendor: {
+//     name: '',
+//     kontak: '',
+//     whatsapp: 'alamat',
+//     alamat: ''
+//   },
+//   items: [
+//     {
+//       no: 1,
+//       kode: '1.23.12.22.233',
+//       name: 'Komputer',
+//       qty: '12',
+//       uom: 'Pcs',
+//       harga: `Rp 10.000`,
+//       totalHarga: `Rp 120.000`
+//     }
+//   ]
+// }
 
-export default function PDF() {
+export default function PDF({data}: {data:any}) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -121,10 +121,10 @@ export default function PDF() {
           </View>
         </View>
         <View >
-          {data.items.map((v, i) => (
+          {data.barang?.map((v:any, i:number) => (
             <View style={styles.row} key={i}>
               <View style={[styles.col, { width: '5%', borderLeftWidth: 1 }]}>
-                <Text style={[styles.cell]}>{v.no}</Text>
+                <Text style={[styles.cell]}>{i + 1}</Text>
               </View>
               <View style={[styles.col, { width: '15%' }]}>
                 <Text style={[styles.cell]}>{v.kode}</Text>

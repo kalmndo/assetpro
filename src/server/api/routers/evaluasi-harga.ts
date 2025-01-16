@@ -484,6 +484,8 @@ export const evaluasiHargaRouter = createTRPCRouter({
 
         if (type === 'po') {
           if (notificationsData) {
+            // TODO: chanel undefined
+            console.log("notifications", notificationsData)
 
             await Promise.all(
               notificationsData.flatMap((v) => (
