@@ -895,9 +895,9 @@ export const perbaikanRouter = createTRPCRouter({
           if (isExternal) {
 
             const penomoran = await tx.penomoran.upsert({
-              where: { id: PENOMORAN.KELUAR_BARANG, year: String(new Date().getFullYear()) },
+              where: { id: PENOMORAN.PERBAIKAN_EKSTERNAL, year: String(new Date().getFullYear()) },
               update: { number: { increment: 1 } },
-              create: { id: PENOMORAN.PERBAIKAN_EKSTERNAL, code: 'FPPK', number: 1, year: String(new Date().getFullYear()) },
+              create: { id: PENOMORAN.PERBAIKAN_EKSTERNAL, code: 'FPPK', number: 0, year: String(new Date().getFullYear()) },
             });
 
             const per = await tx.perbaikanExternal.create({

@@ -638,6 +638,7 @@ model PerbaikanExternal {
   updatedAt                  DateTime                     @updatedAt
   PerbaikanExternalHistory   PerbaikanExternalHistory[]
   PerbaikanEksternalKomponen PerbaikanEksternalKomponen[]
+  PerbaikanExternalFiles     PerbaikanExternalFiles[]
 }
 
 model PerbaikanEksternalKomponen {
@@ -648,6 +649,20 @@ model PerbaikanEksternalKomponen {
   jumlah              Int
 
   PerbaikanEksternal PerbaikanExternal @relation(fields: [perbaikanExternalId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PerbaikanExternalFiles {
+  id                  String @id @default(cuid())
+  perbaikanExternalId String
+  name                String
+  url                 String
+  type                String
+  size                Int
+
+  PerbaikanExternal PerbaikanExternal @relation(fields: [perbaikanExternalId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -821,9 +836,9 @@ model Vendor {
 }
 
 model Teknisi {
-  id   String @unique // userId
-  User User   @relation(fields: [id], references: [id])
-  isActive Int @default(1) // 1 true, 0 false
+  id       String @unique // userId
+  User     User   @relation(fields: [id], references: [id])
+  isActive Int    @default(1) // 1 true, 0 false
 
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt

@@ -7,13 +7,13 @@ import { getStatus } from "@/lib/status";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import formatDate from "@/lib/formatDate";
 import { api } from "@/trpc/server";
-import TambahKomponenDialog from "./_components/tambah-komponen-dialog";
-import TableKomponen from "./_components/table-komponen";
 import RejectDialog from "./_components/reject-dialog";
 import ApproveDialog from "./_components/approve-dialog";
 import SendToVendorDialog from "./_components/send-to-vendor-dialog";
 import ReceiveDialog from "./_components/receive-dialog";
 import SendToUserDialog from "./_components/send-to-user-dialog";
+import ComponentWrapper from "./_components/component-wrapper";
+import TableKomponen from "./_components/table-komponen";
 
 export default async function Page({ params: { id } }: { params: { id: string } }) {
   const data = await api.perbaikanEksternal.getById({ id })
@@ -47,7 +47,6 @@ export default async function Page({ params: { id } }: { params: { id: string } 
       <div className="rounded-sm border">
         <div className="flex justify-between p-4">
           <div style={{ color }} className="font-semibold">{status}</div>
-          <div>Print</div>
         </div>
         <Separator />
         <div className="grid grid-cols-3 gap-4 p-4">
@@ -117,15 +116,9 @@ export default async function Page({ params: { id } }: { params: { id: string } 
               </div>
             </>
           }
-          <div className="my-4">
-            <div className="flex justify-between my-2 items-center">
-              <p className="font-semibold text-lg">Komponen perbaikan</p>
-              {data.canAddComponents &&
-                <TambahKomponenDialog id={data.id} />
-              }
-            </div>
+          <ComponentWrapper data={data} >
             <TableKomponen data={data.components} />
-          </div>
+          </ComponentWrapper>
           {data.isAtasanCanApprove &&
             <div className="flex justify-end space-x-4">
               <RejectDialog id={data.id} />
@@ -135,11 +128,6 @@ export default async function Page({ params: { id } }: { params: { id: string } 
           {data.canSendToVendor &&
             <div className="flex justify-end space-x-4">
               <SendToVendorDialog id={data.id} />
-            </div>
-          }
-          {data.canReceiveFromVendor &&
-            <div className="flex justify-end space-x-4">
-              <ReceiveDialog id={data.id} />
             </div>
           }
           {data.canSendToUser &&

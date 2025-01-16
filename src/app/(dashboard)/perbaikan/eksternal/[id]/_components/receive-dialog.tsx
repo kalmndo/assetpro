@@ -77,8 +77,16 @@ const TheForm = ({
 
 export default function ReceiveDialog({
   id,
+  files
 }: {
   id: string,
+  files: {
+    id: string,
+    name: string,
+    type: string,
+    size: number,
+    url: string
+  }[]
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -87,7 +95,7 @@ export default function ReceiveDialog({
 
   async function onSubmit(v: z.infer<typeof formSchema>) {
     try {
-      const result = await mutateAsync({ id, type: v.type })
+      const result = await mutateAsync({ id, type: v.type, files })
       toast.success(result.message)
       router.refresh()
       setOpen(false)

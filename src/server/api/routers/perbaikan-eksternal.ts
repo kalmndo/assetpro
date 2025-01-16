@@ -43,6 +43,7 @@ export const perbaikanEksternalRouter = createTRPCRouter({
               createdAt: 'desc'
             }
           },
+          PerbaikanExternalFiles:true,
           Vendor: true,
           PerbaikanExternalHistory: true,
           Perbaikan: {
@@ -73,7 +74,7 @@ export const perbaikanEksternalRouter = createTRPCRouter({
         });
       }
 
-      // permohanan, setujui, diserahkan ke vendor, diterima dan tambah komponen, di terima user
+      // evaluasi harga penawaran
 
       const isAtasanCanApprove = user?.UserRole.map((v) => v.roleId).some((v) => v === ROLE.PERBAIKAN_EKSTERNAL_APPROVE.id) && result.status === STATUS.PENGAJUAN.id
       const canSendToVendor = user?.UserRole.map((v) => v.roleId).some((v) => v === ROLE.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_VENDOR.id) && result.status === STATUS.IM_APPROVE.id
@@ -117,6 +118,7 @@ export const perbaikanEksternalRouter = createTRPCRouter({
         },
         components: comps.length === 0 ? [] : [...comps, { id: "total", biaya: `Rp ${totalComps.toLocaleString("id-ID")}`, jumlah: '', name: "" }],
         riwayat: result.PerbaikanExternalHistory,
+        files: result.PerbaikanExternalFiles ,
         isAtasanCanApprove,
         canAddComponents,
         canSendToVendor,
@@ -343,18 +345,37 @@ export const perbaikanEksternalRouter = createTRPCRouter({
   receiveFromVendor: protectedProcedure
     .input(z.object({
       id: z.string(),
-      type: z.string()
+      type: z.string(),
+      files: z.array(z.object({
+        name: z.string(),
+        type: z.string(),
+        size: z.number(),
+        url: z.string()
+      })).optional()
     }))
     .mutation(async ({ ctx, input }) => {
       const {
         id,
-        type
+        type,
+        files
       } = input
 
       const isDone = type === '0' ? false : true
 
       try {
         await ctx.db.$transaction(async (tx) => {
+
+          if (files) {
+            await tx.perbaikanExternalFiles.createMany({
+              data: files.map((v) => ({
+                perbaikanExternalId: id,
+                name: v.name,
+                url: v.url,
+                type: v.type,
+                size: v.size
+              }))
+            })
+          }
           if (isDone) {
             await tx.perbaikanExternal.update({
               where: {
@@ -387,16 +408,21 @@ export const perbaikanEksternalRouter = createTRPCRouter({
             //    kirim ke user/ teknisi
             //  
             //  
-            //  tidak selesai
-            //    status perbaikan tidak selesai
-            //    catatan tambahan dari vendor di perbaikan
-            //   TODO: aset status jadi rusak
-            await tx.perbaikan.update({
+            const res = await tx.perbaikan.update({
               where: {
                 id: ex.perbaikanId
               },
               data: {
                 status: STATUS.TIDAK_SELESAI.id
+              }
+            })
+
+            await tx.daftarAset.update({
+              where: {
+                id: res.asetId
+              },
+              data: {
+                status: STATUS.ASET_BROKE.id
               }
             })
 
