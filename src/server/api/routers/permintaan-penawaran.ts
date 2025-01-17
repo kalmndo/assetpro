@@ -330,7 +330,7 @@ https://assetpro.site/vendor/pp/${result.id}`;
         );
         const { notifications } = result
 
-        await Promise.all(
+        Promise.all(
           notifications.map((v) => (
             pusherServer.trigger(
               v.toId,
