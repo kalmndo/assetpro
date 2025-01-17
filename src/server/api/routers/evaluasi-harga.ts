@@ -487,48 +487,48 @@ export const evaluasiHargaRouter = createTRPCRouter({
             // TODO: chanel undefined
             console.log("notifications", notificationsData)
 
-            await Promise.all(
-              notificationsData.flatMap((v) => (
-                pusherServer.trigger(
-                  v.toId,
-                  "notification",
-                  {
-                    id: v.id,
-                    fromId: user?.id,
-                    toId: v.toId,
-                    link: v.link,
-                    desc: v.desc,
-                    isRead: false,
-                    createdAt: v.createdAt,
-                    From: {
-                      image: user?.image,
-                      name: user?.name
-                    },
-                  }
-                )
-              ))
-            )
+            // await Promise.all(
+            //   notificationsData.flatMap((v) => (
+            //     pusherServer.trigger(
+            //       v.toId,
+            //       "notification",
+            //       {
+            //         id: v.id,
+            //         fromId: user?.id,
+            //         toId: v.toId,
+            //         link: v.link,
+            //         desc: v.desc,
+            //         isRead: false,
+            //         createdAt: v.createdAt,
+            //         From: {
+            //           image: user?.image,
+            //           name: user?.name
+            //         },
+            //       }
+            //     )
+            //   ))
+            // )
           }
 
         } else {
           if (notification) {
-            await pusherServer.trigger(
-              notification.toId,
-              "notification",
-              {
-                id: notification.id,
-                fromId: user?.id,
-                toId: notification.toId,
-                link: notification.link,
-                desc: notification.desc,
-                isRead: false,
-                createdAt: notification.createdAt,
-                From: {
-                  image: user?.image,
-                  name: user?.name
-                },
-              }
-            )
+            // await pusherServer.trigger(
+            //   notification.toId,
+            //   "notification",
+            //   {
+            //     id: notification.id,
+            //     fromId: user?.id,
+            //     toId: notification.toId,
+            //     link: notification.link,
+            //     desc: notification.desc,
+            //     isRead: false,
+            //     createdAt: notification.createdAt,
+            //     From: {
+            //       image: user?.image,
+            //       name: user?.name
+            //     },
+            //   }
+            // )
           }
         }
 
