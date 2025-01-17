@@ -24,6 +24,7 @@ import { Page, Text, View, Document, StyleSheet, Font, Image } from '@react-pdf/
 // }
 
 export default function PDF({data}: {data:any}) {
+  const total = data.barang?.map((v) => v.)
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -150,7 +151,7 @@ export default function PDF({data}: {data:any}) {
             flexDirection: 'row-reverse'
           }} >
             <View style={[styles.col, { width: '19.25%', borderLeftWidth: 1 }]}>
-              <Text style={[styles.cell, { textAlign: 'right' }]}>Rp 2.000.000</Text>
+              <Text style={[styles.cell, { textAlign: 'right' }]}>{data.total}</Text>
             </View>
           </View>
 

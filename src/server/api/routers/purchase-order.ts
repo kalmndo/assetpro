@@ -69,11 +69,14 @@ export const purchaseOrderRouter = createTRPCRouter({
 
       const vendor = result.Vendor
 
+      const total = result.PoBarang.map((v) => v.Barang.totalHarga).reduce((a, b) => a! + b!, 0)
+
       return {
         ...result,
         tanggal: result.createdAt.toLocaleDateString("id-ID"),
         noEvaluasi: result.Evaluasi.no,
         vendor,
+        total,
         barang: result.PoBarang.map((v) => {
           const lah = v.Barang.PembelianBarang.PermintaanPenawaranBarangVendor.find((p) => p.Vendor.vendorId === v.Barang.Vendor.vendorId)
           return ({
