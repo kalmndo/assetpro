@@ -290,7 +290,7 @@ ${barang.map((v, i) => `${i + 1}. ${v}`).join("\n")}
 Silahkan klik link berikut untuk mengirim penawaran harga.
 https://assetpro.site/vendor/pp/${result.id}`;
 
-            sendWhatsAppMessage(formatPhoneNumber(result.Vendor.nohp ?? ''), message);
+            // sendWhatsAppMessage(formatPhoneNumber(result.Vendor.nohp ?? ''), message);
           }
 
           const penomoran = await tx.penomoran.upsert({
