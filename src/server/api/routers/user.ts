@@ -6,6 +6,8 @@ import bcrypt from "bcryptjs";
 import { ROLE } from "@/lib/role";
 import { STATUS } from "@/lib/status";
 import checkKetersediaanByBarang from "../shared/check-ketersediaan-by-barang";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export const userRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx }) => {
@@ -28,16 +30,19 @@ export const userRouter = createTRPCRouter({
       },
     });
     if (!user) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "User tidak ada",
-      });
+      return {
+        ok:false,
+        data: undefined
+      }
     }
     return {
-      ...user,
-      image: user.image ?? "",
-      notifications: user.NotificationTo,
-      userRoles: user.UserRole.map((v) => v.roleId),
+      ok: true,
+      data: {
+        ...user,
+        image: user.image ?? "",
+        notifications: user.NotificationTo,
+        userRoles: user.UserRole.map((v) => v.roleId),
+      }
     };
   }),
   getAll: protectedProcedure.query(async ({ ctx }) => {

@@ -15,7 +15,10 @@ import { signOut } from 'next-auth/react'
 import { type RouterOutputs } from '@/trpc/react'
 import { getInitials } from '@/lib/utils'
 
-export function UserNav({ data }: { data: RouterOutputs['user']['me'] }) {
+export function UserNav({ data }: { data: RouterOutputs['user']['me']['data'] }) {
+  if (!data) {
+    return 
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

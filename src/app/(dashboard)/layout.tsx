@@ -1,6 +1,8 @@
+'use server'
 import AppShell from "@/components/app-shell";
 import Cart from "@/components/cart";
 import { Layout, LayoutBody, LayoutHeader } from "@/components/custom/layout";
+import LogOut from "@/components/logout";
 import Notification from "@/components/notification";
 import { Input } from "@/components/ui/input";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -26,16 +28,22 @@ const Search = () => {
 
 export default async function LayoutYa({ children }: Props) {
   const result = await api.user.me();
+
+  if (!result.data) {
+   return <LogOut /> 
+   
+  }
+
   return (
-    <AppShell userRoles={result.userRoles}>
+    <AppShell userRoles={result.data.userRoles}>
       <Layout>
         <LayoutHeader>
           <Search />
           <div className="ml-auto flex items-center space-x-4">
             {/* <ThemeSwitch /> */}
-            <Notification notifications={result.notifications} userId={result.id} />
+            <Notification notifications={result.data.notifications} userId={result.data.id} />
             <Cart />
-            <UserNav data={result} />
+            <UserNav data={result.data && result.data} />
           </div>
         </LayoutHeader>
         <LayoutBody className="flex flex-col" fixedHeight>
