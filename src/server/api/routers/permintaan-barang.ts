@@ -64,7 +64,7 @@ export const permintaanBarangRouter = createTRPCRouter({
       return result.map((v) => ({
         ...v,
         // @ts-ignore
-        ruang: v.Ruang.name,
+        ruang: v.Ruang?.name,
         // @ts-ignore
         jumlah: v.PermintaanBarangBarang.length,
         tanggal: v.createdAt.toLocaleDateString(),
@@ -146,7 +146,6 @@ export const permintaanBarangRouter = createTRPCRouter({
       const barang = PermintaanBarangBarang.filter(
         (v) => v.status !== STATUS.IM_REJECT.id,
       ).map((v) => {
-        console.log("anjing", v.PermintaanBarangBarangKodeAnggaran)
         const isOut =
           v.PermintaanBarangBarangSplit.map((a) => a.status).some(
             (b) => b === "out",
