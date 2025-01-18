@@ -125,7 +125,7 @@ export const sidelinks: SideLink[] = [
   },
   {
     title: "Pengadaan",
-    label: "3",
+    label: "",
     href: "/tasks",
     icon: <ShoppingCart size={18} />,
     sub: [
