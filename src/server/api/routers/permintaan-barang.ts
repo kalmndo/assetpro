@@ -11,6 +11,7 @@ import getPenomoran from "@/lib/getPenomoran";
 import notifDesc from "@/lib/notifDesc";
 import { getPusherInstance } from "@/lib/pusher/server";
 import { notificationQueue } from "@/app/api/queue/notification/route";
+import { SelectProps } from "@/lib/type";
 const pusherServer = getPusherInstance();
 
 export const permintaanBarangRouter = createTRPCRouter({
@@ -98,7 +99,9 @@ export const permintaanBarangRouter = createTRPCRouter({
             include: {
               Uom: true,
               Barang: true,
-              PermintaanBarangBarangKodeAnggaran: true,
+              PermintaanBarangBarangKodeAnggaran: {
+                include: { MasterKodeAnggaranDepartment: { include: { MasterKodeAnggaran: true } } }
+              },
               PermintaanBarangBarangHistory: {
                 orderBy: { createdAt: "asc" },
               },
@@ -126,7 +129,7 @@ export const permintaanBarangRouter = createTRPCRouter({
       const {
         no,
         perihal,
-        Ruang: { name: ruang },
+        Ruang,
         createdAt,
         status,
         Pemohon: {
@@ -143,6 +146,7 @@ export const permintaanBarangRouter = createTRPCRouter({
       const barang = PermintaanBarangBarang.filter(
         (v) => v.status !== STATUS.IM_REJECT.id,
       ).map((v) => {
+        console.log("anjing", v.PermintaanBarangBarangKodeAnggaran)
         const isOut =
           v.PermintaanBarangBarangSplit.map((a) => a.status).some(
             (b) => b === "out",
@@ -160,7 +164,7 @@ export const permintaanBarangRouter = createTRPCRouter({
             name: v.Uom.name,
           },
           kodeAnggaran: v.PermintaanBarangBarangKodeAnggaran.map(
-            (v) => v.kodeAnggaranId,
+            (v) => `${v.MasterKodeAnggaranDepartment?.MasterKodeAnggaran.id} - ${v.MasterKodeAnggaranDepartment?.MasterKodeAnggaran.name}`,
           ),
           status: v.status,
           persetujuan: v.PermintaanBarangBarangHistory,
@@ -187,7 +191,7 @@ export const permintaanBarangRouter = createTRPCRouter({
         no,
         tanggal: createdAt.toLocaleDateString("id-ID"),
         perihal,
-        ruang,
+        ruang: Ruang?.name,
         status,
         pemohon: {
           name,
@@ -344,7 +348,7 @@ export const permintaanBarangRouter = createTRPCRouter({
     .input(
       z.object({
         perihal: z.string(),
-        ruangId: z.string(),
+        ruangId: z.string().optional(),
         peruntukan: z.string(),
         barang: z.array(
           z.object({
@@ -389,7 +393,7 @@ export const permintaanBarangRouter = createTRPCRouter({
             data: {
               no: getPenomoran(penomoran),
               perihal,
-              ruangId,
+              ruangId: Number(peruntukan) === 2 ? null : ruangId,
               status: STATUS.PENGAJUAN.id,
               pemohondId,
               ...(user?.UserRole.length !== 0 && {
@@ -491,6 +495,128 @@ export const permintaanBarangRouter = createTRPCRouter({
           message: "Kemunkingan terjadi kesalahan sistem, silahkan coba lagi",
           cause: error,
         });
+      }
+    }),
+  createQuery: protectedProcedure
+    .query(async ({ ctx }) => {
+      const userId = ctx.session.user.id;
+      const user = await ctx.db.user.findFirst({
+        where: {
+          id: userId,
+        },
+        include: {
+          Department: true,
+        },
+      });
+      const orgId = user?.Department.organisasiId;
+      const result = await ctx.db.masterRuang.findMany({
+        where: {
+          orgId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      const kodes = await ctx.db.masterKodeAnggaranDepartment.findMany({
+        where: {
+          departmentId: user?.departmentId,
+          deletedAt: null
+        },
+        include: {
+          MasterKodeAnggaran: true
+        },
+        orderBy: {
+          createdAt: "desc"
+        },
+      })
+
+      const kodeAnggarans = kodes.map((v) => ({
+        label: `${v.MasterKodeAnggaran.id} - ${v.MasterKodeAnggaran.name}`,
+        value: v.id,
+      }))
+
+      const ruangs = result.map((v) => ({
+        label: v.name,
+        value: v.id,
+      }));
+
+      let peruntukan = [
+        { value: "0", label: "Personal" },
+      ]
+
+      const isTeknisi = await ctx.db.teknisi.findFirst({
+        where: {
+          id: userId
+        },
+        include: {
+          Perbaikan: {
+            where: {
+              status: STATUS.TEKNISI_FIXING.id
+            }
+
+          }
+        }
+      })
+
+      let formPerbaikans: any[] = []
+
+      if (isTeknisi) {
+        peruntukan.push(
+          { value: "2", label: "Perbaikan" },
+        )
+        formPerbaikans = await Promise.all(
+          isTeknisi.Perbaikan.map(async (v) => {
+            const dept = await ctx.db.user.findFirst({ where: { id: v.userId } })
+            // Fetch kodeAnggaran data for the current Perbaikan
+            const kodePer = await ctx.db.masterKodeAnggaranDepartment.findMany({
+              where: {
+                departmentId: dept?.departmentId, // Assuming 'v.id' refers to the departmentId
+                deletedAt: null,
+              },
+              include: {
+                MasterKodeAnggaran: true,
+              },
+              orderBy: {
+                createdAt: "desc",
+              },
+            });
+
+
+            // Transform kodeAnggaran data into desired format
+            const kodeAnggaranPerbaikan = kodePer.map((item) => ({
+              label: `${item.MasterKodeAnggaran.id} - ${item.MasterKodeAnggaran.name}`,
+              value: item.id,
+            }));
+
+            // Return the transformed object for the current Perbaikan
+            return {
+              value: v.id,
+              label: v.no,
+              kodeAnggarans: kodeAnggaranPerbaikan,
+            };
+          })
+        );
+      }
+
+      const isRole = await ctx.db.userRole.findFirst({
+        where: {
+          userId,
+          roleId: ROLE.GUDANG_REQUEST_VIEW.id
+        }
+      })
+
+      if (isRole) {
+        peruntukan.push(
+          { value: "1", label: "Stock" },
+        )
+      }
+
+      return {
+        kodeAnggarans,
+        ruangs,
+        peruntukan,
+        formPerbaikans
       }
     }),
   approve: protectedProcedure
@@ -834,7 +960,7 @@ Catatan: ${v.catatan}
             )
           ))
         )
-        
+
 
         return {
           ok: true,

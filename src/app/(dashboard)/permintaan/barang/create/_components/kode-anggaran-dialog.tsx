@@ -57,7 +57,7 @@ export default function KodeAnggaranDialog({
           onMouseLeave={handleHover}
         >
           {cart.kodeAnggaran.length > 0 && !isHovered
-            ? cart.kodeAnggaran[0]
+            ? kodeAnggarans.find((va) => va.value === cart.kodeAnggaran[0])?.label
             : 'Input kode anggaran'}
         </Button>
       </DialogTrigger>

@@ -3,8 +3,7 @@ import { api } from "@/trpc/server";
 import Content from "./_components/content";
 
 export default async function Page() {
-  const ruangs = await api.mRuang.getSelectByUser();
-  const kodeAnggarans = await api.kodeAnggaranDept.getSelectByUser();
+  const { kodeAnggarans, ruangs, peruntukan, formPerbaikans } = await api.permintaanBarang.createQuery()
 
   return (
     <div>
@@ -18,7 +17,11 @@ export default async function Page() {
       </div>
       <Separator className="my-4" />
       <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
-        <Content kodeAnggarans={kodeAnggarans} ruangs={ruangs} />
+        <Content
+          kodeAnggarans={kodeAnggarans}
+          ruangs={ruangs}
+          peruntukan={peruntukan}
+          formPerbaikans={formPerbaikans} />
       </div>
     </div>
   );

@@ -70,16 +70,16 @@ model UserRole {
 }
 
 model PermintaanBarang {
-  id         String @id @default(cuid())
-  no         String @unique
+  id         String  @id @default(cuid())
+  no         String  @unique
   status     String
   perihal    String
-  ruangId    String
+  ruangId    String?
   pemohondId String
-  peruntukan Int    @default(0) // 0 personal 1 stock 2 perbaikan
+  peruntukan Int     @default(0) // 0 personal 1 stock 2 perbaikan
 
   Pemohon                User                     @relation(fields: [pemohondId], references: [id])
-  Ruang                  MasterRuang              @relation(fields: [ruangId], references: [id])
+  Ruang                  MasterRuang?             @relation(fields: [ruangId], references: [id])
   PermintaanBarangBarang PermintaanBarangBarang[]
 
   createdAt       DateTime          @default(now())
@@ -142,13 +142,12 @@ model PermintaanBarangBarangKodeAnggaran {
   pbbId          String
   kodeAnggaranId String
 
-  masterKodeAnggaranDepartmentId String?
 
   Barang PermintaanBarangBarang @relation(fields: [pbbId], references: [id])
 
   createdAt                    DateTime                      @default(now())
   updatedAt                    DateTime                      @updatedAt
-  MasterKodeAnggaranDepartment MasterKodeAnggaranDepartment? @relation(fields: [masterKodeAnggaranDepartmentId], references: [id])
+  MasterKodeAnggaranDepartment MasterKodeAnggaranDepartment? @relation(fields: [kodeAnggaranId], references: [id])
 }
 
 model PermintaanBarangBarangSplit {

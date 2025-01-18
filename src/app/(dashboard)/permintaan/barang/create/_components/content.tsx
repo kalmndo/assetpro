@@ -35,34 +35,27 @@ import UplaodImage from "./upload-image";
 
 const formSchema = z.object({
   perihal: z.string().min(1).max(9999),
-  ruangId: z.string().min(1).max(255),
+  ruangId: z.string(),
   peruntukan: z.string().min(1).max(255),
+  formPerbaikan: z.string().optional()
 });
 
 export default function Content({
+  peruntukan,
+  formPerbaikans,
   kodeAnggarans,
   ruangs,
 }: {
   kodeAnggarans: SelectProps[];
   ruangs: SelectProps[];
+  peruntukan: SelectProps[];
+  formPerbaikans: SelectProps[];
 }) {
   const [cartAtoms, dispatch] = useAtom(cartsAtomsAtom);
   const [barang, setBarang] = useAtom(cartsAtom);
   const { mutateAsync, isPending } = api.permintaanBarang.create.useMutation();
   const router = useRouter();
-  const [isUser, setIsUser] = useState(true);
-
-  useEffect(() => {
-    getSession()
-      .then((v) => {
-        if (v?.user.role.length === 0) {
-          setIsUser(true);
-        } else {
-          setIsUser(false);
-        }
-      })
-      .catch((v) => console.log("v", v));
-  }, []);
+  const [kodes, setKodes] = useState(kodeAnggarans)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -72,6 +65,18 @@ export default function Content({
       peruntukan: "0",
     },
   });
+
+  useEffect(() => {
+    console.log("effect 1")
+    if (form.watch("formPerbaikan")) {
+      console.log("effect 2")
+
+      const asdf = formPerbaikans.find((v) => v.value === form.watch("formPerbaikan"))
+      // @ts-ignore
+      setKodes(asdf?.kodeAnggarans)
+    }
+
+  }, [form.watch("formPerbaikan")])
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (barang.every((v: any) => v.kodeAnggaran.length > 0)) {
@@ -102,31 +107,42 @@ export default function Content({
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-2 "
         >
-          <div className="flex space-x-4">
+          {peruntukan.length > 1 && (
             <div className="w-60">
               <SearchSelect
-                data={ruangs}
+                data={peruntukan}
                 form={form}
-                label="Ruang"
-                name="ruangId"
-                placeholder="Pilih Ruang "
+                label="Peruntukan"
+                name="peruntukan"
+                placeholder="Pilih Peruntukan"
               />
             </div>
-            {!isUser && (
+          )}
+          {form.watch("peruntukan") !== '2' ?
+            <div className="flex space-x-4">
               <div className="w-60">
                 <SearchSelect
-                  data={[
-                    { value: "0", label: "Personal" },
-                    { value: "1", label: "Stock" },
-                  ]}
+                  data={ruangs}
                   form={form}
-                  label="Peruntukan"
-                  name="peruntukan"
-                  placeholder="Pilih Peruntukan"
+                  label="Ruang"
+                  name="ruangId"
+                  placeholder="Pilih Ruang "
                 />
               </div>
-            )}
-          </div>
+            </div>
+            :
+            <div className="flex space-x-4">
+              <div className="w-60">
+                <SearchSelect
+                  data={formPerbaikans}
+                  form={form}
+                  label="Form perbaikan"
+                  name="formPerbaikan"
+                  placeholder="Pilih Form perbaikan "
+                />
+              </div>
+            </div>
+          }
 
           <FormField
             control={form.control}
@@ -161,7 +177,7 @@ export default function Content({
               {cartAtoms.map((cartAtom: any, i) => (
                 <Barang
                   key={i}
-                  kodeAnggarans={kodeAnggarans}
+                  kodeAnggarans={kodes}
                   cartAtom={cartAtom}
                   remove={() => dispatch({ type: "remove", atom: cartAtom })}
                 />
