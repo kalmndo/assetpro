@@ -301,6 +301,8 @@ export const barangMasukRouter = createTRPCRouter({
                       imId: val.id,
                       fttbItemId: fttbItem.id,
                       status: STATUS.ASET_IDLE.id,
+                      hargaPembelian: value.Barang.harga!,
+                      nilaiBuku: value.Barang.harga!,
                       // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
                       umur: subKat?.umur ?? 10,
                       desc: val.desc,
