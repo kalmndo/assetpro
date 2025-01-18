@@ -2,55 +2,65 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@/server/api/trpc";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 export const kodeAnggaranRouter = createTRPCRouter({
   getAll: protectedProcedure
     .query(async ({ ctx }) => {
       const result = await ctx.db.masterKodeAnggaran.findMany({
+        where: {
+          deletedAt: null
+        },
         orderBy: {
           createdAt: "desc"
         },
-        include: {
-          Department: true
-        }
       })
       return result.map((v) => ({
         kode: v.id,
         name: v.name,
-        department: v.Department.name,
-        nilai: v.nilai ? v.nilai?.toLocaleString("id-ID") : "Rp 0"
+        nilai: v.nilai ? `Rp ${v.nilai?.toLocaleString("id-ID")}` : "Rp 0"
       }))
     }),
-  getSelect: protectedProcedure
-    .query(async ({ ctx }) => {
-      const result = await ctx.db.masterKodeAnggaran.findMany({
-        orderBy: {
-          createdAt: "desc"
-        },
-      })
+  delete: protectedProcedure
+    .input(z.object({
+      id: z.string()
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { id } = input
+      try {
+        await ctx.db.$transaction(async (tx) => {
+          await tx.masterKodeAnggaran.update({
+            where: {
+              id
+            },
+            data: {
+              deletedAt: new Date()
+            }
+          })
 
-      return result.map((v) => ({
-        label: v.name,
-        value: v.id,
-      }))
-    }),
-  getSelectByUser: protectedProcedure
-    .query(async ({ ctx }) => {
-      const userId = ctx.session.user.id
-      const user = await ctx.db.user.findUnique({ where: { id: userId } })
-      const result = await ctx.db.masterKodeAnggaran.findMany({
-        where: {
-          departmentId: user?.departmentId
-        },
-        orderBy: {
-          createdAt: "desc"
-        },
-      })
+          await tx.masterKodeAnggaranDepartment.updateMany({
+            where: {
+              kodeAnggaranId:id
+            },
+            data: {
+              deletedAt: new Date()
+            }
+          })
+        })
 
-      return result.map((v) => ({
-        label: `${v.id} - ${v.name}`,
-        value: v.id,
-      }))
-    }),
+        return {
+          ok: true,
+          message: "Berhasil menghapus kode anggaran"
+        }
 
+      } catch (error) {
+        throw new TRPCError({
+          code: "BAD_GATEWAY",
+          message: "Terjadi kesalahan server, harap coba lagi"
+        })
+
+      }
+
+    })
 });

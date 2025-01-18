@@ -4,7 +4,7 @@ import Content from "./_components/content";
 
 export default async function Page() {
   const ruangs = await api.mRuang.getSelectByUser();
-  const kodeAnggarans = await api.kodeAnggaran.getSelectByUser();
+  const kodeAnggarans = await api.kodeAnggaranDept.getSelectByUser();
 
   return (
     <div>

@@ -6,7 +6,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { DeleteModal } from "@/components/delete-modal";
-import { EditDialog } from "./edit-dialog";
+import { Button } from "@/components/ui/button";
+import { Trash } from "lucide-react";
 
 const defaultValues = {
   id: "",
@@ -15,18 +16,16 @@ const defaultValues = {
 
 export function Table({
   data,
-  departments
 }: {
   data: RouterOutputs['kodeAnggaran']['getAll'],
-  departments: RouterOutputs['department']['getSelect']
 }) {
   const [dialog, setDialog] = useState<{ open: boolean | string, data: any }>({ open: false, data: defaultValues })
-  const { mutateAsync, isPending } = api.departmentUnit.remove.useMutation()
+  const { mutateAsync, isPending } = api.kodeAnggaran.delete.useMutation()
   const router = useRouter()
 
   const onSubmit = async () => {
     try {
-      const result = await mutateAsync({ id: dialog.data.id })
+      const result = await mutateAsync({ id: dialog.data.kode })
       toast.success(result.message)
       router.refresh()
       setDialog({ open: false, data: defaultValues })
@@ -44,24 +43,30 @@ export function Table({
     <div>
       <DataTable
         data={data}
-        columns={columns}
+        columns={[
+          ...columns,
+          {
+            id: 'actions',
+            cell: ({ row }) => (
+              <div className="flex justify-end">
+                <Button size={'icon'} variant={'ghost'} onClick={() => { setDialog({ open: 'delete', data: row.original }) }} >
+                  <Trash size={16} />
+                </Button>
+              </div>
+            ),
+            enableSorting: false,
+            enableHiding: false,
+          },
+        ]}
         filter={{ column: 'name', placeholder: 'Nama ...' }}
-      // ini masalah di column
-      // facetedFilter={[{ column: 'golongan', title: "Golongan", options: [{ label: 'Aset', value: "Aset" }] }]}
       />
       <DeleteModal
         open={dialog.open === 'delete'}
         onOpenChange={onOpenChange}
-        dataName="KATEGORI"
+        dataName="KODE ANGGARAN"
         name={dialog.data.name}
         isPending={isPending}
         onSubmit={onSubmit}
-      />
-      <EditDialog
-        departments={departments}
-        open={dialog.open === 'edit'}
-        value={dialog.data}
-        onOpenChange={onOpenChange}
       />
     </div>
   )

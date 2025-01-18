@@ -142,11 +142,13 @@ model PermintaanBarangBarangKodeAnggaran {
   pbbId          String
   kodeAnggaranId String
 
-  Barang       PermintaanBarangBarang @relation(fields: [pbbId], references: [id])
-  KodeAnggaran MasterKodeAnggaran     @relation(fields: [kodeAnggaranId], references: [id])
+  masterKodeAnggaranDepartmentId String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  Barang PermintaanBarangBarang @relation(fields: [pbbId], references: [id])
+
+  createdAt                    DateTime                      @default(now())
+  updatedAt                    DateTime                      @updatedAt
+  MasterKodeAnggaranDepartment MasterKodeAnggaranDepartment? @relation(fields: [masterKodeAnggaranDepartmentId], references: [id])
 }
 
 model PermintaanBarangBarangSplit {
@@ -810,12 +812,12 @@ model Department {
 
   Organisasi Organisasi @relation(fields: [organisasiId], references: [id])
 
-  User               User[]
-  MasterKodeAnggaran MasterKodeAnggaran[]
-  DepartmentUnit     DepartmentUnit[]
+  User           User[]
+  DepartmentUnit DepartmentUnit[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt                    DateTime                       @default(now())
+  updatedAt                    DateTime                       @updatedAt
+  MasterKodeAnggaranDepartment MasterKodeAnggaranDepartment[]
 }
 
 model Vendor {
@@ -1027,15 +1029,30 @@ model MasterNomor {
 }
 
 model MasterKodeAnggaran {
-  id           String @id @unique
-  name         String
-  nilai        Int?
-  departmentId String
+  id       String @id @unique
+  name     String
+  nilai    Int
+  terpakai Int    @default(0)
 
-  Department Department @relation(fields: [departmentId], references: [id])
+  createdAt                    DateTime                       @default(now())
+  updatedAt                    DateTime                       @updatedAt
+  deletedAt                    DateTime?
+  MasterKodeAnggaranDepartment MasterKodeAnggaranDepartment[]
+}
+
+model MasterKodeAnggaranDepartment {
+  id             String @id @default(cuid())
+  departmentId   String
+  kodeAnggaranId String
+  nilai          Int
+  terpakai       Int
+
+  Department         Department         @relation(fields: [departmentId], references: [id])
+  MasterKodeAnggaran MasterKodeAnggaran @relation(fields: [kodeAnggaranId], references: [id])
 
   createdAt                          DateTime                             @default(now())
   updatedAt                          DateTime                             @updatedAt
+  deletedAt                          DateTime?
   PermintaanBarangBarangKodeAnggaran PermintaanBarangBarangKodeAnggaran[]
 }
 

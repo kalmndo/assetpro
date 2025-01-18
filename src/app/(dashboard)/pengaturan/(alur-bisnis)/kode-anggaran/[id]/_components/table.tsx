@@ -1,24 +1,26 @@
 "use client"
 import { DataTable } from "@/components/data-table";
 import { columns } from "./columns";
-import { DataTableRowActions } from "@/components/data-table/row-actions";
-import { api } from "@/trpc/react";
+import { type RouterOutputs, api } from "@/trpc/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { DeleteModal } from "@/components/delete-modal";
-import { EditDialog } from "./edit-dialog";
-import { type SelectProps } from "@/lib/type";
+import { DataTableRowActions } from "@/components/data-table/row-actions";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 const defaultValues = {
   id: "",
   name: ""
 }
 
-export function Table({ data, organisasis }: { data: any, organisasis: SelectProps[] }) {
+export function Table({
+  data,
+}: {
+  data: RouterOutputs['kodeAnggaranDept']['getAll']['data'],
+}) {
   const [dialog, setDialog] = useState<{ open: boolean | string, data: any }>({ open: false, data: defaultValues })
-  const { mutateAsync, isPending } = api.department.remove.useMutation()
+  const { mutateAsync, isPending } = api.kodeAnggaranDept.remove.useMutation()
   const router = useRouter()
 
   const onSubmit = async () => {
@@ -60,16 +62,10 @@ export function Table({ data, organisasis }: { data: any, organisasis: SelectPro
       <DeleteModal
         open={dialog.open === 'delete'}
         onOpenChange={onOpenChange}
-        dataName="KATEGORI"
+        dataName="DEPARTMENT"
         name={dialog.data.name}
         isPending={isPending}
         onSubmit={onSubmit}
-      />
-      <EditDialog
-        organisasis={organisasis}
-        open={dialog.open === 'edit'}
-        value={dialog.data}
-        onOpenChange={onOpenChange}
       />
     </div>
   )
