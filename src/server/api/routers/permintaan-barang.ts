@@ -91,6 +91,7 @@ export const permintaanBarangRouter = createTRPCRouter({
           Ruang: true,
           Pemohon: {
             include: {
+              Teknisi: true,
               Department: true,
               DepartmentUnit: true,
             },
@@ -139,6 +140,7 @@ export const permintaanBarangRouter = createTRPCRouter({
           atasanId,
           Department: { name: department },
           DepartmentUnit,
+          Teknisi
         },
         PermintaanBarangBarang,
       } = result;
@@ -185,6 +187,26 @@ export const permintaanBarangRouter = createTRPCRouter({
 
       const canUpdate = isAtasan || isImApprove;
 
+      let perbaikan
+
+      if (Teknisi) {
+        const res = await ctx.db.imPerbaikan.findFirst({
+          where: {
+            imId: id
+          },
+          include: {
+            Perbaikan: true
+          }
+        })
+        console.log("anjin", res)
+
+        perbaikan= {
+          id: res?.Perbaikan.id,
+          no: res?.Perbaikan.no
+        }
+      }
+      console.log("perbaikan", perbaikan)
+
       return {
         id,
         no,
@@ -202,6 +224,7 @@ export const permintaanBarangRouter = createTRPCRouter({
         barang,
         canUpdate,
         isImApprove,
+        perbaikan
       };
     }),
   receive: protectedProcedure
@@ -348,6 +371,7 @@ export const permintaanBarangRouter = createTRPCRouter({
       z.object({
         perihal: z.string(),
         ruangId: z.string().optional(),
+        formPerbaikan: z.string().optional(),
         peruntukan: z.string(),
         barang: z.array(
           z.object({
@@ -362,7 +386,7 @@ export const permintaanBarangRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { perihal, ruangId, peruntukan, barang } = input;
+      const { perihal, ruangId, peruntukan, barang, formPerbaikan } = input;
       const pemohondId = ctx.session.user.id;
 
       const userId = ctx.session.user.id;
@@ -400,6 +424,15 @@ export const permintaanBarangRouter = createTRPCRouter({
               }),
             },
           });
+
+          if (formPerbaikan) {
+            await tx.imPerbaikan.create({
+              data: {
+                imId: pb.id,
+                perbaikanId: formPerbaikan
+              }
+            })
+          }
 
           // Prepare data for batch insertion
           const permintaanBarangData = barang.map(({ id, qty, uomId, kodeAnggaran, deskripsi }) => ({
