@@ -12,6 +12,6 @@ export default async function Page({ params: { id } }: { params: { id: string } 
   // }
   
   return (
-    <Content data={data} imComponents={[]} />
+    <Content data={data} />
   )
 }

@@ -298,11 +298,15 @@ export const barangKeluarRouter = createTRPCRouter({
                     id: hmm.href,
                   },
                   include: {
-                    Ruang: true,
+                    Pemohon: {
+                      include: {
+                        Department: true
+                      }
+                    }
                   },
                 });
 
-                const orgId = asdf!.Ruang.orgId;
+                const orgId = asdf!.Pemohon.Department.organisasiId;
 
                 const qty = hmm.permintaan;
 
@@ -383,7 +387,7 @@ export const barangKeluarRouter = createTRPCRouter({
             timeout: 10000, // default: 5000
           }
         );
-        const { notifications} = result
+        const { notifications } = result
 
         await Promise.all(
           notifications.map((v) => (
@@ -406,7 +410,7 @@ export const barangKeluarRouter = createTRPCRouter({
             )
           ))
         )
-        
+
         return {
           ok: true,
           message: "Berhasil membuat form keluar barang",

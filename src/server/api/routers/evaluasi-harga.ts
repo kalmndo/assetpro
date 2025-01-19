@@ -365,7 +365,16 @@ export const evaluasiHargaRouter = createTRPCRouter({
               ),
             );
 
-            const notificationsData: any[][] = []
+            const notificationsData: {
+              id: string;
+              fromId: string;
+              toId: string;
+              link: string;
+              desc: string;
+              isRead: boolean;
+              createdAt: Date;
+              updatedAt: Date;
+            }[][] = []
 
             for (const value of groupedData) {
 
@@ -432,7 +441,7 @@ export const evaluasiHargaRouter = createTRPCRouter({
             return {
               ok: true,
               message: "Berhasil membuat PO",
-              notificationsData,
+              notificationsData: notificationsData.flatMap((v) => v),
               type: 'po'
             };
           } else {

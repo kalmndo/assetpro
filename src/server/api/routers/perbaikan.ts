@@ -112,19 +112,72 @@ export const perbaikanRouter = createTRPCRouter({
       const totalComps = comps.map((v) => v.b).reduce((a, b) => a + b, 0);
 
       let vendors: SelectProps[] = []
-
+      let imComponents
+      
       if (isTeknisiCanDone) {
         const resv = await ctx.db.vendor.findMany()
         vendors = resv.map((v) => ({
           label: v.name,
           value: v.id
         }))
+        const relatedBarangIds = await ctx.db.perbaikanKomponen.findMany({
+          where: {
+            barangId: {
+              not: null,
+            },
+          },
+          select: {
+            barangId: true,
+          },
+        });
+
+        const relatedIds = relatedBarangIds.map((item) => item.barangId!);
+
+        const asdf = await ctx.db.imPerbaikan.findMany({
+          where: {
+            perbaikanId: id,
+          },
+          include: {
+            IM: {
+              include: {
+                PermintaanBarangBarang: {
+                  where: {
+                    id: {
+                      notIn: relatedIds,
+                    },
+                    status: STATUS.SELESAI.id,
+                  },
+                  include: {
+                    PerbaikanKomponen: true,
+                    Barang: {
+                      include: { Uom: true },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        imComponents =  asdf.map((v) => ({
+          id: v.id,
+          imId: v.imId,
+          no: v.IM.no,
+          barang: v.IM.PermintaanBarangBarang.map((v) => ({
+            id: v.id,
+            barangId: v.barangId,
+            image: v.Barang.image,
+            name: v.Barang.name,
+            code: v.Barang.fullCode,
+            qty: v.qty,
+            uom: v.Barang.Uom.name,
+          })),
+        }));
       }
 
       let teknisis: SelectProps[] = []
 
       if (isCanSelectTeknisi) {
-
         const rest = await ctx.db.teknisi.findMany({
           orderBy: {
             createdAt: "desc"
@@ -139,6 +192,8 @@ export const perbaikanRouter = createTRPCRouter({
           value: v.id,
         }))
       }
+
+
 
       return {
         id: result.id,
@@ -184,73 +239,11 @@ export const perbaikanRouter = createTRPCRouter({
             ],
         riwayat: result.PerbaikanHistory,
         vendors,
-        teknisis
+        teknisis,
+        imComponents
       };
     }),
-  getImConponents: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const { id } = input;
-
-      const relatedBarangIds = await ctx.db.perbaikanKomponen.findMany({
-        where: {
-          barangId: {
-            not: null,
-          },
-        },
-        select: {
-          barangId: true,
-        },
-      });
-
-      const relatedIds = relatedBarangIds.map((item) => item.barangId!);
-
-      const result = await ctx.db.imPerbaikan.findMany({
-        where: {
-          perbaikanId: id,
-        },
-        include: {
-          IM: {
-            include: {
-              PermintaanBarangBarang: {
-                where: {
-                  id: {
-                    notIn: relatedIds,
-                  },
-                  status: STATUS.SELESAI.id,
-                },
-                include: {
-                  PerbaikanKomponen: true,
-                  Barang: {
-                    include: { Uom: true },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      return result.map((v) => ({
-        id: v.id,
-        imId: v.imId,
-        no: v.IM.no,
-        barang: v.IM.PermintaanBarangBarang.map((v) => ({
-          id: v.id,
-          barangId: v.barangId,
-          image: v.Barang.image,
-          name: v.Barang.name,
-          code: v.Barang.fullCode,
-          qty: v.qty,
-          uom: v.Barang.Uom.name,
-        })),
-      }));
-    }),
-  addComponent: protectedProcedure
+   addComponent: protectedProcedure
     .input(
       z.object({
         perbaikanId: z.string(),

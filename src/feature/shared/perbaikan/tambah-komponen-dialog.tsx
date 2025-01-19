@@ -62,7 +62,7 @@ const TheForm = ({
 }: {
   isPending: boolean;
   onSubmit(value: any): void;
-  imComponents: RouterOutputs["perbaikan"]["getImConponents"];
+  imComponents: RouterOutputs["perbaikan"]["get"]['imComponents'];
 }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -137,15 +137,14 @@ const TheForm = ({
               />
               {form.watch("imId") ? (
                 // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-                imComponents.find((v) => v.imId === form.watch("imId"))?.barang
+                imComponents?.find((v) => v.imId === form.watch("imId"))?.barang
                   .length! > 0 ? (
                   <FormField
                     control={form.control}
                     name="items"
                     render={() => (
                       <FormItem>
-                        {imComponents
-                          .find((v) => v.imId === form.watch("imId"))
+                        {imComponents?.find((v) => v.imId === form.watch("imId"))
                           ?.barang.map((item) => (
                             <FormField
                               key={item.id}
@@ -286,7 +285,7 @@ export default function TambahKomponenDialog({
   imComponents,
 }: {
   id: string;
-  imComponents: RouterOutputs["perbaikan"]["getImConponents"];
+  imComponents: RouterOutputs["perbaikan"]["get"]['imComponents'];
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);

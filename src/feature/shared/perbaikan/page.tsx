@@ -28,10 +28,8 @@ import formatDate from "@/lib/formatDate";
 
 export default function Page({
   data,
-  imComponents,
 }: {
   data: RouterOutputs["perbaikan"]["get"];
-  imComponents: RouterOutputs["perbaikan"]["getImConponents"];
 }) {
   const { color, name: status } = getStatus(data.status);
 
@@ -147,7 +145,7 @@ export default function Page({
               {data.isTeknisiCanDone && (
                 <TambahKomponenDialog
                   id={data.id}
-                  imComponents={imComponents}
+                  imComponents={data.imComponents}
                 />
               )}
             </div>

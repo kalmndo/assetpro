@@ -198,14 +198,12 @@ export const permintaanBarangRouter = createTRPCRouter({
             Perbaikan: true
           }
         })
-        console.log("anjin", res)
 
         perbaikan= {
           id: res?.Perbaikan.id,
           no: res?.Perbaikan.no
         }
       }
-      console.log("perbaikan", perbaikan)
 
       return {
         id,

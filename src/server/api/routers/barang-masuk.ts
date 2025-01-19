@@ -369,11 +369,11 @@ export const barangMasukRouter = createTRPCRouter({
                 },
                 include: {
                   PBPP: {
-                    include: { Permintaan: { include: { Ruang: true } } },
+                    include: { Permintaan: { include: { Pemohon: {include: {Department:true}} } } },
                   },
                 },
               });
-              const orgId = edan!.PBPP[0]!.Permintaan.Ruang.orgId;
+              const orgId = edan!.PBPP[0]!.Permintaan.Pemohon.Department.organisasiId;
 
               await tx.laporanStock.create({
                 data: {
@@ -537,6 +537,7 @@ export const barangMasukRouter = createTRPCRouter({
           message: "Berhasil membuat barang masuk",
         };
       } catch (error) {
+        console.log("error", error)
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
           if (error.code === "P2002") {
             throw new TRPCError({

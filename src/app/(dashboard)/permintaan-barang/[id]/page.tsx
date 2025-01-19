@@ -65,14 +65,27 @@ export default async function Page({
               <p className="text-sm">Tanggal</p>
               <p className="font-semibold">{data.tanggal}</p>
             </div>
-            <div className="space-y-2">
-              <p className="text-sm">Ruang</p>
-              <p className="font-semibold">{data.ruang}</p>
-            </div>
+            {!data.perbaikan && (
+              <div className="space-y-2">
+                <p className="text-sm">Ruang</p>
+                <p className="font-semibold">{data.ruang}</p>
+              </div>
+            )}
             <div className="space-y-2">
               <p className="text-sm">Perihal</p>
-              <p className="text-sm">Permohonan internal memo</p>
+              <p className="text-sm">{data.perihal}</p>
             </div>
+            {data.perbaikan && (
+              <div className="space-y-2">
+                <p className="text-sm">Form perbaikan</p>
+                <Link
+                  href={`/permintaan/perbaikan/${data.perbaikan.id}`}
+                  className="col-span-2 text-xs font-semibold text-blue-600 hover:underline"
+                >
+                  {data.perbaikan.no}
+                </Link>
+              </div>
+            )}
           </div>
           <div className="space-y-4">
             <p className="text-sm">Pemohon</p>
