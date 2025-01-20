@@ -8,7 +8,7 @@ import { Download, FileIcon, Image, Send, Trash } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { ReactNode, useCallback, useState } from "react";
 import Link from "next/link";
-import ReceiveDialog from "./receive-dialog";
+import InputHargaDialog from "./input-harga-dialog";
 
 const imagesType =  ['png', 'jpg', 'jpeg']
 
@@ -166,14 +166,13 @@ export default function ComponentWrapper({ data, children }: { data: RouterOutpu
   }
   return (
     <>
-
       <div className="my-4">
         <div className="flex justify-between my-4">
           <div className="space-y-2">
             <p className="text-sm">File pendukung</p>
             {/* <p className="text-sm">{data.catatanTeknisi}</p> */}
-            {images?.map((v) => (
-              <File file={v} onRemove={onRemove} canRemove={data.canAddComponents} />
+            {images?.map((v, i) => (
+              <File key={i} file={v} onRemove={onRemove} canRemove={data.canAddComponents} />
             ))}
           </div>
         </div>
@@ -191,9 +190,9 @@ export default function ComponentWrapper({ data, children }: { data: RouterOutpu
         </div>
         {children}
       </div>
-      {data.canReceiveFromVendor &&
+      {data.canAddComponents &&
         <div className="flex justify-end space-x-4">
-          <ReceiveDialog id={data.id} files={images} />
+          <InputHargaDialog id={data.id} files={images} />
         </div>
       }
     </>

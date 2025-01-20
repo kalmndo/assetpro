@@ -27,7 +27,7 @@ export default function PermintaanBarang({ data }: { data: any }) {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.approval}</div>
+            {/* <div className="text-2xl font-bold">{data.approval}</div> */}
           </CardContent>
         </Card>
         <Card>

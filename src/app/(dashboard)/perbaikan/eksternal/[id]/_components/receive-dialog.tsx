@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LoaderCircle } from "lucide-react";
 
 const formSchema = z.object({
   type: z.string()
@@ -62,14 +63,7 @@ const TheForm = ({
             )}
           />
         </div>
-        <DialogFooter className="mt-4">
-          <Button
-            type="submit"
-            disabled={!form.formState.isValid || isPending}
-          >
-            Terima barang
-          </Button>
-        </DialogFooter>
+
       </form>
     </Form>
   )
@@ -77,25 +71,17 @@ const TheForm = ({
 
 export default function ReceiveDialog({
   id,
-  files
 }: {
   id: string,
-  files: {
-    id: string,
-    name: string,
-    type: string,
-    size: number,
-    url: string
-  }[]
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const { mutateAsync, isPending } = api.perbaikanEksternal.receiveFromVendor.useMutation()
 
 
-  async function onSubmit(v: z.infer<typeof formSchema>) {
+  async function onSubmit() {
     try {
-      const result = await mutateAsync({ id, type: v.type, files })
+      const result = await mutateAsync({ id })
       toast.success(result.message)
       router.refresh()
       setOpen(false)
@@ -115,10 +101,21 @@ export default function ReceiveDialog({
         </DialogHeader>
         <div>
           <p className="text-sm">Apakah anda yakin menerima barang ini?</p>
-          <p className="text-sm">Silahkan pilih <span className="font-semibold">{"SELESAI"}</span> atau <span className="font-semibold">{"TIDAK SELESAI"}</span></p>
         </div>
-        <TheForm isPending={isPending} onSubmit={onSubmit} />
-
+        <DialogFooter className="mt-4">
+          <Button
+            type="submit"
+            disabled={isPending}
+            onClick={onSubmit}
+          >
+            {isPending
+            ?
+            <LoaderCircle className="animate-spin" />
+            :
+            "Terima barang"
+            }
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

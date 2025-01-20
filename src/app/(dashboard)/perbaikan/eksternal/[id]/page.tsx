@@ -10,10 +10,12 @@ import { api } from "@/trpc/server";
 import RejectDialog from "./_components/reject-dialog";
 import ApproveDialog from "./_components/approve-dialog";
 import SendToVendorDialog from "./_components/send-to-vendor-dialog";
-import ReceiveDialog from "./_components/receive-dialog";
 import SendToUserDialog from "./_components/send-to-user-dialog";
 import ComponentWrapper from "./_components/component-wrapper";
 import TableKomponen from "./_components/table-komponen";
+import MintaPenawaranDialog from "./_components/minta-penawaran";
+import EvaluasiApproveDialog from "./_components/evaluasi-approve-dialog";
+import ReceiveDialog from "./_components/receive-dialog";
 
 export default async function Page({ params: { id } }: { params: { id: string } }) {
   const data = await api.perbaikanEksternal.getById({ id })
@@ -89,7 +91,7 @@ export default async function Page({ params: { id } }: { params: { id: string } 
           <div className="space-y-4">
             <p className="text-sm">Vendor</p>
             <Avatar className='w-14 h-14'>
-              <AvatarImage src={data.vendor.name ?? ''} alt="@shadcn" />
+              <AvatarImage src={''} alt="@shadcn" />
               <AvatarFallback>{getInitials(data.vendor.name)}</AvatarFallback>
             </Avatar>
             <p className="font-semibold">{data.vendor.name}</p>
@@ -126,18 +128,34 @@ export default async function Page({ params: { id } }: { params: { id: string } 
           </ComponentWrapper>
           {data.isAtasanCanApprove &&
             <div className="flex justify-end space-x-4">
-              <RejectDialog id={data.id} />
-              <ApproveDialog id={data.id} />
+              <RejectDialog id={id} />
+              <ApproveDialog id={id} />
+            </div>
+          }
+          {data.canApproveEvaluasi &&
+            <div className="flex justify-end space-x-4">
+              <RejectDialog id={id} />
+              <EvaluasiApproveDialog id={id} />
+            </div>
+          }
+          {data.canMintaPenawaran &&
+            <div className="flex justify-end space-x-4">
+              <MintaPenawaranDialog id={id} />
             </div>
           }
           {data.canSendToVendor &&
             <div className="flex justify-end space-x-4">
-              <SendToVendorDialog id={data.id} />
+              <SendToVendorDialog id={id} />
+            </div>
+          }
+          {data.canReceiveFromVendor &&
+            <div className="flex justify-end space-x-4">
+              <ReceiveDialog id={id} />
             </div>
           }
           {data.canSendToUser &&
             <div className="flex justify-end space-x-4">
-              <SendToUserDialog id={data.id} />
+              <SendToUserDialog id={id} />
             </div>
           }
         </div>

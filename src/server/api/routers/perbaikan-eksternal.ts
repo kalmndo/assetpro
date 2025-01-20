@@ -3,16 +3,9 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { STATUS } from "@/lib/status";
 import { ROLE } from "@/lib/role";
-
-// permohanan perbaikan eksternal 
-// disetujui oleh sadat atau di tolak | Permohonan eksternal disetujui
-// minta invoice
-// invoice ada | input invoice
-// persetujuan harga
-// jika setuju lakukan perbaikan
-// jika tolak barang rusak
-// barang di terima di gudang
-// user terima
+import notifDesc from "@/lib/notifDesc";
+import { getPusherInstance } from "@/lib/pusher/server";
+const pusherServer = getPusherInstance();
 
 export const perbaikanEksternalRouter = createTRPCRouter({
   getById: protectedProcedure
@@ -43,7 +36,7 @@ export const perbaikanEksternalRouter = createTRPCRouter({
               createdAt: 'desc'
             }
           },
-          PerbaikanExternalFiles:true,
+          PerbaikanExternalFiles: true,
           Vendor: true,
           PerbaikanExternalHistory: true,
           Perbaikan: {
@@ -74,15 +67,38 @@ export const perbaikanEksternalRouter = createTRPCRouter({
         });
       }
 
-      // evaluasi harga penawaran
-
       const isAtasanCanApprove = user?.UserRole.map((v) => v.roleId).some((v) => v === ROLE.PERBAIKAN_EKSTERNAL_APPROVE.id) && result.status === STATUS.PENGAJUAN.id
-      const canSendToVendor = user?.UserRole.map((v) => v.roleId).some((v) => v === ROLE.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_VENDOR.id) && result.status === STATUS.IM_APPROVE.id
+      const canMintaPenawaran = user?.UserRole.map((v) => v.roleId).some((v) => v === ROLE.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_VENDOR.id) && result.status === STATUS.IM_APPROVE.id
+      const canAddComponents = user?.UserRole.map((v) => v.roleId).some((v) => v === ROLE.PERBAIKAN_EKSTERNAL_ADD_COMPONENT.id) && result.status === STATUS.PERBAIKAN_EKSTERNAL_MINTA_PENAWARAN.id
+      const canSendToVendor = user?.UserRole.map((v) => v.roleId).some((v) => v === ROLE.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_VENDOR.id) && result.status === STATUS.PERBAIKAN_EKSTERNAL_EVALUASI_SETUJU.id
       const canReceiveFromVendor = user?.UserRole.map((v) => v.roleId).some((v) => v === ROLE.PERBAIKAN_EKSTERNAL_TERIMA.id) && result.status === STATUS.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_VENDOR.id
       const canSendToUser = user?.UserRole.map((v) => v.roleId).some((v) => v === ROLE.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_USER.id) && result.status === STATUS.PERBAIKAN_EKSTERNAL_TERIMA.id
-      const canAddComponents = user?.UserRole.map((v) => v.roleId).some((v) => v === ROLE.PERBAIKAN_EKSTERNAL_ADD_COMPONENT.id) && result.status === STATUS.PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_VENDOR.id
+      let canApproveEvaluasi = false
 
-      // const p = result.Perbaikan.User
+      if (result.status === STATUS.PERBAIKAN_EKSTERNAL_EVALUASI_HARGA.id) {
+        const total = result.PerbaikanEksternalKomponen.map((v) => v.biaya).reduce((a, b) => a + b, 0)
+
+        const evaluasi = await ctx.db.masterEvaluasiUser.findMany({
+          orderBy: { nilai: 'asc' },
+        })
+
+        const sendTo = []
+
+        for (const anjing of evaluasi) {
+          // if (anjing.userId === ctx.session.user.id) {
+          if (anjing.nilai < total) {
+            sendTo.push(anjing.userId)
+          }
+          // }
+        }
+
+        const gas = sendTo[sendTo.length - 1]
+
+        if (gas === ctx.session.user.id) {
+          canApproveEvaluasi = true
+        }
+      }
+
       const b = result.Perbaikan.Aset.MasterBarang
 
       const comps = result.PerbaikanEksternalKomponen.map((v) => {
@@ -119,12 +135,14 @@ export const perbaikanEksternalRouter = createTRPCRouter({
         },
         components: comps.length === 0 ? [] : [...comps, { id: "total", biaya: `Rp ${totalComps.toLocaleString("id-ID")}`, jumlah: '', name: "" }],
         riwayat: result.PerbaikanExternalHistory,
-        files: result.PerbaikanExternalFiles ,
+        files: result.PerbaikanExternalFiles,
         isAtasanCanApprove,
         canAddComponents,
         canSendToVendor,
         canReceiveFromVendor,
-        canSendToUser
+        canSendToUser,
+        canMintaPenawaran,
+        canApproveEvaluasi
       }
     }),
   getAll: protectedProcedure
@@ -264,6 +282,42 @@ export const perbaikanEksternalRouter = createTRPCRouter({
 
       }
     }),
+  mintaPenawaran: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id } = input
+
+      try {
+        await ctx.db.$transaction(async (tx) => {
+          await tx.perbaikanExternal.update({
+            where: {
+              id
+            },
+            data: {
+              status: STATUS.PERBAIKAN_EKSTERNAL_MINTA_PENAWARAN.id
+            }
+          })
+
+          await tx.perbaikanExternalHistory.create({
+            data: {
+              desc: "Meminta harga penawaran ke vendor",
+              perbaikanExternalId: id
+            }
+          })
+
+        })
+        return {
+          ok: true,
+          message: 'Berhasil meminta harga penawaran ke vendor'
+        }
+
+      } catch (error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: "Terjadi kesalahan pada server"
+        })
+      }
+    }),
   sendToVendor: protectedProcedure
     .input(z.object({
       id: z.string()
@@ -343,10 +397,9 @@ export const perbaikanEksternalRouter = createTRPCRouter({
         })
       }
     }),
-  receiveFromVendor: protectedProcedure
+  inputHarga: protectedProcedure
     .input(z.object({
       id: z.string(),
-      type: z.string(),
       files: z.array(z.object({
         name: z.string(),
         type: z.string(),
@@ -357,14 +410,17 @@ export const perbaikanEksternalRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const {
         id,
-        type,
         files
       } = input
 
-      const isDone = type === '0' ? false : true
-
+      const user = await ctx.db.user.findFirst({
+        where: {
+          id: ctx.session.user.id
+        }
+      })
       try {
-        await ctx.db.$transaction(async (tx) => {
+
+        const result = await ctx.db.$transaction(async (tx) => {
 
           if (files) {
             await tx.perbaikanExternalFiles.createMany({
@@ -377,63 +433,157 @@ export const perbaikanEksternalRouter = createTRPCRouter({
               }))
             })
           }
-          if (isDone) {
-            await tx.perbaikanExternal.update({
-              where: {
-                id
-              },
-              data: {
-                status: STATUS.PERBAIKAN_EKSTERNAL_TERIMA.id
-              }
-            })
 
-            await tx.perbaikanExternalHistory.create({
-              data: {
-                desc: "Barang telah diterima di gudang",
-                perbaikanExternalId: id
-              }
-            })
-          } else {
-            const ex = await tx.perbaikanExternal.update({
-              where: {
-                id
-              },
-              data: {
-                status: STATUS.TIDAK_SELESAI.id
-              }
-            })
-            // diterima 
-            //  selesai
-            //    status perbaikan? gak ada status
-            //    status eksternal terima selesai tapi belum dikirim ke user
-            //    kirim ke user/ teknisi
-            //  
-            //  
-            const res = await tx.perbaikan.update({
-              where: {
-                id: ex.perbaikanId
-              },
-              data: {
-                status: STATUS.TIDAK_SELESAI.id
-              }
-            })
+          const p = await tx.perbaikanExternal.update({
+            where: {
+              id
+            },
+            data: {
+              status: STATUS.PERBAIKAN_EKSTERNAL_EVALUASI_HARGA.id
+            }
+          })
 
-            await tx.daftarAset.update({
-              where: {
-                id: res.asetId
-              },
-              data: {
-                status: STATUS.ASET_BROKE.id
-              }
-            })
 
-            await tx.perbaikanHistory.create({
-              data: {
-                perbaikanId: ex.perbaikanId,
-                desc: "Perbaikan eksternal tidak selesai"
-              }
-            })
+          const komponen = await tx.perbaikanEksternalKomponen.findMany({
+            where: {
+              perbaikanExternalId: id
+            }
+          })
+
+          const total = komponen.map((v) => v.biaya).reduce((a, b) => a + b, 0)
+
+          const evaluasi = await tx.masterEvaluasiUser.findMany({
+            orderBy: { nilai: 'asc' },
+            include: { User: true }
+          })
+
+          let sendTo: typeof evaluasi[0]['User'] | undefined
+
+          for (const user of evaluasi) {
+            if (user.nilai < total) {
+              sendTo = user.User
+            }
           }
+
+          await tx.perbaikanExternalHistory.create({
+            data: {
+              desc: `Menunggu evaluasi harga oleh ${sendTo?.name}`,
+              perbaikanExternalId: id
+            }
+          })
+          const notification = await tx.notification.create({
+            data: {
+              fromId: ctx.session.user.id,
+              toId: sendTo!.id,
+              link: `/perbaikan/eksternal/${id}`,
+              desc: notifDesc(user!.name, "Permohonan evaluasi harga perbaikan eksternal", p.no),
+              isRead: false,
+            }
+          })
+
+          return {
+            notification
+          }
+        })
+        const { notification: v } = result
+
+        await pusherServer.trigger(
+          v.toId,
+          "notification",
+          {
+            id: v.id,
+            fromId: user?.id,
+            toId: v.toId,
+            link: v.link,
+            desc: v.desc,
+            isRead: false,
+            createdAt: v.createdAt,
+            From: {
+              image: user?.image,
+              name: user?.name
+            },
+          }
+        )
+
+
+        return {
+          ok: true,
+          message: 'Berhasil menginput harga'
+        }
+
+      } catch (error) {
+        console.log("error", error)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: "Terjadi kesalahan pada server"
+        })
+      }
+    }),
+  evaluasiSetuju: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+
+      const {
+        id,
+      } = input
+
+      try {
+        await ctx.db.$transaction(async (tx) => {
+          await tx.perbaikanExternal.update({
+            where: {
+              id
+            },
+            data: {
+              status: STATUS.PERBAIKAN_EKSTERNAL_EVALUASI_SETUJU.id
+            }
+          })
+
+          await tx.perbaikanExternalHistory.create({
+            data: {
+              desc: `Evaluasi harga di setujui`,
+              perbaikanExternalId: id
+            }
+          })
+        })
+
+        return {
+          ok: true,
+          message: "Berhasil menyetujui evaluasi harga perbaikan eksternal"
+        }
+
+      } catch (error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: "Terjadi kesalahan pada server"
+        })
+      }
+    }),
+  receiveFromVendor: protectedProcedure
+    .input(z.object({
+      id: z.string(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const {
+        id
+      } = input
+
+      try {
+        await ctx.db.$transaction(async (tx) => {
+          await tx.perbaikanExternal.update({
+            where: {
+              id
+            },
+            data: {
+              status: STATUS.PERBAIKAN_EKSTERNAL_TERIMA.id
+            }
+          })
+
+          await tx.perbaikanExternalHistory.create({
+            data: {
+              desc: "Barang telah diterima di gudang",
+              perbaikanExternalId: id
+            }
+          })
         })
         return {
           ok: true,

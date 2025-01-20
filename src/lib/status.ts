@@ -65,16 +65,6 @@ export const STATUS = {
     name: 'Teknisi selesai memperbaiki',
     color: '#15803c'
   },
-  PERBAIKAN_EKSTERNAL_SELESAI: {
-    id: 'perbaikan-eksternal-selesai',
-    name: 'Perbaikan eksternal selesai',
-    color: '#15803c'
-  },
-  PERBAIKAN_EKSTERNAL_TIDAK_SELESAI: {
-    id: 'perbaikan-eksternal-tidak-selesai',
-    name: 'Perbaikan eksternal tidak selesai',
-    color: '#15803c'
-  },
   TEKNISI_UNDONE: {
     id: 'teknisi-undone',
     name: 'Tidak Selesai',
@@ -85,6 +75,31 @@ export const STATUS = {
     name: 'Perbaikan eksternal',
     color: '#15803c'
   },
+  PERBAIKAN_EKSTERNAL_SELESAI: {
+    id: 'perbaikan-eksternal-selesai',
+    name: 'Perbaikan eksternal selesai',
+    color: '#15803c'
+  },
+  PERBAIKAN_EKSTERNAL_MINTA_PENAWARAN: {
+    id: 'perbaikan-eksternal-minta-penawaran',
+    name: 'Permintaan penawaran',
+    color: '#15803c'
+  },
+  PERBAIKAN_EKSTERNAL_EVALUASI_HARGA: {
+    id: 'perbaikan-eksternal-evaluasi-harga',
+    name: 'Menunggu evaluasi',
+    color: '#15803c'
+  },
+  PERBAIKAN_EKSTERNAL_EVALUASI_SETUJU: {
+    id: 'perbaikan-eksternal-evaluasi-setuju',
+    name: 'Evaluasi disetujui',
+    color: '#15803c'
+  },
+  PERBAIKAN_EKSTERNAL_EVALUASI_TOLAK: {
+    id: 'perbaikan-eksternal-evaluasi-tolak',
+    name: 'Evaluasi ditolak',
+    color: '#15803c'
+  },
   PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_VENDOR: {
     id: 'perbaikan-eksternal-diserahkan-ke-vendor',
     name: 'Diserahkan ke vendor',
@@ -93,6 +108,11 @@ export const STATUS = {
   PERBAIKAN_EKSTERNAL_TERIMA: {
     id: 'perbaikan-eksternal-terima',
     name: 'Diterima oleh gudang',
+    color: '#15803c'
+  },
+  PERBAIKAN_EKSTERNAL_TIDAK_SELESAI: {
+    id: 'perbaikan-eksternal-tidak-selesai',
+    name: 'Perbaikan eksternal tidak selesai',
     color: '#15803c'
   },
   PERBAIKAN_EKSTERNAL_DISERAHKAN_KE_USER: {
