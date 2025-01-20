@@ -61,8 +61,29 @@ export default async function Page({ params: { id } }: { params: { id: string } 
             </div>
             <div className="space-y-2">
               <p className="text-sm">No Perbaikan</p>
-              <p className="text-sm">{data.noPerbaikan}</p>
+              <Link
+                href={`/perbaikan/permintaan/${data.idPerbaikan}`}
+                className="col-span-2 text-xs font-semibold text-blue-600 hover:underline"
+              >
+                {data.noPerbaikan}
+              </Link>
             </div>
+            {data.teknisi &&
+              <>
+                <div className="flex justify-between">
+                  <div className="space-y-2">
+                    <p className="text-sm">Teknisi</p>
+                    <p className="font-semibold">{data.teknisi}</p>
+                  </div>
+                </div>
+                <div className="flex justify-between my-4">
+                  <div className="space-y-2">
+                    <p className="text-sm">Catatan Teknisi</p>
+                    <p className="text-sm">{data.catatanTeknisi}</p>
+                  </div>
+                </div>
+              </>
+            }
 
           </div>
           <div className="space-y-4">
@@ -100,22 +121,6 @@ export default async function Page({ params: { id } }: { params: { id: string } 
               </p>
             </div>
           </div>
-          {data.teknisi &&
-            <>
-              <div className="flex justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm">Teknisi</p>
-                  <p className="font-semibold">{data.teknisi}</p>
-                </div>
-              </div>
-              <div className="flex justify-between my-4">
-                <div className="space-y-2">
-                  <p className="text-sm">Catatan Teknisi</p>
-                  <p className="text-sm">{data.catatanTeknisi}</p>
-                </div>
-              </div>
-            </>
-          }
           <ComponentWrapper data={data} >
             <TableKomponen data={data.components} />
           </ComponentWrapper>

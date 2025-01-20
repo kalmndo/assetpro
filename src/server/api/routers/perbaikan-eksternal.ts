@@ -104,6 +104,7 @@ export const perbaikanEksternalRouter = createTRPCRouter({
         tanggal: result.createdAt.toLocaleDateString(),
         status: result.status,
         noPerbaikan: result.Perbaikan.no,
+        idPerbaikan: result.Perbaikan.id,
         vendor: {
           ...result.Vendor
         },
