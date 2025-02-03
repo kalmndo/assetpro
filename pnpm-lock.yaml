@@ -188,6 +188,9 @@ importers:
       print-js:
         specifier: ^1.6.0
         version: 1.6.0
+      prisma:
+        specifier: ^5.19.1
+        version: 5.19.1
       pusher:
         specifier: ^5.2.0
         version: 5.2.0
@@ -291,9 +294,6 @@ importers:
       prettier-plugin-tailwindcss:
         specifier: ^0.5.11
         version: 0.5.14(prettier@3.3.3)
-      prisma:
-        specifier: ^5.10.2
-        version: 5.19.1
       tailwindcss:
         specifier: ^3.4.1
         version: 3.4.13
