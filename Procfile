@@ -1,2 +1,2 @@
-release: pnpm install --frozen-lockfile && pnpm run migrate:deploy
+release: pnpm install prisma && pnpm run migrate:deploy
 web: pnpm start
