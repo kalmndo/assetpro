@@ -1,2 +1,2 @@
-release: pnpm run migrate:deploy
+release: pnpm run postinstall
 web: pnpm start
