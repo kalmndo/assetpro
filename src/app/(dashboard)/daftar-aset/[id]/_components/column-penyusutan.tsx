@@ -66,39 +66,5 @@ export const columnsPenyusutan: ColumnDef<Schema>[] = [
     enableSorting: false,
     enableHiding: false,
   },
-  {
-    accessorKey: 'total',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Total Penyusutan' />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className='flex space-x-2 items-center'>
-          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue("total")}
-          </span>
-        </div>
-      )
-    },
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: 'nilai',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Nilai Sekarang' />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className='flex space-x-2 items-center'>
-          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue("nilai")}
-          </span>
-        </div>
-      )
-    },
-    enableSorting: false,
-    enableHiding: false,
-  },
 ]
 

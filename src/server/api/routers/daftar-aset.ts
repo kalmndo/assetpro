@@ -13,7 +13,7 @@ export const daftarAsetRouter = createTRPCRouter({
         Pengguna: true,
         Ruang: {
           include: {
-            Organisasi:true
+            Organisasi: true
           }
         },
         MasterBarang: {
@@ -118,6 +118,9 @@ export const daftarAsetRouter = createTRPCRouter({
           id,
         },
         include: {
+          Ruang: {
+            include: { Organisasi: true }
+          },
           PeminjamanAsetEksternal: {
             include: {
               Peminjaman: {
@@ -245,6 +248,7 @@ export const daftarAsetRouter = createTRPCRouter({
       }
 
       const { usia, usiaString } = monthsDifference(res.createdAt);
+      console.log("res", res.createdAt)
       // TODO: default umur ekonomi
       const umurEkonomi = res.umur;
       const umurEkonomiMonth = 12 * umurEkonomi;
@@ -306,7 +310,7 @@ export const daftarAsetRouter = createTRPCRouter({
       const result = {
         name: barang.name,
         status: res.status,
-        lokasi: IM?.Ruang?.name,
+        lokasi: res.Ruang ? `${res.Ruang?.name} - ${res.Ruang.Organisasi.name}` : '',
         peruntukan: IM?.perihal,
         no: res.id,
         garansi: pembelian?.Barang.garansi,
@@ -328,7 +332,7 @@ export const daftarAsetRouter = createTRPCRouter({
           tgl: pembelian?.createdAt.toLocaleDateString(),
           vendor: pembelian?.PO.Vendor.name,
           noPo: pembelian?.PO.no,
-          harga: `Rp ${hargaPembelian?.toLocaleString("id-ID")}`,
+          harga: hargaPembelian ? `Rp ${hargaPembelian?.toLocaleString("id-ID")}` : "",
         },
         penyusutan: {
           id: "",
@@ -342,7 +346,7 @@ export const daftarAsetRouter = createTRPCRouter({
           name: pj?.name,
           image: pj?.image,
           title: pj?.title,
-          department: `${pj?.Department.name} - ${pj?.DepartmentUnit?.name}`,
+          department: pj?.Department ? `${pj?.Department.name} - ${pj?.DepartmentUnit?.name}` : "Tidak ada pengguna",
         },
         // riwayat mutasi, terima barang, keluar barang, perbaikan, peminjaman
         perbaikan,
