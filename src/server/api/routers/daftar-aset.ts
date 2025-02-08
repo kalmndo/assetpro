@@ -307,6 +307,7 @@ export const daftarAsetRouter = createTRPCRouter({
         ),
       ).reduce((a, b) => a + b, 0);
 
+
       const result = {
         name: barang.name,
         status: res.status,
@@ -329,10 +330,10 @@ export const daftarAsetRouter = createTRPCRouter({
         info: res.DaftarAsetAdditional,
         // additional barang info
         pembelian: {
-          tgl: pembelian?.createdAt.toLocaleDateString(),
-          vendor: pembelian?.PO.Vendor.name,
-          noPo: pembelian?.PO.no,
-          harga: hargaPembelian ? `Rp ${hargaPembelian?.toLocaleString("id-ID")}` : "",
+          tgl: pembelian ? pembelian?.createdAt.toLocaleDateString(): res.createdAt.toLocaleDateString() ,
+          vendor: pembelian?.PO.Vendor.name ?? '-',
+          noPo: pembelian?.PO.no ?? "-",
+          harga: hargaPembelian ? `Rp ${hargaPembelian?.toLocaleString("id-ID")}` : `Rp ${res.hargaPembelian.toLocaleString("id-ID")}`,
         },
         penyusutan: {
           id: "",
