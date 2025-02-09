@@ -32,7 +32,8 @@ export const kartuStokRouter = createTRPCRouter({
         kategori: v.MasterBarang.SubSubKategori.name,
         satuan: v.MasterBarang.Uom.name,
         jumlah: v.qty,
-        harga: ''
+        harga: v.harga,
+        total: v.total
       }))
     }),
   get: protectedProcedure

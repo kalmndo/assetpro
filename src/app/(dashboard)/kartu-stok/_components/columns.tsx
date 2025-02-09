@@ -17,6 +17,7 @@ export const schema = z.object({
   satuan: z.number(),
   jumlah: z.string(),
   harga: z.string(),
+  total: z.string(),
 })
 
 export type Schema = z.infer<typeof schema>
@@ -106,13 +107,28 @@ export const columns: ColumnDef<Schema>[] = [
   {
     accessorKey: 'harga',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Harga Rerata' />
+      <DataTableColumnHeader column={column} title='Harga Satuan' />
     ),
     cell: ({ row }) => {
       return (
         <Link href={`kartu-stok/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
             {row.getValue('harga')}
+          </span>
+        </Link>
+      )
+    },
+  },
+  {
+    accessorKey: 'total',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Total harga' />
+    ),
+    cell: ({ row }) => {
+      return (
+        <Link href={`kartu-stok/${row.original.id}`} className='flex w-full'>
+          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
+            {row.getValue('total')}
           </span>
         </Link>
       )
