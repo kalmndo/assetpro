@@ -128,7 +128,7 @@ export const columns: ColumnDef<Schema>[] = [
       return (
         <Link href={`kartu-stok/${row.original.id}`} className='flex w-full'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('total')}
+            Rp {row.getValue('total')}
           </span>
         </Link>
       )
