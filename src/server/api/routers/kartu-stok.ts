@@ -149,7 +149,7 @@ export const kartuStokRouter = createTRPCRouter({
           stok: result.qty,
           masuk: masuk.map((v) => v.jumlah).reduce((acc, num) => acc + num, 0),
           keluar: keluar.map((v) => v.jumlah).reduce((acc, num) => acc + num, 0),
-          harga: 'Rp 0'
+          harga: `Rp ${result.total.toNumber().toLocaleString("id-ID")}`
         },
         pergerakanStok,
         riwayat: {
