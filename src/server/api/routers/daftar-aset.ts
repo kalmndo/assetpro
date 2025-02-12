@@ -213,7 +213,7 @@ export const daftarAsetRouter = createTRPCRouter({
 
       const barang = res.MasterBarang;
       const pembelian = res.FttbItem?.PoBarang;
-      const hargaPembelian = pembelian?.Barang.harga;
+      const hargaPembelian = res.hargaPembelian;
 
       function monthsDifference(start: Date) {
         const end = new Date(new Date());
@@ -248,7 +248,6 @@ export const daftarAsetRouter = createTRPCRouter({
       }
 
       const { usia, usiaString } = monthsDifference(res.createdAt);
-      console.log("res", res.createdAt)
       // TODO: default umur ekonomi
       const umurEkonomi = res.umur;
       const umurEkonomiMonth = 12 * umurEkonomi;
