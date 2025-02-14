@@ -10,6 +10,7 @@ import { getInitials } from "@/lib/utils";
 export const schema = z.object({
   id: z.string(),
   no: z.string(),
+  name: z.string(),
   barang: z.object({
     name: z.string(),
     image: z.string().nullable(),
@@ -46,7 +47,7 @@ export const columns: ColumnDef<Schema>[] = [
     },
   },
   {
-    accessorKey: "barang",
+    accessorKey: "name",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Barang" />
     ),
@@ -67,7 +68,7 @@ export const columns: ColumnDef<Schema>[] = [
               </AvatarFallback>
             </Avatar>
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.original.barang.name}
+              {row.getValue("name")}
             </span>
           </div>
         </Link>

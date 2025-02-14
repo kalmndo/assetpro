@@ -36,6 +36,7 @@ export const daftarAsetRouter = createTRPCRouter({
     const data = result.map((v) => ({
       id: v.id,
       no: v.id,
+      name: v.MasterBarang.name,
       barang: {
         name: v.MasterBarang.name,
         image: v.MasterBarang.image,
