@@ -40,6 +40,10 @@ export const columns: ColumnDef<Schema>[] = [
         </Link>
       );
     },
+     footer: ({ table }) => {
+     
+      return `Total`
+    },
   },
   {
     accessorKey: "barang",
@@ -90,7 +94,7 @@ export const columns: ColumnDef<Schema>[] = [
       );
     },
   },
- {
+  {
     accessorKey: "masaManfaat",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Masa Manfaat" />
@@ -125,6 +129,10 @@ export const columns: ColumnDef<Schema>[] = [
         </Link>
       );
     },
+    footer: ({ table }) => {
+      const res = table.getFilteredRowModel().rows.reduce((total, row) => total + row.original.hargaNum, 0)
+      return `Rp ${res.toLocaleString("id-ID")}`
+    },
   },
   {
     accessorKey: "susut",
@@ -143,6 +151,10 @@ export const columns: ColumnDef<Schema>[] = [
         </Link>
       );
     },
+    footer: ({ table }) => {
+      const res = table.getFilteredRowModel().rows.reduce((total, row) => total + row.original.susutNum, 0)
+      return `Rp ${res.toLocaleString("id-ID")}`
+    },
   },
   {
     accessorKey: "nilaiBuku",
@@ -160,6 +172,10 @@ export const columns: ColumnDef<Schema>[] = [
           </span>
         </Link>
       );
+    },
+    footer: ({ table }) => {
+      const res = table.getFilteredRowModel().rows.reduce((total, row) => total + row.original.nilaiBukuNum, 0)
+      return `Rp ${res.toLocaleString("id-ID")}`
     },
   },
   {

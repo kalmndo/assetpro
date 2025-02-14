@@ -22,6 +22,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -36,7 +37,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   facetedFilter?: DataTableFacetedFilterProps[]
   filter?: DataTableToolbarFilterProps
-  defaultFilters?: {id: string, value: string | string[]}[]
+  defaultFilters?: { id: string, value: string | string[] }[]
   columnVisibilityDefaultState?: VisibilityState
   checkboxToolbarActions?: { title: string, desc: string, handleAction(table: any): void }[]
   isPagintation?: boolean
@@ -153,6 +154,22 @@ export function DataTable<TData, TValue>({
               </TableRow>
             )}
           </TableBody>
+          <TableFooter>
+            {table.getFooterGroups().map(footerGroup => (
+              <TableRow key={footerGroup.id}>
+                {footerGroup.headers.map(header => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                        header.column.columnDef.footer,
+                        header.getContext()
+                      )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableFooter>
         </Table>
       </div>
       {isPagintation && <DataTablePagination table={table} />}
