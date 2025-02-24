@@ -103,6 +103,10 @@ export const columns: ColumnDef<Schema>[] = [
         </Link>
       )
     },
+    footer: ({ table }) => {
+      const res = table.getFilteredRowModel().rows.reduce((total, row) => total + row.original.jumlah, 0)
+      return res
+    },
   },
   {
     accessorKey: 'harga',
@@ -118,6 +122,10 @@ export const columns: ColumnDef<Schema>[] = [
         </Link>
       )
     },
+    footer: ({ table }) => {
+      const res = table.getFilteredRowModel().rows.reduce((total, row) => total + row.original.hargaNum, 0)
+      return `Rp ${res.toLocaleString("id-ID")}`
+    },
   },
   {
     accessorKey: 'total',
@@ -132,6 +140,10 @@ export const columns: ColumnDef<Schema>[] = [
           </span>
         </Link>
       )
+    },
+    footer: ({ table }) => {
+      const res = table.getFilteredRowModel().rows.reduce((total, row) => total + row.original.totalNum, 0)
+      return `Rp ${res.toLocaleString("id-ID")}`
     },
   },
 ]
